@@ -374,14 +374,41 @@ class frostnumber_method( perma_base.permafrost_component ):
     	
     	lambda_f=1.67 # some dummy thermal conductivity  
     	# https://shop.bgs.ac.uk/GeoReports/examples/modules/C012.pdf
-    	S=86400
+    	sec_per_day=86400
     	rho_d=2.798  # dry density of silt
     	wf=0.4       # tipical for silty soils
     	denominator=rho_d*wf*self.Lf
-    	self.Zfplus=np.sqrt(2*lambda_f*S*np.abs(self.Twplus)*self.Lw/denominator)               #(eqn. 15)
+    	self.Zfplus=np.sqrt(2*lambda_f*sec_per_day*np.abs(self.Twplus)*self.Lw/denominator)               #(eqn. 15)
     	print 'Zfplus=',self.Zfplus
-    #   update_air_frost_number()
-    
+    	
+    	# assuming 3 soil layers with thickness 0.25, 0.5 and 1.75 m
+    	# and thermal conductivities 0.08, 1.5, and 2.1 
+    	soil_thick=np.array([0.25, 0.5 , 1.75])
+    	lambda_b=np.array([0.08, 1.5, 2.1])
+    	# resistivity R
+    	R=soil_thick/lambda_b
+    	QL=self.Lf/1000 # volumetric latent heat, 1000 s a density of water
+    	#partial freezing thawing index DD
+    	DD=np.zeros(3)
+    	Z=np.zeros(3)
+    	DD[0]=0.5*QL*soil_thick[0]*R[0]/sec_per_day
+    	S=0;
+    	for i in range(1,3):
+    		S=R[i]+S
+    		DD[i]=(S+0.5*R[i-1])*QL*soil_thick[i]/sec_per_day
+    		#The depth of the frost thaw penetration
+    	S=0; Z_tot=0
+    	for i in range(0,3):
+    		#The depth of the frost thaw penetration
+    		Z[i]=np.sqrt(2*lambda_b[i]*sec_per_day*DD[i]/QL + lambda_b[i]**2*S**2) \
+    			- lambda_b[i]*S	
+    		S=R[i]+S
+    		Z_tot=Z_tot + Z[i]
+    		
+    	self.Z_tot=Z_tot
+    	self.stefan_number = np.sqrt(self.Fplus) / ( np.sqrt( self.Fplus) + np.sqrt( self.Z_tot) )
+    	
+    #   update_stefan_frost_number()  
     #-------------------------------------------------------------------  
     
     def update_ALT(self):
@@ -394,23 +421,12 @@ class frostnumber_method( perma_base.permafrost_component ):
     #   update_ALT()
     #-------------------------------------------------------------------       
     def update_ground_temperatures(self):
-    	# in this method there is only one output the temperature at the top of permafrost
-    	# TTOP
+    	# This method does not update temps instead it does frost numbers 
     	self.update_dd() 
     	self.update_air_frost_number()
     	self.update_snow_prop()
     	self.update_surface_frost_number()
     	self.update_stefan_frost_number()
-    	#self.update_soil_thermal_conductivity()
-    	#self.update_snow_thermal_properties()
-
-        # Update mean temperatures for warmes and coldest seasons similar to Nelson & Outcalt 87
-        # Cold and Warm Season, Page-129, Sazonova, 2003 
-        #self.tao1 = self.sec_per_year*(0.5 - 1./np.pi*np.arcsin(self.T_air/self.A_air)); 
-    	#self.tao2 = self.sec_per_year - self.tao1;   
-    	#self.L=self.Lf*self.vwc_H2O
-    	
-    	#self.update_TOP_temperatures()
              
     #   update_ground_temperatures() 
     #-------------------------------------------------------------------
