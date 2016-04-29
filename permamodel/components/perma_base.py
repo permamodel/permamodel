@@ -116,7 +116,6 @@ class permafrost_component( BMI_base.BMI_component ):
    		OUTPUTs:
             p_data: grid value   
     	"""
-    	print input_file
         
         from netCDF4 import Dataset
     	#import numpy as np
@@ -155,17 +154,30 @@ class permafrost_component( BMI_base.BMI_component ):
     	return p_data
 	#   extract_grid_value_from_GSD()      
     #-------------------------------------------------------------------     	
+    def check_file_exists(self,input_file):
+    	import os
+    	# make sure php-cgi file exists, else show an error
+    	if ( not os.path.isfile( input_file)):
+    		print("Error: %s file not found" %  input_file)
+    	else:
+    		print("Setting soil properties using %s ..." %  input_file)    	
+    #-------------------------------------------------------------------   
     
     def initialize_soil_texture_from_GSD(self):
 
         # NOTE: this part is a hardcoded 
         # Maybe there is abetter way of organizing it
         
-        Clay_file = 'Parameters/T_CLAY.nc4'
-    	Sand_file = 'Parameters/T_SAND.nc4'
-    	Silt_file = 'Parameters/T_SILT.nc4'
-    	Peat_file = 'Parameters/T_OC.nc4'
+        Clay_file = '../permamodel/components/Parameters/T_CLAY.nc4'
+     	Sand_file = '../permamodel/components/Parameters/T_SAND.nc4'
+    	Silt_file = '../permamodel/components/Parameters/T_SILT.nc4'
+    	Peat_file = '../permamodel/components/Parameters/T_OC.nc4'
     	
+    	self.check_file_exists(Clay_file)
+    	self.check_file_exists(Sand_file)
+    	self.check_file_exists(Silt_file)
+    	self.check_file_exists(Peat_file)
+    		
     	# Kang please add a file check method here
     	# to check that all files do exist
     	# if not it should warn user that files are not found
