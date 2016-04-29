@@ -69,7 +69,7 @@ class permafrost_component( BMI_base.BMI_component ):
         #           value from:  NCAR CSM Flux Coupler web page
         #---------------------------------------------------------
         # Lf = latent heat of fusion for water [J kg -1]
-        #---------------------------------------------------------        
+        #---------------------------------------------------------
         self.Cp_snow  = np.float64( 2090.0 )  # [J kg-1 K-1]
         self.Lf       = np.float64( 334000 )  # [J kg-1]
 
@@ -78,8 +78,8 @@ class permafrost_component( BMI_base.BMI_component ):
         #--------------------------------------
         ## self.rho_snow = np.float64(300)
         ## self.rho_H2O  = np.float64(1000)  # (See initialize() method.)
-                
-    #   set_constants()  
+
+    #   set_constants()
     #-------------------------------------------------------------------
 
     def open_input_files(self):
@@ -93,17 +93,17 @@ class permafrost_component( BMI_base.BMI_component ):
         print ' Ignoring this message for now.'
 
     #   open_input_files()
-    #------------------------------------------------------------------- 
-    
+    #-------------------------------------------------------------------
+
     def extract_grid_value_from_GSD(self,input_file,
-                        	lonname, lon_grid_scale,
-                        	latname, lat_grid_scale,
-                        	varname):
-    	""" 
-    	The function is to extract the grid value from NetCDF file,
-    	according to input of latitude and longitude;
-    
-    	INPUTs:
+                            lonname, lon_grid_scale,
+                            latname, lat_grid_scale,
+                            varname):
+        """
+        The function is to extract the grid value from NetCDF file,
+        according to input of latitude and longitude;
+
+        INPUTs:
             input_lat: Latitude;
             input_lon: Longitude;
             input_file: grid data file (NetCDF file)
@@ -112,94 +112,94 @@ class permafrost_component( BMI_base.BMI_component ):
             lon_grid_scale: grid size of longitude
             lat_grid_scale: grid size of latitude
             varname: name of variable should be extracted.
-            
-   		OUTPUTs:
-            p_data: grid value   
-    	"""
-    	print input_file
-        
+
+        OUTPUTs:
+            p_data: grid value
+        """
+        print input_file
+
         from netCDF4 import Dataset
-    	#import numpy as np
-    
-    	# Read the nc file
-    
-    	fh = Dataset(input_file, mode='r')
-    	
-		# Get the lat and lon
-    	#   Set the grid size for lat. and lon. (here is 0.5 degree)
-    
-    	lon_grid = fh.variables[lonname][:]; 
-    	lat_grid = fh.variables[latname][:]; 
-    
-    	# Get boundary of each grid
-    	#    Including top and bottom of latitude 
-    	#              top and bottom of longitude
-    
-    	lon_grid_top = lon_grid + lon_grid_scale / 2.0;
-    	lat_grid_top = lat_grid + lat_grid_scale / 2.0;
-    
-    	lon_grid_bot = lon_grid - lon_grid_scale / 2.0;
-    	lat_grid_bot = lat_grid - lat_grid_scale / 2.0;
-    
-    	# Get the index of input location acccording to lat and lon inputed    	
-    	idx_lon = np.where((self.lon <= lon_grid_top) & (self.lon > lon_grid_bot))          
-    	idx_lat = np.where((self.lat <= lat_grid_top) & (self.lat > lat_grid_bot))
-    
-    	idx_lon = np.array(idx_lon)
-    	idx_lat = np.array(idx_lat)
-    
-    	p_data  = fh.variables[varname][idx_lat[0,0], idx_lon[0,0]]
-		
-		#fh.close()
-    	
-    	return p_data
-	#   extract_grid_value_from_GSD()      
-    #-------------------------------------------------------------------     	
-    
+        #import numpy as np
+
+        # Read the nc file
+
+        fh = Dataset(input_file, mode='r')
+
+        # Get the lat and lon
+        #   Set the grid size for lat. and lon. (here is 0.5 degree)
+
+        lon_grid = fh.variables[lonname][:];
+        lat_grid = fh.variables[latname][:];
+
+        # Get boundary of each grid
+        #    Including top and bottom of latitude
+        #              top and bottom of longitude
+
+        lon_grid_top = lon_grid + lon_grid_scale / 2.0;
+        lat_grid_top = lat_grid + lat_grid_scale / 2.0;
+
+        lon_grid_bot = lon_grid - lon_grid_scale / 2.0;
+        lat_grid_bot = lat_grid - lat_grid_scale / 2.0;
+
+        # Get the index of input location acccording to lat and lon inputed
+        idx_lon = np.where((self.lon <= lon_grid_top) & (self.lon > lon_grid_bot))
+        idx_lat = np.where((self.lat <= lat_grid_top) & (self.lat > lat_grid_bot))
+
+        idx_lon = np.array(idx_lon)
+        idx_lat = np.array(idx_lat)
+
+        p_data  = fh.variables[varname][idx_lat[0,0], idx_lon[0,0]]
+
+        #fh.close()
+
+        return p_data
+    #   extract_grid_value_from_GSD()
+    #-------------------------------------------------------------------
+
     def initialize_soil_texture_from_GSD(self):
 
-        # NOTE: this part is a hardcoded 
+        # NOTE: this part is a hardcoded
         # Maybe there is abetter way of organizing it
-        
+
         Clay_file = 'Parameters/T_CLAY.nc4'
-    	Sand_file = 'Parameters/T_SAND.nc4'
-    	Silt_file = 'Parameters/T_SILT.nc4'
-    	Peat_file = 'Parameters/T_OC.nc4'
-    	
-    	# Kang please add a file check method here
-    	# to check that all files do exist
-    	# if not it should warn user that files are not found
-    	
-    	lonname     = 'lon'; lon_grid_scale = 0.05;
-    	latname     = 'lat'; lat_grid_scale = 0.05;
-    
-    	self.p_clay = self.extract_grid_value_from_GSD(Clay_file,        
-    	                 lonname, lon_grid_scale, 
+        Sand_file = 'Parameters/T_SAND.nc4'
+        Silt_file = 'Parameters/T_SILT.nc4'
+        Peat_file = 'Parameters/T_OC.nc4'
+
+        # Kang please add a file check method here
+        # to check that all files do exist
+        # if not it should warn user that files are not found
+
+        lonname     = 'lon'; lon_grid_scale = 0.05;
+        latname     = 'lat'; lat_grid_scale = 0.05;
+
+        self.p_clay = self.extract_grid_value_from_GSD(Clay_file,
+                         lonname, lon_grid_scale,
                          latname, lat_grid_scale,
-                         'T_CLAY')              
-    	self.p_sand = self.extract_grid_value_from_GSD(Sand_file,        
-    	                 lonname, lon_grid_scale, 
+                         'T_CLAY')
+        self.p_sand = self.extract_grid_value_from_GSD(Sand_file,
+                         lonname, lon_grid_scale,
                          latname, lat_grid_scale,
                          'T_SAND')
-    	self.p_peat = self.extract_grid_value_from_GSD(Peat_file,        
-    	                 lonname, lon_grid_scale, 
+        self.p_peat = self.extract_grid_value_from_GSD(Peat_file,
+                         lonname, lon_grid_scale,
                          latname, lat_grid_scale,
                          'T_OC')
-    	self.p_silt = self.extract_grid_value_from_GSD(Silt_file,        
-    	                 lonname, lon_grid_scale, 
+        self.p_silt = self.extract_grid_value_from_GSD(Silt_file,
+                         lonname, lon_grid_scale,
                          latname, lat_grid_scale,
                          'T_SILT')
-        self.p_peat=0                                          
-    #   initialize_soil_texture_from_GSD()      
-    #-------------------------------------------------------------------    	
-    
+        self.p_peat=0
+    #   initialize_soil_texture_from_GSD()
+    #-------------------------------------------------------------------
+
     def read_input_files(self):
 
         print 'ERROR: read_input_files() for permafrost component'
         print '       has not been implemented.'
         print ' Ignoring this message for now. Can not find the rti class'
-        
-    #   read_input_files()       
+
+    #   read_input_files()
     #-------------------------------------------------------------------
     def check_input_types(self):
 
@@ -209,7 +209,7 @@ class permafrost_component( BMI_base.BMI_component ):
         #----------------------------------------------------
         # Notes: rho_H2O, Cp_snow, rho_air and Cp_air are
         #        currently always scalars.
-        #----------------------------------------------------        
+        #----------------------------------------------------
         are_scalars = np.array([
                           self.is_scalar('lat'),
                           self.is_scalar('lon'),
@@ -225,10 +225,10 @@ class permafrost_component( BMI_base.BMI_component ):
                           self.is_scalar('Dvt') ])
 
         self.ALL_SCALARS = np.all(are_scalars)
-  
+
     #   check_input_types()
-    #-------------------------------------------------------------------  
-   
+    #-------------------------------------------------------------------
+
     def initialize(self, cfg_file=None, mode="nondriver",
                    SILENT=False):
 
@@ -244,30 +244,30 @@ class permafrost_component( BMI_base.BMI_component ):
         if not(SILENT):
             print ' '
             print 'Permafrost component: Initializing...'
-            
+
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
         self.mode       = mode
         self.cfg_file   = cfg_file
         #print mode, cfg_file
-        
+
         #-----------------------------------------------
         # Load component parameters from a config file
-        #-----------------------------------------------       
+        #-----------------------------------------------
         self.set_constants()
         self.initialize_config_vars()
-        # At this stage we are going to ignore read_grid_info b/c 
+        # At this stage we are going to ignore read_grid_info b/c
         # we do not have rti file associated with our model
         # we also skipping the basin_vars which calls the outlets
         #self.read_grid_info()
         #self.initialize_basin_vars()
-        
+
         #---------------------------------------------
-       	# Extract soil texture from Grid Soil Database (Netcdf files)
-       	# according to locations  
-    	#---------------------------------------------
+        # Extract soil texture from Grid Soil Database (Netcdf files)
+        # according to locations
+        #---------------------------------------------
         self.initialize_soil_texture_from_GSD()
-        
-        self.initialize_time_vars() 
+
+        self.initialize_time_vars()
 
         if (self.comp_status == 'Disabled'):
             #########################################
@@ -290,7 +290,7 @@ class permafrost_component( BMI_base.BMI_component ):
             return
 
         #---------------------------------------------
-        # Open input files needed to initialize vars 
+        # Open input files needed to initialize vars
         #---------------------------------------------
         self.open_input_files()
         self.read_input_files()
@@ -298,14 +298,14 @@ class permafrost_component( BMI_base.BMI_component ):
         #---------------------------
         # Initialize computed vars
         #---------------------------
-        self.check_input_types()  # (maybe not used yet)        
-             
+        self.check_input_types()  # (maybe not used yet)
+
         self.status = 'initialized'
-             
+
     #   initialize()
     #-------------------------------------------------------------------
     def update_ALT(self):
- 
+
         #---------------------------------------------------------
         # Note: We don't need to update any variables if
         #       the soil_thermal_conductivity method is None.  But we need
@@ -315,11 +315,11 @@ class permafrost_component( BMI_base.BMI_component ):
         #--------------------------------------------------
         print 'ERROR: update_ALT() method for Permafrost component'
         print '       has not been implemented.'
-       
-    #   update_ALT()       
+
+    #   update_ALT()
     #-------------------------------------------------------------------
     def update_ground_temperatures(self):
- 
+
        #---------------------------------------------------------
         # Note: We don't need to update any variables if
         #       the soil_thermal_conductivity method is None.  But we need
@@ -329,10 +329,10 @@ class permafrost_component( BMI_base.BMI_component ):
         #--------------------------------------------------
         print 'ERROR: update_ground_temperatures method for Permafrost component'
         print '       has not been implemented.'
-             
-    #   update_ground_temperatures() 
+
+    #   update_ground_temperatures()
     #-------------------------------------------------------------------
-    
+
     ## def update(self, dt=-1.0, time_seconds=None):
     def update(self, dt=-1.0):
 
@@ -347,17 +347,17 @@ class permafrost_component( BMI_base.BMI_component ):
         #       If the input files don't contain any additional
         #       data, the last data read persists by default.
         #----------------------------------------------------------
-        
+
         #-------------------------------------------------
         # Note: self.SM already set to 0 by initialize()
         #-------------------------------------------------
         if (self.comp_status == 'Disabled'): return
-        self.status = 'updating'  # (OpenMI)    
-        
+        self.status = 'updating'  # (OpenMI)
+
         #-------------------------
-        # Update computed values 
+        # Update computed values
         #-------------------------
-        self.update_ground_temperatures()      
+        self.update_ground_temperatures()
         self.update_ALT()
 
         #-----------------------------------------
@@ -376,15 +376,15 @@ class permafrost_component( BMI_base.BMI_component ):
         #----------------------------------------------
         # Components use own self.time_sec by default.
         #-----------------------------------------------
-        self.write_output_files()   
-        
+        self.write_output_files()
+
         #-----------------------------
         # Update internal clock
         # after write_output_files()
         #-----------------------------
         self.update_time( dt )
-        self.status = 'updated'  # (OpenMI)  
-           
+        self.status = 'updated'  # (OpenMI)
+
     #   update()
     #-------------------------------------------------------------------
 
@@ -396,7 +396,7 @@ class permafrost_component( BMI_base.BMI_component ):
         if (time_seconds is None):
             time_seconds = self.time_sec
         model_time = int(time_seconds)
-        
+
         #----------------------------------------
         # Save computed values at sampled times
         #----------------------------------------
@@ -412,48 +412,48 @@ class permafrost_component( BMI_base.BMI_component ):
 ##             self.save_grids()
 ##        if ((self.time_index % self.pixel_save_step) == 0):
 ##             self.save_pixel_values()
-        
+
     #   write_output_files()
     #-------------------------------------------------------------------
     def save_grids(self):
-    	# Saves the grid values based on the prescribed ones in cfg file
-     
+        # Saves the grid values based on the prescribed ones in cfg file
+
         #if (self.SAVE_MR_GRIDS):
         #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
-            
+
         if (self.SAVE_HS_GRIDS):
             model_output.add_grid( self, self.h_snow, 'h_snow', self.time_min )
-            
+
         #if (self.SAVE_SW_GRIDS):
         #    model_output.add_grid( self, self.Tps, 'Tps', self.time_min )
 
         #if (self.SAVE_CC_GRIDS):
         #    model_output.add_grid( self, self.Zal, 'Zal', self.time_min )
 
-    #   save_grids()     
+    #   save_grids()
     #-------------------------------------------------------------------
     def save_pixel_values(self):
 
         #IDs  = self.outlet_IDs  : not sure what is this
         time = self.time_min   ###
-        
+
         #if (self.SAVE_MR_PIXELS):
         #    model_output.add_values_at_IDs( self, time, self.SM, 'mr', IDs )
-            
+
         if (self.SAVE_HS_PIXELS):
             model_output.add_values_at_IDs( self, time, self.h_snow, 'h_snow', IDs )
-            
+
         #if (self.SAVE_SW_PIXELS):
         #    model_output.add_values_at_IDs( self, time, self.h_swe, 'sw', IDs )
-            
+
         #if (self.SAVE_CC_PIXELS):
         #    model_output.add_values_at_IDs( self, time, self.Ecc, 'cc', IDs )
 
     #   save_pixel_values()
-    #------------------------------------------------------------------- 
+    #-------------------------------------------------------------------
     def finalize(self):
 
-        self.status = 'finalizing'  # (OpenMI)   
+        self.status = 'finalizing'  # (OpenMI)
         self.close_input_files()   ##  TopoFlow input "data streams"
         self.close_output_files()
         self.status = 'finalized'  # (OpenMI)
@@ -467,25 +467,25 @@ class permafrost_component( BMI_base.BMI_component ):
         # of the component's CCA Imple file
         #----------------------------------------
         # self.release_cca_ports( port_names, d_services )
-        
+
     #   finalize()
     #-------------------------------------------------------------------
     def close_output_files(self):
-    
-        #if (self.SAVE_MR_GRIDS): model_output.close_gs_file( self, 'mr')   
-        if (self.SAVE_HS_GRIDS): model_output.close_gs_file( self, 'hs')   
-        #if (self.SAVE_SW_GRIDS): model_output.close_gs_file( self, 'sw')   
+
+        #if (self.SAVE_MR_GRIDS): model_output.close_gs_file( self, 'mr')
+        if (self.SAVE_HS_GRIDS): model_output.close_gs_file( self, 'hs')
+        #if (self.SAVE_SW_GRIDS): model_output.close_gs_file( self, 'sw')
         #if (self.SAVE_CC_GRIDS): model_output.close_gs_file( self, 'cc')
-        #-----------------------------------------------------------------        
-        #if (self.SAVE_MR_PIXELS): model_output.close_ts_file( self, 'mr')  
-        #if (self.SAVE_HS_PIXELS): model_output.close_ts_file( self, 'hs')   
-        #if (self.SAVE_SW_PIXELS): model_output.close_ts_file( self, 'sw')   
+        #-----------------------------------------------------------------
+        #if (self.SAVE_MR_PIXELS): model_output.close_ts_file( self, 'mr')
+        #if (self.SAVE_HS_PIXELS): model_output.close_ts_file( self, 'hs')
+        #if (self.SAVE_SW_PIXELS): model_output.close_ts_file( self, 'sw')
         #if (self.SAVE_CC_PIXELS): model_output.close_ts_file( self, 'cc')
-    #-------------------------------------------------------------------   
+    #-------------------------------------------------------------------
     def close_input_files(self):
 
         print 'ERROR: close_input_files() for Snow component'
         print '       has not been implemented.'
 
     #   close_input_files()
-    #-------------------------------------------------------------------          
+    #-------------------------------------------------------------------
