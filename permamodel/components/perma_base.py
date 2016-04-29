@@ -161,10 +161,10 @@ class permafrost_component( BMI_base.BMI_component ):
         # NOTE: this part is a hardcoded
         # Maybe there is abetter way of organizing it
 
-        Clay_file = 'Parameters/T_CLAY.nc4'
-        Sand_file = 'Parameters/T_SAND.nc4'
-        Silt_file = 'Parameters/T_SILT.nc4'
-        Peat_file = 'Parameters/T_OC.nc4'
+        Clay_file = './Parameters/T_CLAY.nc4'
+        Sand_file = './Parameters/T_SAND.nc4'
+        Silt_file = './Parameters/T_SILT.nc4'
+        Peat_file = './Parameters/T_OC.nc4'
 
         # Kang please add a file check method here
         # to check that all files do exist
