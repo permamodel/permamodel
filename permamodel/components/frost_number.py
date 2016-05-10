@@ -5,6 +5,7 @@
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
+import os
 
 class frostnumber_method( perma_base.permafrost_component ):
 
@@ -457,6 +458,11 @@ class frostnumber_method( perma_base.permafrost_component ):
         print("month: %d"  % month)
         filename = "%s/tas_mean_C_cru_TS31_%02d_%4d.tif" % \
                 (datadir, month, year)
+        if not os.path.isfile(filename):
+            print("Warning: this temperature tiff file does not exist: %s" %\
+                  filename)
+            exit(-1)
+
         return filename
 
     #   get_temperature_tiff_filename(year, month, [datadir])
