@@ -154,33 +154,35 @@ class permafrost_component( BMI_base.BMI_component ):
     	return p_data
 	#   extract_grid_value_from_GSD()      
     #-------------------------------------------------------------------     	
-    def check_file_exists(self,input_file):
-    	import os
-    	# make sure php-cgi file exists, else show an error
-    	if ( not os.path.isfile( input_file)):
-    		print("Error: %s file not found" %  input_file)
-    	else:
-    		print("Setting soil properties using %s ..." %  input_file)    	
-    #-------------------------------------------------------------------   
+
+    def get_param_nc4_filename(self, filename_root, permamodel_dir="."):
+        filename = "%s/permamodel/components/Parameters/%s.nc4" % \
+                (permamodel_dir, filename_root)
+        if not os.path.isfile(filename):
+            print("Error: File %s does not exist" % filename)
+            exit(-1)
+        return filename
     
     def initialize_soil_texture_from_GSD(self):
 
-        # NOTE: this part is a hardcoded 
-        # Maybe there is abetter way of organizing it
-        
-        Clay_file = '../permamodel/components/Parameters/T_CLAY.nc4'
-     	Sand_file = '../permamodel/components/Parameters/T_SAND.nc4'
-    	Silt_file = '../permamodel/components/Parameters/T_SILT.nc4'
-    	Peat_file = '../permamodel/components/Parameters/T_OC.nc4'
-    	
-    	self.check_file_exists(Clay_file)
-    	self.check_file_exists(Sand_file)
-    	self.check_file_exists(Silt_file)
-    	self.check_file_exists(Peat_file)
-    		
-    	# Kang please add a file check method here
-    	# to check that all files do exist
-    	# if not it should warn user that files are not found
+        #Clay_file = '../permamodel/components/Parameters/T_CLAY.nc4'
+     	#Sand_file = '../permamodel/components/Parameters/T_SAND.nc4'
+    	#Silt_file = '../permamodel/components/Parameters/T_SILT.nc4'
+    	#Peat_file = '../permamodel/components/Parameters/T_OC.nc4'
+
+        Clay_file = self.get_param_nc4_filename("T_CLAY",
+                                                self.permafrost_dir)
+        Sand_file = self.get_param_nc4_filename("T_SAND",
+                                                self.permafrost_dir)
+        Silt_file = self.get_param_nc4_filename("T_SILT",
+                                                self.permafrost_dir)
+        Peat_file = self.get_param_nc4_filename("T_OC",
+                                                self.permafrost_dir)
+
+        print("Clay_file: %s" % Clay_file)
+        print("Sand_file: %s" % Sand_file)
+        print("Silt_file: %s" % Silt_file)
+        print("Peat_file: %s" % Peat_file)
     	
     	lonname     = 'lon'; lon_grid_scale = 0.05;
     	latname     = 'lat'; lat_grid_scale = 0.05;
