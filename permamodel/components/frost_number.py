@@ -6,6 +6,8 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 import os
+import gdal
+from gdalconst import *  # Import standard constants, such as GA_ReadOnly
 
 class frostnumber_method( perma_base.permafrost_component ):
 
@@ -459,9 +461,6 @@ class frostnumber_method( perma_base.permafrost_component ):
     def get_temperature_tiff_filename(self, year, month, datadir="/data/tas"):
         # Generate the name of the CRU tiff file
 
-        print("datadir: %s"  % datadir)
-        print("year: %d"  % year)
-        print("month: %d"  % month)
         filename = "%s/tas_mean_C_cru_TS31_%02d_%4d.tif" % \
                 (datadir, month, year)
         if not os.path.isfile(filename):
@@ -473,4 +472,26 @@ class frostnumber_method( perma_base.permafrost_component ):
 
     #   get_temperature_tiff_filename(year, month, [datadir])
     #-------------------------------------------------------------------
+
+    def get_temperature_from_cru_indexes(self, i, j, m, y):
+        # Inputs are:
+        #    (i, j):  the location on the grid
+        #    m:       the month
+        #    y:       the year
+        temp_filename = self.get_temperature_tiff_filename(y, m)
+        ds = gdal.Open(temp_filename, GA_ReadOnly)
+
+        xdim = ds.RasterXSize
+        ydim = ds.RasterYSize
+
+        assert(i<xdim)
+        assert(j<ydim)
+
+        band = ds.GetRasterBand(1)
+
+        temperatures = band.ReadAsArray(0, 0, xdim,
+                           ydim).astype(gdal.GetDataTypeName(band.DataType))
+
+        return temperatures[j][i]
+
 
