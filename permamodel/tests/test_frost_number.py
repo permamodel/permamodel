@@ -31,24 +31,26 @@ def test_have_output_var_names():
 # ---------------------------------------------------
 def test_can_initialize_frostnumber_method_from_file():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg")
+    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg", SILENT=True)
 
 def test_frostnumber_method_has_date_and_location():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg")
+    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg", SILENT=True)
     assert(fn.year >= 0)
     assert(fn.year == fn.start_year)
 
 def test_can_get_temperature_filename_from_date_and_location():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg")
+    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",
+                 SILENT=True)
     # Given year and month, calculate the tiff_filename
     fname = fn.get_temperature_tiff_filename(fn.year, 6)
-    print("fname: %s" % fname)
+    assert(fname != None)
 
 def test_get_temperature_from_cru_indexes():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg")
+    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",
+                 SILENT=True)
 
     # Test using data file for June of 2009
     month = 6
@@ -68,7 +70,7 @@ def test_get_temperature_from_cru_indexes():
 
 def test_get_cru_indexes_from_lon_lat():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg")
+    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",SILENT=True)
 
     # Test using CRU tiff file for June 2009
     month = 6
@@ -94,4 +96,37 @@ def test_get_cru_indexes_from_lon_lat():
     (i, j) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
     assert(i==4761)
     assert(j==2556)
+
+def test_get_lon_lat_from_cru_indexes():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",SILENT=True)
+
+    # Try to get the upper left corner indexes
+    month = 6
+    year = 2009
+    i = -0.5
+    j = -0.5
+    (lon, lat) = fn.get_lon_lat_from_cru_indexes(i, j, month, year)
+    assert(abs(157.44516 - lon) < 1e-3)
+    assert(abs(63.90865 - lat) < 1e-3)
+
+    # Try to get the lower right corner indexes
+    month = 6
+    year = 2009
+    i = 4761.5
+    j = 2556.5
+    (lon, lat) = fn.get_lon_lat_from_cru_indexes(i, j, month, year)
+    assert(abs(-132.17774 - lon) < 1e-3)
+    assert(abs(51.460417 - lat) < 1e-3)
+
+
+def test_get_temperature_from_cru():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",SILENT=True)
+    month = 6
+    year = 2009
+    lon = -160.55371
+    lat = 62.382381
+    temperature = fn.get_temperature_from_cru(lon, lat, month, year)
+    print("Temperature: %f" % temperature)
 

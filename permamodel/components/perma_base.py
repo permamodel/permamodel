@@ -179,10 +179,10 @@ class permafrost_component( BMI_base.BMI_component ):
         Peat_file = self.get_param_nc4_filename("T_OC",
                                                 self.permafrost_dir)
 
-        print("Clay_file: %s" % Clay_file)
-        print("Sand_file: %s" % Sand_file)
-        print("Silt_file: %s" % Silt_file)
-        print("Peat_file: %s" % Peat_file)
+        #print("Clay_file: %s" % Clay_file)
+        #print("Sand_file: %s" % Sand_file)
+        #print("Silt_file: %s" % Silt_file)
+        #print("Peat_file: %s" % Peat_file)
 
         lonname     = 'lon'; lon_grid_scale = 0.05;
         latname     = 'lat'; lat_grid_scale = 0.05;

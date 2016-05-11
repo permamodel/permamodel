@@ -174,6 +174,7 @@ class frostnumber_method( perma_base.permafrost_component ):
     #-------------------------------------------------------------------
 
     def read_input_files(self):
+        #print("in read_input_files for year %d" % self.year)
 
         #rti = self.rti # has a problem with loading rti: do not know where its been initialized
 
@@ -182,7 +183,7 @@ class frostnumber_method( perma_base.permafrost_component ):
         #-------------------------------------------------------
         T_air = model_input.read_next_modified(self.T_air_unit, self.T_air_type)
         if (T_air != None): self.T_air = T_air
-        print("T_air in frost_number: %f" % T_air)
+        #print("T_air in frost_number: %f" % T_air)
 
         #T0 = model_input.read_next(self.T0_unit, self.T0_type, rti)
         #if (T0 != None): self.T0 = T0
@@ -207,8 +208,16 @@ class frostnumber_method( perma_base.permafrost_component ):
 
         # Output: ddf (degree freezing days)
         #         ddt (degree thawing days)
+
+        # In the first test case, we used T_air_max and T_air_min
         T_hot=self.T_air_max
         T_cold=self.T_air_min
+
+        # Now, we use the values from the temperature CRU tiff files
+        # Assume that warmest month is July and coldest is the following Jan
+        #T_hot
+
+        print("In update_dd, year=%d" % self.year)
         assert(T_hot > T_cold)
         T_avg = (T_hot + T_cold) / 2.0
         # Note that these conditions should cover T_hot == T_cold
@@ -554,6 +563,50 @@ class frostnumber_method( perma_base.permafrost_component ):
         i = min(i, xdim-1)
         j = min(j, ydim-1)
 
-        print(i, j, x, y)
         return (i, j)
 
+    def get_lon_lat_from_cru_indexes(self, i, j, month, year):
+        # Based on:
+        #  http://gis.stackexchange.com/questions/122335/using-gdals-getprojection-information-to-make-a-coordinate-conversion-in-pyproj
+
+        # Note: i, j can be floating point
+
+        temp_filename = self.get_temperature_tiff_filename(year, month)
+
+        ds = gdal.Open(temp_filename, GA_ReadOnly)
+        tiff_proj_wkt = ds.GetProjection()
+        proj_converter = osr.SpatialReference()
+        proj_converter.ImportFromWkt(tiff_proj_wkt)
+        tiff_Proj4_string = proj_converter.ExportToProj4()
+        p1 = Proj(tiff_Proj4_string)
+
+        # Following:
+        #   http://geoinformaticstutorial.blogspot.com/2012/09/
+        #          reading-raster-data-with-python-and-gdal.html
+
+        xdim = ds.RasterXSize
+        ydim = ds.RasterYSize
+        geotransform = ds.GetGeoTransform()
+
+        # (originX, originY) is the upper left corner of the grid
+        #   Note: this is *not* the center of the UL gridcell
+        originX = geotransform[0]
+        originY = geotransform[3]
+        pixelWidth = geotransform[1]
+        pixelHeight = geotransform[5]  # Note this is negative for cru
+
+        # (zeroX, zeroY) is the center of the UL gridcell
+        zeroX = originX + 0.5*pixelWidth
+        zeroY = originY + 0.5*pixelHeight
+
+        # (xm, ym) is the point on the projected grid in meters
+        xm = zeroX + i * pixelWidth
+        ym = zeroY + j * pixelHeight
+        (lon, lat) = p1(xm, ym, inverse=True)
+
+        return (lon, lat)
+
+    def get_temperature_from_cru(self, lon, lat, month, year):
+        (i, j) = self.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+        temperature = self.get_temperature_from_cru_indexes(i, j, month, year)
+        return temperature
