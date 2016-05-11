@@ -35,16 +35,16 @@ class frostnumber_method( perma_base.permafrost_component ):
         'atmosphere_bottom_air__temperature_amplitude',
         'snowpack__depth',
         'snowpack__density',
-        'water-liquid__volumetric-water-content-soil',   
+        'water-liquid__volumetric-water-content-soil',
         'vegetation__Hvgf',
         'vegetation__Hvgt',
         'vegetation__Dvf',
         'vegetation__Dvt' ]
-        
+
     _output_var_names = [
-        'soil__temperature',                                  # Tps 
-        'soil__active_layer_thickness' ]                      # Zal      
-      
+        'soil__temperature',                                  # Tps
+        'soil__active_layer_thickness' ]                      # Zal
+
     _var_name_map = {
     # NOTE: we need to look up for the corresponding standard names
         'latitude':                                           'lat',
@@ -55,11 +55,11 @@ class frostnumber_method( perma_base.permafrost_component ):
         'atmosphere_bottom_air__temperature_amplitude':       'A_air',
         'snowpack__depth':                                    'h_snow',
         'snowpack__density':                                  'rho_snow',
-        'water-liquid__volumetric-water-content-soil':        'vwc_H2O',        
+        'water-liquid__volumetric-water-content-soil':        'vwc_H2O',
         'vegetation__Hvgf':                                   'Hvgf',
         'vegetation__Hvgt':                                   'Hvgt',
         'vegetation__Dvf':                                    'Dvf',
-        'vegetation__Dvt':                                    'Dvt' }       
+        'vegetation__Dvt':                                    'Dvt' }
 
     _var_units_map = {
     # NOTE: Kang please complete the vegetation info both on var names and units
@@ -69,12 +69,12 @@ class frostnumber_method( perma_base.permafrost_component ):
         'atmosphere_bottom_air__temperature_amplitude':       'deg_C',
         'snowpack__depth':                                    'm',
         'snowpack__density':                                  'kg m-3',
-        'water-liquid__volumetric-water-content-soil':        'm3 m-3',        
+        'water-liquid__volumetric-water-content-soil':        'm3 m-3',
         'vegetation__Hvgf':                                   'm',
         'vegetation__Hvgt':                                   'm',
         'vegetation__Dvf':                                    'm2 s',
-        'vegetation__Dvt':                                    'm2 s' }      
-    
+        'vegetation__Dvt':                                    'm2 s' }
+
     #-------------------------------------------------------------------
     def get_attribute(self, att_name):
 
@@ -86,26 +86,26 @@ class frostnumber_method( perma_base.permafrost_component ):
             print '###################################################'
             print ' '
 
-    #   get_attribute() 
-    #-------------------------------------------------------------------   
+    #   get_attribute()
+    #-------------------------------------------------------------------
     def get_input_var_names(self):
 
         #--------------------------------------------------------
         # Note: These are currently variables needed from other
         #       components vs. those read from files or GUI.
-        #--------------------------------------------------------   
+        #--------------------------------------------------------
         return self._input_var_names
-    
+
     #   get_input_var_names()
     #-------------------------------------------------------------------
     def get_output_var_names(self):
- 
+
         return self._output_var_names
-    
+
     #   get_output_var_names()
     #-------------------------------------------------------------------
     def get_var_name(self, long_var_name):
-            
+
         return self._var_name_map[ long_var_name ]
 
     #   get_var_name()
@@ -113,31 +113,31 @@ class frostnumber_method( perma_base.permafrost_component ):
     def get_var_units(self, long_var_name):
 
         return self._var_units_map[ long_var_name ]
-   
+
     #   get_var_units()
-    #------------------------------------------------------------------- 
+    #-------------------------------------------------------------------
     def check_input_types(self):
 
         #--------------------------------------------------
         # Notes: rho_H2O, Cp_snow, rho_air and Cp_air are
         #        currently always scalars.
-        #--------------------------------------------------        
+        #--------------------------------------------------
         are_scalars = np.array([
                           self.is_scalar('lat'),
                           self.is_scalar('lon'),
                           self.is_scalar('T_air_min'),
                           self.is_scalar('T_air_max'),
                           self.is_scalar('A_air'),
-                          self.is_scalar('h_snow'),  
+                          self.is_scalar('h_snow'),
                           self.is_scalar('rho_snow'),
-                          self.is_scalar('vwc_H2O'), 
+                          self.is_scalar('vwc_H2O'),
                           self.is_scalar('Hvgf'),
                           self.is_scalar('Hvgt'),
                           self.is_scalar('Dvf'),
                           self.is_scalar('Dvt') ])
 
         self.ALL_SCALARS = np.all(are_scalars)
-        
+
     #   check_input_types()
     #-------------------------------------------------------------------
     def open_input_files(self):
@@ -162,12 +162,12 @@ class frostnumber_method( perma_base.permafrost_component ):
         self.Hvgt_unit        = model_input.open_file(self.Hvgt_type,  self.Hvgt_file)
         self.Dvf_unit         = model_input.open_file(self.Dvf_type,  self.Dvf_file)
         self.Dvt_unit         = model_input.open_file(self.Dvt_type,  self.Dvt_file)
-        
+
         # This isn't exactly "opening an input file", but it is an init
         self.year = self.start_year
 
     #   open_input_files()
-    #-------------------------------------------------------------------  
+    #-------------------------------------------------------------------
 
     def read_input_files(self):
 
@@ -189,23 +189,23 @@ class frostnumber_method( perma_base.permafrost_component ):
 
         #h0_snow = model_input.read_next(self.h0_snow_unit, self.h0_snow_type, rti)
         #if (h0_snow != None): self.h0_snow = h0_snow
-        
+
        # h0_swe = model_input.read_next(self.h0_swe_unit, self.h0_swe_type, rti)
         #if (h0_swe != None): self.h0_swe = h0_swe
-        
-    #   read_input_files()       
-    #-------------------------------------------------------------------  
+
+    #   read_input_files()
+    #-------------------------------------------------------------------
 
 
     def update_dd(self):
- 
+
         # Input: T_hot (avg temp of warmest month)
         #        T_cold (avg temp of coldest month)
-        
+
         # Output: ddf (degree freezing days)
         #         ddt (degree thawing days)
         T_hot=self.T_air_max
-        T_cold=self.T_air_min 
+        T_cold=self.T_air_min
         assert(T_hot > T_cold)
         T_avg = (T_hot + T_cold) / 2.0
         # Note that these conditions should cover T_hot == T_cold
@@ -219,7 +219,10 @@ class frostnumber_method( perma_base.permafrost_component ):
             ddf = 0
             ddt = 365.0 * T_avg
         elif (self.T_air_type != 'Scalar'):
-            wk = np.loadtxt('examples/temp_copy.txt', skiprows=1,unpack=False)
+            #wk = np.loadtxt('examples/temp_copy.txt', skiprows=1,unpack=False)
+            temperature_filename = self.permafrost_dir +\
+                "permamodel/examples/temp_copy.txt"
+            wk = np.loadtxt(temperature_filename, skiprows=1,unpack=False)
             t_month = wk[:,0]
             T_month = wk[:,1]
             Th=max(T_month)
@@ -256,30 +259,33 @@ class frostnumber_method( perma_base.permafrost_component ):
     #   update_dd_from_annual_minmax_temp()
     #-------------------------------------------------------------------
     def update_air_frost_number(self):
-        # Calculating Reduced Air Frost Number (pages 280-281). 
+        # Calculating Reduced Air Frost Number (pages 280-281).
         # The reduced frost number is close 0 for long summers and close to 1 for long winters.
         self.air_frost_number = np.sqrt(self.ddf) / ( np.sqrt( self.ddf) + np.sqrt( self.ddt) )
-    
+
     #   update_air_frost_number()
-    #-------------------------------------------------------------------  
-    
+    #-------------------------------------------------------------------
+
     def update_snow_prop(self):
         # find indexes for which temp > 0 and make precip = 0
         if (self.T_air_type != 'Scalar'): # if not should stop
-            wk = np.loadtxt('examples/prec.txt', skiprows=1,unpack=False)
+            #wk = np.loadtxt('examples/prec.txt', skiprows=1,unpack=False)
+            precipitation_filename = self.permafrost_dir +\
+                "permamodel/examples/prec.txt"
+            wk = np.loadtxt(precipitation_filename, skiprows=1,unpack=False)
             t_month = wk[:,0]
             prec_month = wk[:,1]
-            
-        pos_temp_ind=np.array(np.where(self.ta_month>0))  
+
+        pos_temp_ind=np.array(np.where(self.ta_month>0))
         prec_month[pos_temp_ind]=0
         neg_temp_ind=np.array(np.where(self.ta_month<=0))
-        
-        if not pos_temp_ind.any():  
+
+        if not pos_temp_ind.any():
         # monthly temp is always below zero
         # i.e. it constantly snows over whole year
-        # the point associated with glaciaer and needs to excluded 
-            print 'snows constatly: stop!' 
-            
+        # the point associated with glaciaer and needs to excluded
+            print 'snows constatly: stop!'
+
         m=np.size(neg_temp_ind)
         pp=0.5; # assume only 50% of precip change to at the beg and end of the snow season
 
@@ -294,40 +300,40 @@ class frostnumber_method( perma_base.permafrost_component ):
             e_idx=neg_temp_ind[:,m-1]
             prec_month[s_idx]=prec_month[s_idx]*pp
             prec_month[e_idx]=prec_month[e_idx]*pp
-            
+
         # sum up precip to get SWE
         j=0; s=0; swe=np.zeros(m);
-        for i in range(s_idx,e_idx+1): 
+        for i in range(s_idx,e_idx+1):
             s=s+prec_month[i]
             swe[j]=s
             j=j+1
-        
+
         #calculating snow density, depth and thermal counductivity
         r_snow=np.zeros(m); # snow density in kg/m3
         h_snow=np.zeros(m); # snow depth in m
         c_snow=np.zeros(m); # snow depth in W/mK
-        
-        rho_sn_min=200; rho_sn_max=300 # allowed min and max snow density 
+
+        rho_sn_min=200; rho_sn_max=300 # allowed min and max snow density
         tauf=0.24 # e-folding value (see Verseghy, 1991)
-        
+
         s=rho_sn_min
         s=((s - rho_sn_max)*np.exp(-tauf)) + rho_sn_max
         r_snow[0] = s
-        for i in range(1,m): 
+        for i in range(1,m):
         # starting from month 2 tauf should be multpled by the 30 days
         # otherwise snow thermal conductivity can be low and insulate ground well enough over the season
         # usually we assume constant max snow thermal conductivity over snow season
             s=((s - rho_sn_max)*np.exp(-tauf)) + rho_sn_max
             r_snow[i] = s
-        
-        h_snow  = (swe/(r_snow*0.001)) 
+
+        h_snow  = (swe/(r_snow*0.001))
         # snow thermal conductivity according to M. Sturm, 1997.
         c_snow = (0.138-1.01*r_snow + 3.233*(r_snow**2))*1e-6
-        
+
         self.r_snow=r_snow
         self.h_snow=h_snow
         self.c_snow=c_snow
-        
+
     #   update_snow_prop()
     #-------------------------------------------------------------------
     def update_surface_frost_number(self):
@@ -346,38 +352,38 @@ class frostnumber_method( perma_base.permafrost_component ):
         # DDFplus [scalar]: freezing index at the surface
         # Tplus [scalar]: mean annual tempratures at the surface
         # Fplus [scalar] : surface frost number
-        
+
         rho_s=np.mean(self.r_snow)
         lambda_s=np.mean(self.c_snow)
         Zs=np.mean(self.h_snow)
         P=2*np.pi/365; # i am not sure what they mean by length of the annual temprature cycle
         # Something worthwhile discussing
-        
+
         c_s=7.79*self.Tw+2115                                               #(eqn. 7)
         alpha_s=lambda_s/(c_s*rho_s)                                        #(eqn. 8)
         Zss=np.sqrt(alpha_s*P/np.pi)                                        #(eqn. 10)
         Aplus=self.A_air*np.exp(-Zs/Zss)                                    #(eqn. 9)
         Twplus=self.T_air-Aplus*np.sin(self.beta/(np.pi-self.beta))         #(eqn. 11)
-        # Twplus is a mean winter surface temprature, I think, should be warmer than air temperature? 
-        # Here is another problem. DDFplus degree days winter should be positive. 
-        # The way it is written in the paper is wrong. I added a minus sign to fix it (see eqn. 2.9) 
+        # Twplus is a mean winter surface temprature, I think, should be warmer than air temperature?
+        # Here is another problem. DDFplus degree days winter should be positive.
+        # The way it is written in the paper is wrong. I added a minus sign to fix it (see eqn. 2.9)
         DDFplus=-Twplus*self.Lw                                             #(eqn. 12)
         Tplus=(self.ddt-DDFplus)/365                                        #(eqn. 13)
-        #Nevertheless the surface frost number is smaller than air which looks resonable to me. 
+        #Nevertheless the surface frost number is smaller than air which looks resonable to me.
         self.Fplus=np.sqrt(DDFplus)/(np.sqrt(self.ddt)+np.sqrt(DDFplus))    #(eqn. 14)
         self.Twplus=Twplus
-    
+
     #   update_surface_frost_number()
     #-------------------------------------------------------------------
     def update_stefan_frost_number(self):
         # Zfplus [scalar]: the depth [m] to which forst extends
         # lambda_f [scalar]: frozen soil thermal conductivity [W m-1 C-1]
-        # S [scalar]: is a const scalar factor [s d-1] 
+        # S [scalar]: is a const scalar factor [s d-1]
         # rho_d [scalar]: dry density of soil [kg m-3]
         # wf [scalar] : soil water content (proportion of dry weight)
         # L [scalar] : is a latent heat of fusion of water [J kg-1]
-        
-        lambda_f=1.67 # some dummy thermal conductivity  
+
+        lambda_f=1.67 # some dummy thermal conductivity
         # https://shop.bgs.ac.uk/GeoReports/examples/modules/C012.pdf
         sec_per_day=86400
         rho_d=2.798  # dry density of silt
@@ -385,9 +391,9 @@ class frostnumber_method( perma_base.permafrost_component ):
         denominator=rho_d*wf*self.Lf
         self.Zfplus=np.sqrt(2*lambda_f*sec_per_day*np.abs(self.Twplus)*self.Lw/denominator)               #(eqn. 15)
         print 'Zfplus=',self.Zfplus
-        
+
         # assuming 3 soil layers with thickness 0.25, 0.5 and 1.75 m
-        # and thermal conductivities 0.08, 1.5, and 2.1 
+        # and thermal conductivities 0.08, 1.5, and 2.1
         soil_thick=np.array([0.25, 0.5 , 1.75])
         lambda_b=np.array([0.08, 1.5, 2.1])
         # resistivity R
@@ -406,48 +412,48 @@ class frostnumber_method( perma_base.permafrost_component ):
         for i in range(0,3):
             #The depth of the frost thaw penetration
             Z[i]=np.sqrt(2*lambda_b[i]*sec_per_day*DD[i]/QL + lambda_b[i]**2*S**2) \
-                - lambda_b[i]*S 
+                - lambda_b[i]*S
             S=R[i]+S
             Z_tot=Z_tot + Z[i]
-            
+
         self.Z_tot=Z_tot
         self.stefan_number = np.sqrt(self.Fplus) / ( np.sqrt( self.Fplus) + np.sqrt( self.Z_tot) )
-        
-    #   update_stefan_frost_number()  
-    #-------------------------------------------------------------------  
-    
+
+    #   update_stefan_frost_number()
+    #-------------------------------------------------------------------
+
     def update_ALT(self):
- 
+
         #---------------------------------------------------------
         #       coming up
         #--------------------------------------------------
-        print 'OK'        
-                
+        print 'OK'
+
     #   update_ALT()
-    #-------------------------------------------------------------------       
+    #-------------------------------------------------------------------
     def update_ground_temperatures(self):
-        # This method does not update temps instead it does frost numbers 
-        self.update_dd() 
+        # This method does not update temps instead it does frost numbers
+        self.update_dd()
         self.update_air_frost_number()
         self.update_snow_prop()
         self.update_surface_frost_number()
         self.update_stefan_frost_number()
-             
-    #   update_ground_temperatures() 
+
+    #   update_ground_temperatures()
     #-------------------------------------------------------------------
     def close_input_files(self):
 
-        if (self.T_air_type     != 'Scalar'): self.T_air_unit.close() 
-        if (self.A_air_type     != 'Scalar'): self.A_air_unit.close() 
-        if (self.h_snow_type    != 'Scalar'): self.h_snow_unit.close() 
-        if (self.rho_snow_type  != 'Scalar'): self.rho_snow_unit.close() 
-        if (self.vwc_H2O_type   != 'Scalar'): self.vwc_H2O_unit.close() 
-        if (self.Hvgf_type      != 'Scalar'): self.Hvgf_unit.close() 
-        if (self.Hvgt_type      != 'Scalar'): self.Hvgt_unit.close() 
-        if (self.Dvf_type       != 'Scalar'): self.Dvf_unit.close() 
-        if (self.Dvt_type       != 'Scalar'): self.Dvt_unit.close() 
+        if (self.T_air_type     != 'Scalar'): self.T_air_unit.close()
+        if (self.A_air_type     != 'Scalar'): self.A_air_unit.close()
+        if (self.h_snow_type    != 'Scalar'): self.h_snow_unit.close()
+        if (self.rho_snow_type  != 'Scalar'): self.rho_snow_unit.close()
+        if (self.vwc_H2O_type   != 'Scalar'): self.vwc_H2O_unit.close()
+        if (self.Hvgf_type      != 'Scalar'): self.Hvgf_unit.close()
+        if (self.Hvgt_type      != 'Scalar'): self.Hvgt_unit.close()
+        if (self.Dvf_type       != 'Scalar'): self.Dvf_unit.close()
+        if (self.Dvt_type       != 'Scalar'): self.Dvt_unit.close()
 
-    #   close_input_files()    
+    #   close_input_files()
     #-------------------------------------------------------------------
 
     def get_temperature_tiff_filename(self, year, month, datadir="/data/tas"):
