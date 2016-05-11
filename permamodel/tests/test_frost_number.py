@@ -66,3 +66,31 @@ def test_get_temperature_from_cru_indexes():
     temp = fn.get_temperature_from_cru_indexes(i, j, month, year)
     np.testing.assert_almost_equal(temp, 12.8, decimal=3)
 
+def test_get_cru_indexes_from_lon_lat():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg")
+
+    # Test using CRU tiff file for June 2009
+    month = 6
+    year = 2009
+    lon = -160.55371
+    lat = 62.382381
+    (i, j, x, y) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+    assert(abs(x-2380.5) < 1e-2)
+    assert(abs(y-1278.0) < 1e-2)
+
+    # Test upper left corner
+    lon = 157.44516
+    lat = 63.90865
+    (i, j, x, y) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+    assert(abs(x-(-0.5)) < 1e-2)
+    assert(abs(y-(-0.5)) < 1e-2)
+
+    # Test lower right corner
+    lon = -132.17774
+    lat = 51.460417
+    (i, j, x, y) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+    print(i, j, x, y)
+    assert(abs(x-4761.5) < 1e-2)
+    assert(abs(y-2556.5) < 1e-2)
+

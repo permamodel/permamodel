@@ -170,11 +170,6 @@ class permafrost_component( BMI_base.BMI_component ):
         #Silt_file = '../permamodel/components/Parameters/T_SILT.nc4'
         #Peat_file = '../permamodel/components/Parameters/T_OC.nc4'
 
-        print("In initialize_soil_texture_from_GSD, in.dir: %s" % \
-              self.in_directory)
-        print("In initialize_soil_texture_from_GSD, permafrost.dir: %s" % \
-              self.permafrost_dir)
-
         Clay_file = self.get_param_nc4_filename("T_CLAY",
                                                 self.permafrost_dir)
         Sand_file = self.get_param_nc4_filename("T_SAND",

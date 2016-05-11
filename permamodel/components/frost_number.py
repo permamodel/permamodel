@@ -8,6 +8,8 @@ from permamodel.components import perma_base
 import os
 import gdal
 from gdalconst import *  # Import standard constants, such as GA_ReadOnly
+import osr
+from pyproj import Proj, transform
 
 class frostnumber_method( perma_base.permafrost_component ):
 
@@ -180,8 +182,7 @@ class frostnumber_method( perma_base.permafrost_component ):
         #-------------------------------------------------------
         T_air = model_input.read_next_modified(self.T_air_unit, self.T_air_type)
         if (T_air != None): self.T_air = T_air
-        print T_air
-        print 'OKOK'
+        print("T_air in frost_number: %f" % T_air)
 
         #T0 = model_input.read_next(self.T0_unit, self.T0_type, rti)
         #if (T0 != None): self.T0 = T0
@@ -481,6 +482,10 @@ class frostnumber_method( perma_base.permafrost_component ):
         temp_filename = self.get_temperature_tiff_filename(y, m)
         ds = gdal.Open(temp_filename, GA_ReadOnly)
 
+        # Examine the tiff metadata, but it's just the Area or Point info
+        # print("Tiff Metadata:\n%s" % ds.GetMetadata())
+
+        # Verify that we are checking a point in the grid
         xdim = ds.RasterXSize
         ydim = ds.RasterYSize
 
@@ -494,4 +499,65 @@ class frostnumber_method( perma_base.permafrost_component ):
 
         return temperatures[j][i]
 
+    def get_cru_indexes_from_lon_lat(self, lon, lat, month, year):
+        # Based on:
+        #  http://gis.stackexchange.com/questions/122335/using-gdals-getprojection-information-to-make-a-coordinate-conversion-in-pyproj
+
+        temp_filename = self.get_temperature_tiff_filename(year, month)
+
+        ds = gdal.Open(temp_filename, GA_ReadOnly)
+        tiff_proj_wkt = ds.GetProjection()
+        proj_converter = osr.SpatialReference()
+        proj_converter.ImportFromWkt(tiff_proj_wkt)
+        tiff_Proj4_string = proj_converter.ExportToProj4()
+        p1 = Proj(tiff_Proj4_string)
+
+        (x, y) = p1(lon, lat)
+
+        print("x: %f" % x)
+        print("y: %f" % y)
+
+        # Following:
+        #   http://geoinformaticstutorial.blogspot.com/2012/09/
+        #          reading-raster-data-with-python-and-gdal.html
+
+        xdim = ds.RasterXSize
+        ydim = ds.RasterYSize
+        geotransform = ds.GetGeoTransform()
+        #print("geotransform: %s" % str(geotransform))
+
+        # (originX, originY) is the upper left corner of the grid
+        #   Note: this is *not* the center of the UL gridcell
+        originX = geotransform[0]
+        originY = geotransform[3]
+        pixelWidth = geotransform[1]
+        pixelHeight = geotransform[5]  # Note this is negative for cru
+
+        # (zeroX, zeroY) is the center of the UL gridcell
+        zeroX = originX + 0.5*pixelWidth
+        zeroY = originY + 0.5*pixelHeight
+
+        #i = round((x - zeroX)/pixelWidth)
+        #j = round((y - zeroY)/pixelHeight)
+        # ix and jy are floating points
+        ix = (x - zeroX)/pixelWidth
+        jy = (y - zeroY)/pixelHeight
+        # i and j are the rounded index values
+        i = round(ix)
+        j = round(jy)
+
+        # Ensure that point is on the grid
+        assert(ix>=-0.501)
+        assert(jy>=-0.501)
+        assert(ix<=xdim-1+0.501)
+        assert(jy<=ydim-1+0.501)
+
+        # Ensure that the indexes are valid
+        i = max(i, 0)
+        j = max(j, 0)
+        i = min(i, xdim-1)
+        j = min(j, ydim-1)
+
+        return (i, j, ix, jy)
+        #return (i, j)
 
