@@ -215,7 +215,10 @@ class frostnumber_method( perma_base.permafrost_component ):
 
         # Now, we use the values from the temperature CRU tiff files
         # Assume that warmest month is July and coldest is the following Jan
-        #T_hot
+        print("Lon: %f" % self.lon)
+        print("Lat: %f" % self.lat)
+        T_hot = self.get_temperature_from_cru(self.lon, self.lat, 7, self.year)
+        T_cold = self.get_temperature_from_cru(self.lon, self.lat, 1, self.year+1)
 
         print("In update_dd, year=%d" % self.year)
         assert(T_hot > T_cold)

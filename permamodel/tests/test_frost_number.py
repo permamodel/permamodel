@@ -125,8 +125,11 @@ def test_get_temperature_from_cru():
     fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",SILENT=True)
     month = 6
     year = 2009
-    lon = -160.55371
-    lat = 62.382381
+
+    # I can see the rightmost value on the geotiff at (4761, 1973)
+    i = 4761
+    j = 1973
+    (lon, lat) = fn.get_lon_lat_from_cru_indexes(i, j, month, year)
     temperature = fn.get_temperature_from_cru(lon, lat, month, year)
-    print("Temperature: %f" % temperature)
+    assert(abs(temperature - 8.6) < 1e-3)
 
