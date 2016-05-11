@@ -512,10 +512,8 @@ class frostnumber_method( perma_base.permafrost_component ):
         tiff_Proj4_string = proj_converter.ExportToProj4()
         p1 = Proj(tiff_Proj4_string)
 
-        (x, y) = p1(lon, lat)
-
-        print("x: %f" % x)
-        print("y: %f" % y)
+        # (xm, ym) is the point on the projected grid in meters
+        (xm, ym) = p1(lon, lat)
 
         # Following:
         #   http://geoinformaticstutorial.blogspot.com/2012/09/
@@ -524,7 +522,6 @@ class frostnumber_method( perma_base.permafrost_component ):
         xdim = ds.RasterXSize
         ydim = ds.RasterYSize
         geotransform = ds.GetGeoTransform()
-        #print("geotransform: %s" % str(geotransform))
 
         # (originX, originY) is the upper left corner of the grid
         #   Note: this is *not* the center of the UL gridcell
@@ -537,20 +534,19 @@ class frostnumber_method( perma_base.permafrost_component ):
         zeroX = originX + 0.5*pixelWidth
         zeroY = originY + 0.5*pixelHeight
 
-        #i = round((x - zeroX)/pixelWidth)
-        #j = round((y - zeroY)/pixelHeight)
-        # ix and jy are floating points
-        ix = (x - zeroX)/pixelWidth
-        jy = (y - zeroY)/pixelHeight
+        # x and y are floating points
+        x = (xm - zeroX)/pixelWidth
+        y = (ym - zeroY)/pixelHeight
+
         # i and j are the rounded index values
-        i = round(ix)
-        j = round(jy)
+        i = int(round(x))
+        j = int(round(y))
 
         # Ensure that point is on the grid
-        assert(ix>=-0.501)
-        assert(jy>=-0.501)
-        assert(ix<=xdim-1+0.501)
-        assert(jy<=ydim-1+0.501)
+        assert(x>=-0.501)
+        assert(y>=-0.501)
+        assert(x<=xdim-1+0.501)
+        assert(y<=ydim-1+0.501)
 
         # Ensure that the indexes are valid
         i = max(i, 0)
@@ -558,6 +554,6 @@ class frostnumber_method( perma_base.permafrost_component ):
         i = min(i, xdim-1)
         j = min(j, ydim-1)
 
-        return (i, j, ix, jy)
-        #return (i, j)
+        print(i, j, x, y)
+        return (i, j)
 

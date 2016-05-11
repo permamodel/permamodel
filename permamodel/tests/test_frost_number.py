@@ -73,24 +73,25 @@ def test_get_cru_indexes_from_lon_lat():
     # Test using CRU tiff file for June 2009
     month = 6
     year = 2009
+
+    # Test midpoint
+    # Difficult to test because even number of x points
     lon = -160.55371
     lat = 62.382381
-    (i, j, x, y) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
-    assert(abs(x-2380.5) < 1e-2)
-    assert(abs(y-1278.0) < 1e-2)
+    (i, j) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+    assert(j==1278)
 
     # Test upper left corner
     lon = 157.44516
     lat = 63.90865
-    (i, j, x, y) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
-    assert(abs(x-(-0.5)) < 1e-2)
-    assert(abs(y-(-0.5)) < 1e-2)
+    (i, j) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+    assert(i==0)
+    assert(j==0)
 
     # Test lower right corner
     lon = -132.17774
     lat = 51.460417
-    (i, j, x, y) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
-    print(i, j, x, y)
-    assert(abs(x-4761.5) < 1e-2)
-    assert(abs(y-2556.5) < 1e-2)
+    (i, j) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+    assert(i==4761)
+    assert(j==2556)
 
