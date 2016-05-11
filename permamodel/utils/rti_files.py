@@ -31,7 +31,7 @@ import sys    # (for sys.byteorder)
 #   make_new_if_needed()  ## future ????????
 #   make_new_from_old()   ## future ????????
 #
-#-------------------------------------------------------------------------  
+#-------------------------------------------------------------------------
 def unit_test():
 
     #------------------------
@@ -49,7 +49,7 @@ def unit_test():
     #-----------------------------
     info = read_info(RTI_file, REPORT=True)
     # info = read_info(grid_file, REPORT=True)  # (also works)
-    
+
     #---------------------------
     # Test the "get" functions
     #---------------------------
@@ -59,7 +59,7 @@ def unit_test():
     print ' '
     print 'Finished with unit_test().'
     print ' '
-    
+
 #   unit_test()
 #-------------------------------------------------------------------
 def get_file_prefix( file_name ):
@@ -113,13 +113,13 @@ def try_to_find_rti_file( file_name, SILENT=False ):
             if (RTI_file == file_name):
                 str1 = 'Could not find the RTI file:'
             else:
-                str1 = 'Could not find RTI file for:'    
+                str1 = 'Could not find RTI file for:'
             print 'ERROR: ' + str1
             print '      ' + file_name
             print ' '
         #---------------
         return None
-    
+
 #   try_to_find_rti_file()
 #---------------------------------------------------------------------
 def get_rti_data_type( dtype ):
@@ -143,7 +143,7 @@ def get_numpy_data_type( data_type ):
 #   get_numpy_data_type()
 #---------------------------------------------------------------------
 def get_rti_byte_order( python_byte_order=sys.byteorder ):
-    
+
     order_map = {'big':'MSB', 'little':'LSB'}
 
     return order_map[ python_byte_order ]
@@ -157,7 +157,7 @@ def get_bpe( data_type ):
     #--------------------------------------------
     BPE_map = {'BYTE':1, 'INTEGER':2, 'LONG':4,
                'LONG64':8, 'FLOAT':4, 'DOUBLE':8}
-    
+
     return BPE_map[ data_type.upper() ]
 
 #   get_bpe()
@@ -180,15 +180,15 @@ def byte_swap_needed( file_name, info=None ):
     if (info == None):
         RTI_file = get_rti_file_name( file_name )
         info = read_info( RTI_file )
-        
+
     machine_byte_order = get_rti_byte_order()
-    
+
     return (machine_byte_order != info.byte_order)
 
 #   byte_swap_needed()
-#-------------------------------------------------------------------------  
+#-------------------------------------------------------------------------
 def exists(RTI_file, SILENT=False):
- 
+
     #------------------------
     # Does RTI file exist ?
     #------------------------
@@ -202,11 +202,11 @@ def exists(RTI_file, SILENT=False):
                    'The file: ', '  ' + RTI_file, \
                    'was not found in the working directory. ', \
                    ' ']
-            for line in msg: print line    
+            for line in msg: print line
         return False
 
 #   exists()
-#-------------------------------------------------------------------------  
+#-------------------------------------------------------------------------
 def read_value(RTI_unit, data_type, UPCASE=False):
 
     #-----------------------------------------------------------------
@@ -241,25 +241,25 @@ def read_value(RTI_unit, data_type, UPCASE=False):
     if   (data_type == 'BYTE'):
         ## value = numpy.int16( val )
         value = numpy.uint8(val)
-    elif (data_type == 'INTEGER'):    
+    elif (data_type == 'INTEGER'):
         value = numpy.int16(val)
-    elif (data_type == 'FLOAT'):    
+    elif (data_type == 'FLOAT'):
         value = numpy.float32(val)
-    elif (data_type == 'DOUBLE'):    
+    elif (data_type == 'DOUBLE'):
         value = numpy.float64(val)
-    elif (data_type == 'LONG'):    
+    elif (data_type == 'LONG'):
         value = numpy.int32(val)
-    elif (data_type == 'LONG64'):    
+    elif (data_type == 'LONG64'):
         value = numpy.int64(val)
-    elif (data_type == 'STRING'):    
+    elif (data_type == 'STRING'):
         value = s.strip()
-        if (UPCASE):    
+        if (UPCASE):
             value = value.upper()
     else:
         raise RuntimeError('no match found for expression')
 
     ### print '### RTI value =', value
-    
+
     return value
 
 #   read_value()
@@ -286,12 +286,12 @@ def read_info(file_name, SILENT=False, REPORT=False):
         # Message already prints before this.
         # if not(SILENT): print 'ERROR: Unable to find RTI file.'
         return None
- 
+
     #----------------------------
     # Open the RTI file to read
     #----------------------------
     RTI_unit = open(RTI_file, 'r')
-    
+
     #-------------------------------
     # Does first line look right ?
     #-------------------------------
@@ -304,7 +304,7 @@ def read_info(file_name, SILENT=False, REPORT=False):
         if not(SILENT):
             for line in msg: print line
         return None
-    
+
     #--------------------------------
     # Read values from the RTI file
     #--------------------------------
@@ -328,8 +328,8 @@ def read_info(file_name, SILENT=False, REPORT=False):
         gmin         = read_value(RTI_unit, 'FLOAT')
         gmax         = read_value(RTI_unit, 'FLOAT')
         UTM_zone     = read_value(RTI_unit, 'STRING', UPCASE=True)
-        
-    if (info.UTM_zone == '-1'):    
+
+    if (info.UTM_zone == '-1'):
         info.UTM_zone = 'unknown'
 
     #---------------------
@@ -350,11 +350,11 @@ def read_info(file_name, SILENT=False, REPORT=False):
     # scalar (if same for all grid cells) or a grid
     #------------------------------------------------
     ## info.da = pixels2.get_da( info )
-        
+
     #------------------
     # Optional report
     #------------------
-    if (REPORT):    
+    if (REPORT):
         print '-----------------'
         print 'Grid Information'
         print '-----------------'
@@ -434,7 +434,7 @@ def make_info(grid_file=None,
     #-------------------------------------------------
     if (dtype != None):
         data_type = get_rti_data_type( dtype )
-        
+
     #---------------------------------------------------------
     # Compute x_east_edge and y_north_edge from other info ?
     #---------------------------------------------------------
@@ -443,7 +443,7 @@ def make_info(grid_file=None,
             xsize = (ncols * xres)
         else:
             xres_deg = (xres / numpy.float64(3600))  # (arcseconds to degrees)
-            xsize    = (ncols * xres_deg)  
+            xsize    = (ncols * xres_deg)
         x_east_edge  = (x_west_edge + xsize)
     #--------------------------------------------------------------------------
     if (y_north_edge == None):
@@ -456,12 +456,12 @@ def make_info(grid_file=None,
 
     #-----------------------------------------
     # Add some other useful things to "info"
-    #-----------------------------------------             
+    #-----------------------------------------
     machine_byte_order = get_rti_byte_order()
     SWAP_ENDIAN        = (machine_byte_order != byte_order)
     n_pixels           = (ncols * nrows)
     bpe                = get_bpe( data_type )
-    
+
     #------------------------------------------
     # Class for putting data into a structure
     #------------------------------------------
@@ -493,11 +493,11 @@ def make_info(grid_file=None,
                   bpe          = bpe,
                   grid_size    = bpe * n_pixels,
                   SWAP_ENDIAN  = SWAP_ENDIAN )
-    
+
     if not(SILENT):
         print 'Finished creating info structure.'
         print ' '
-        
+
     return info
 
 #   make_info()
@@ -505,7 +505,7 @@ def make_info(grid_file=None,
 def write_info(file_name, info, SILENT=True):
 
     RTI_file = get_rti_file_name( file_name )
-    
+
     #--------------------------------------------------
     # Prepare floating-point values as output strings
     #--------------------------------------------------
@@ -518,17 +518,17 @@ def write_info(file_name, info, SILENT=True):
     xres_string    = (format % info.xres).strip()
     yres_string    = (format % info.yres).strip()
     zres_string    = (format % info.zres).strip()
-    #------------------------------------------------------    
+    #------------------------------------------------------
     pixel_geom_string = str(numpy.int16(info.pixel_geom))
-    #------------------------------------------------------ 
+    #------------------------------------------------------
     gmin_string    = (format % info.gmin).strip()
     gmax_string    = (format % info.gmax).strip()
-    
+
     #-------------------------
     # Open RTI file to write
     #-------------------------
     RTU = open(RTI_file, 'w')
-    
+
     #-------------------------
     # Write info to RTI file
     #-------------------------
@@ -578,7 +578,7 @@ def write_info(file_name, info, SILENT=True):
     RTU.write('UTM zone: ' + info.UTM_zone + '\n')
     RTU.write('\n')
     RTU.write('\n')
-    
+
     #-------------------------
     # Write RTI file trailer
     #-------------------------
@@ -607,21 +607,21 @@ def write_info(file_name, info, SILENT=True):
     RTU.write(';     dialog in the File menu.\n')
     RTU.write('\n')
     RTU.write('\n')
-    
+
     #---------------------
     # Close the RTI file
     #---------------------
     RTU.close()
-    
+
     #-----------------------------
     # Print or display a message
     #-----------------------------
-    if not(SILENT):    
+    if not(SILENT):
         print 'Finished writing new RTI file: '
         print '   ' + RTI_file
         print ' '
-    
+
 #   write_info()
 #---------------------------------------------------------------------
 
-   
+

@@ -108,7 +108,7 @@ def count_lines( filename, SILENT=False ):
     # Open the file
     #----------------
     file_unit = open(filename, 'r')
-    
+
     #------------------
     # Count the lines
     #------------------
@@ -123,9 +123,9 @@ def count_lines( filename, SILENT=False ):
         # Count the nonblank lines
         #---------------------------
         n_chars = len(line.strip())
-        if (n_chars != 0):    
+        if (n_chars != 0):
             n_lines += 1
-                 
+
 ##    line = ''
 ##    while logical_not(idl_func.eof(file_unit)):
 ##        line = idl_func.readf(file_unit, line)
@@ -134,23 +134,23 @@ def count_lines( filename, SILENT=False ):
 ##        # Count the nonblank lines
 ##        #---------------------------
 ##        _len = len(line.strip())
-##        if (_len != 0):    
+##        if (_len != 0):
 ##            n_lines += 1
-    
+
     #-----------------
     # Close the file
     #-----------------
     file_unit.close()
-    
+
     #--------------------
     # Print a message ?
     #--------------------
-    if not(SILENT):    
+    if not(SILENT):
         print 'For the file: ' + filename
         print 'Total number of lines    = ' + str(n_total)
         print 'Number of nonblank lines = ' + str(n_lines)
         print ' '
-    
+
     return n_lines
 
 #   count_lines()
@@ -158,14 +158,14 @@ def count_lines( filename, SILENT=False ):
 ##def insert_time_stamp( file_name ):
 ##
 ##    prefix, extension = get_prefix_and_extension( file_name )
-##    
+##
 ##    jstr = '-'
 ##    ## jstr = '.'
-##    
+##
 ##    time_str = jstr.join("%s" % k for k in time.localtime()[:6])
 ##
 ##    return (prefix + '_' + time_str + extension)
-##            
+##
 ###   insert_time_stamp()
 ###-------------------------------------------------------------------
 ##def check_overwrite_last( file_name ):
@@ -175,7 +175,7 @@ def count_lines( filename, SILENT=False ):
 ##    #----------------------------
 ##    if not(os.path.exists( file_name )):
 ##        return file_name
-##    
+##
 ##    #----------------------------------------
 ##    # Append timestamp to make new filename
 ##    #----------------------------------------
@@ -183,13 +183,13 @@ def count_lines( filename, SILENT=False ):
 ##    print 'Inserting timestamp in filename.'
 ##    new_name = insert_time_stamp( file_name )
 ##    return new_name
-##    
+##
 ##    #--------------------------------------------
 ##    # Overwrite not allowed; must remove first.
 ##    #--------------------------------------------
 ####    print 'Deleting existing file: ' + file_name
 ####    os.remove( file_name )
-##            
+##
 ###   check_overwrite_last()
 #-------------------------------------------------------------------
 

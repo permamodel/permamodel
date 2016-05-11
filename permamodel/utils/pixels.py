@@ -5,7 +5,7 @@
 #           in meters_per_degree_lat()
 #           but seems to be correct.
 #########################################################
-        
+
 ## Copyright (c) 2009-2010, Scott D. Peckham
 ## January 12-16, 2009
 ## May 2010 (changes to unit_test())
@@ -32,7 +32,7 @@ from tf_utils import TF_Print
 def unit_test():
 
     import rti_files
-    
+
     print 'Testing meters_per_degree_lon()...'
     MPD_lon = meters_per_degree_lon(0)
     print 'meters_per_degree_lon(0)   =', MPD_lon
@@ -44,7 +44,7 @@ def unit_test():
     print 'meters_per_degree_lat(0)   =', MPD_lat
     print 'meters_per_3_arcsec_lat(0) =', MPD_lat / 1200.0
     print ' '
-    #------------------------------------------------------------    
+    #------------------------------------------------------------
     print 'Testing get_da() with KY_Sub (fixed-angle pixels)...'
     in_directory  = '/Applications/RIVIX/RiverTools_3.0/basins/KY_Sub/'
     site_prefix = 'KY_Sub'
@@ -55,7 +55,7 @@ def unit_test():
     print da
     print 'shape(da) =', shape(da)
     print ' '
-    #------------------------------------------------------------    
+    #------------------------------------------------------------
     print 'Testing get_da() with Beaver... (fixed-length pixels)'
     in_directory  = '/Applications/RIVIX/RiverTools_3.0/basins/Beaver_Creek_KY/'
     site_prefix = 'Beaver'
@@ -66,8 +66,8 @@ def unit_test():
     print da
     print 'shape(da) =', shape(da)
     print ' '
-    
-#   unit_test()                    
+
+#   unit_test()
 #-------------------------------------------------------------------
 def get_sizes_by_row(rti, REPORT=False, METERS=False):
 
@@ -99,16 +99,16 @@ def get_sizes_by_row(rti, REPORT=False, METERS=False):
     #        are very good approximations as long as dx and
     #        dy are not too large.
     #----------------------------------------------------------
-    
+
     #-------------------------
     # Kilometers or Meters ?
     #-------------------------
-    if (METERS):  
+    if (METERS):
         ufactor = float64(1)
-    else:    
+    else:
         ufactor = float64(1000)
-    
-    if (rti.pixel_geom == 0):    
+
+    if (rti.pixel_geom == 0):
         #---------------
         # Compute lats
         #---------------
@@ -116,7 +116,7 @@ def get_sizes_by_row(rti, REPORT=False, METERS=False):
         ycoords = arange(rti.nrows, dtype='Int16')
         yresdeg = (rti.yres / float64(3600))    #(arcsecs -> degrees)
         lats = (rti.y_north_edge - (yresdeg * (ycoords + float64(1))))
-        
+
         #----------------------------------------
         # Compute pixel sizes using lats & lons
         #----------------------------------------
@@ -128,8 +128,8 @@ def get_sizes_by_row(rti, REPORT=False, METERS=False):
         dx = (rti.xres / float64(3600) * MPD_LON / ufactor)  #(vector)
         dy = (rti.yres / float64(3600) * MPD_LAT / ufactor)  #(vector)
         dd = sqrt(dx ** 2 + dy ** 2)
-        da = (dx * dy)   
-    else:    
+        da = (dx * dy)
+    else:
         dx = (rti.xres / ufactor)   #(meters or km)
         dy = (rti.yres / ufactor)
         dd = sqrt(dx ** 2 + dy ** 2)
@@ -141,12 +141,12 @@ def get_sizes_by_row(rti, REPORT=False, METERS=False):
         dy = zeros([rti.nrows], dtype='Float64') + dy
         dd = zeros([rti.nrows], dtype='Float64') + dd
         da = zeros([rti.nrows], dtype='Float64') + da
-    
+
     #------------------
     # Optional report
     #------------------
-    if (REPORT):    
-        if (rti.pixel_geom == 0):    
+    if (REPORT):
+        if (rti.pixel_geom == 0):
             RADEG = (float64(180) / numpy.pi)
             #---------------------
             print 'Pixel geometry = Fixed-angle '
@@ -155,7 +155,7 @@ def get_sizes_by_row(rti, REPORT=False, METERS=False):
             print 'Computed south edge lat = ' + str(lats[rti.nrows - 1] * RADEG)
             print 'Actual north edge lat   = ' + str(rti.y_north_edge)
             print 'Computed north edge lat = ' + str((lats[0] + yresdeg) * RADEG)
-        else:    
+        else:
             print 'Pixel geometry = Fixed-length '
             print ' '
             print 'Actual south edge y   = ' + str(rti.y_south_edge)
@@ -172,20 +172,20 @@ def get_sizes_by_row(rti, REPORT=False, METERS=False):
 #   get_sizes_by_row()
 #-------------------------------------------------------------------
 def get_da(rti, METERS=False, REPORT=False, VERBOSE=False):
-    
+
     #------------------------------------
     # Pixel dimensions; convert km to m
     # These are planform dimensions.
     #---------------------------------------
     dx, dy, dd = get_sizes_by_row(rti, METERS=True)
-    
+
     #-------------------------------------------
     # 7/13/06.  Allow da to be scalar or grid.
     # For speed;  was always grid before.
     #-------------------------------------------
     if (rti.pixel_geom == 1):
         da = (dx[0] * dy[0])
-        
+
         if (VERBOSE):
             TF_Print('dx = ' + str(dx[0]) + '  [m]')
             TF_Print('dy = ' + str(dy[0]) + '  [m]')
@@ -275,14 +275,14 @@ def meters_per_degree_lon(lat_deg,
     #            a_radius = 6378.2064, b_radius = 6356.5838
     #        Default arguments are for WGS_1984.
     #-----------------------------------------------------------
-    
+
     #-------------------------------
     # Compute flattening ratio, f,
     # and eccentricity, e
     #-------------------------------
     f = (a_radius - b_radius) / a_radius
     e = sqrt((float64(2) * f) - f ** float64(2))
-    
+
     #--------------------
     # Compute the value
     #--------------------
@@ -293,7 +293,7 @@ def meters_per_degree_lon(lat_deg,
                                         (e * sin(lat_rad)) ** float64(2))
 
     return (dtor * (p1 + p2))
-    
+
 #   meters_per_degree_lon()
 #-------------------------------------------------------------------
 def meters_per_degree_lat(lat_deg,
@@ -327,23 +327,23 @@ def meters_per_degree_lat(lat_deg,
 
     #        Default arguments are for WGS_1984.
     #----------------------------------------------------------
-    
+
     #-------------------------------
     # Compute flattening ratio, f,
     # and eccentricity, e
     #-------------------------------
     f = (a_radius - b_radius) / a_radius
     e = sqrt((float64(2) * f) - f ** float64(2))
-    
+
     #--------------------
     # Compute the value
     #--------------------
     dtor    = numpy.pi / float64(180)
     lat_rad = (lat_deg * dtor)
     p = a_radius * (float64(1) - e ** float64(2)) / (float64(1) - (e * sin(lat_rad)) ** float64(2)) ** float64(1.5)
-       
+
     return (dtor * (mean_elev + p))
-    
+
 #   meters_per_degree_lat()
-#-------------------------------------------------------------------    
+#-------------------------------------------------------------------
 

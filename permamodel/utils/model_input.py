@@ -27,7 +27,7 @@ def open_file(var_type, input_file):
     #-----------------------------------------------------
     # print 'var_type   =', var_type
     # print 'input_file =', input_file
-    
+
     #--------------------------------------------
     # A scalar input value was provided already
     #--------------------------------------------
@@ -49,7 +49,7 @@ def open_file(var_type, input_file):
         print '    ' + input_file
         # print '   ' + input_file
         return file_unit
-            
+
     if (var_type.lower() == 'time_series'):
         #-----------------------------------------
         # Input file contains a time series and
@@ -62,7 +62,7 @@ def open_file(var_type, input_file):
         # as row-major, binary file with no header.
         #--------------------------------------------
         file_unit = open(input_file, 'rb')
-            
+
     return file_unit
 
 #   open_file()
@@ -81,18 +81,18 @@ def read_next(file_unit, var_type, rti, \
         dtype = dtype_map[dtype]
 
 
-    if (var_type.lower() == 'scalar'): 
+    if (var_type.lower() == 'scalar'):
         #-------------------------------------------
         # Scalar value was entered by user already
         #-------------------------------------------
         data = None
-    elif (var_type.lower() == 'time_series'):  
+    elif (var_type.lower() == 'time_series'):
         #----------------------------------------------
         # Time series: Read scalar value from file.
         # File is ASCII text with one value per line.
         #----------------------------------------------
         data = read_scalar(file_unit, dtype)
-    elif (var_type.lower() in ['grid', 'grid_sequence']):   
+    elif (var_type.lower() in ['grid', 'grid_sequence']):
         #--------------------------------------
         # Single grid: Read grid from file
         # read_grid() accounts for byte order
@@ -129,7 +129,7 @@ def read_next_modified(file_unit, var_type, \
 
     #-------------------------------------------------------
     # (5/7/09) Allow "dtype" to be given using RTI types.
-    # (4/21/16) Elchin Jafarov introduced this function b/c 
+    # (4/21/16) Elchin Jafarov introduced this function b/c
     # he was not sure how to deal with rti in the original function
     # this version foes not have grid choice
     #-------------------------------------------------------
@@ -141,12 +141,12 @@ def read_next_modified(file_unit, var_type, \
         dtype = dtype_map[dtype]
 
 
-    if (var_type.lower() == 'scalar'): 
+    if (var_type.lower() == 'scalar'):
         #-------------------------------------------
         # Scalar value was entered by user already
         #-------------------------------------------
         data = None
-    elif (var_type.lower() == 'time_series'):  
+    elif (var_type.lower() == 'time_series'):
         #----------------------------------------------
         # Time series: Read scalar value from file.
         # File is ASCII text with one value per line.
@@ -184,7 +184,7 @@ def read_next_modified(file_unit, var_type, \
 ##    #-----------------------------------------------------
 ##    # print 'var_type   =', var_type
 ##    # print 'input_file =', input_file
-##    
+##
 ##    #--------------------------------------------
 ##    # A scalar input value was provided already
 ##    #--------------------------------------------
@@ -205,7 +205,7 @@ def read_next_modified(file_unit, var_type, \
 ##        print '    ' + input_file
 ##        # print '   ' + input_file
 ##        return file_unit
-##            
+##
 ##    if (var_type == 1):
 ##        #-----------------------------------------
 ##        # Input file contains a time series and
@@ -218,7 +218,7 @@ def read_next_modified(file_unit, var_type, \
 ##        # as row-major, binary file with no header.
 ##        #--------------------------------------------
 ##        file_unit = open(input_file, 'rb')
-##            
+##
 ##    return file_unit
 ##
 ###   open_file()
@@ -237,18 +237,18 @@ def read_next_modified(file_unit, var_type, \
 ##        dtype = dtype_map[dtype]
 ##
 ##
-##    if (var_type == 0): 
+##    if (var_type == 0):
 ##        #-------------------------------------------
 ##        # Scalar value was entered by user already
 ##        #-------------------------------------------
 ##        data = None
-##    elif (var_type == 1):  
+##    elif (var_type == 1):
 ##        #----------------------------------------------
 ##        # Time series: Read scalar value from file.
 ##        # File is ASCII text with one value per line.
 ##        #----------------------------------------------
 ##        data = read_scalar(file_unit, dtype)
-##    elif (var_type in [2,3]):   
+##    elif (var_type in [2,3]):
 ##        #--------------------------------------
 ##        # Single grid: Read grid from file
 ##        # read_grid() accounts for byte order
@@ -260,7 +260,7 @@ def read_next_modified(file_unit, var_type, \
 ##    else:
 ##        raise RuntimeError('No match found for "var_type".')
 ##        return None
-##    
+##
 ##    if (factor != 1) and (data != None):
 ##        data = (data * factor)
 ##    return data
@@ -278,7 +278,7 @@ def read_scalar(file_unit, dtype='Float32'):
     #-------------------------------
     # scalar = fromfile(file_unit, count=1, dtype=dtype)
     # scalar = fromfile(file_unit, count=1, dtype=dtype, sep="\n")
-    # scalar = fromfile(file_unit, count=1, dtype=dtype, sep=" ")    
+    # scalar = fromfile(file_unit, count=1, dtype=dtype, sep=" ")
     # scalar = loadtxt(file_unit, dtype=dtype)
 
     line = file_unit.readline()
@@ -291,7 +291,7 @@ def read_scalar(file_unit, dtype='Float32'):
 ##        print 'words[0]      =', words[0]
 ##        print 'type(words[0] =', type(words[0])
 
-        #----------------------------------------        
+        #----------------------------------------
         # This worked in Python version at home
         #----------------------------------------
         ## scalar = numpy.float32(words[0])
@@ -301,7 +301,7 @@ def read_scalar(file_unit, dtype='Float32'):
 
     return scalar
 
-#   read_scalar()  
+#   read_scalar()
 #-------------------------------------------------------------------
 def read_grid(file_unit, rti, dtype='Float32'):
 
@@ -315,11 +315,11 @@ def read_grid(file_unit, rti, dtype='Float32'):
     if (END_OF_FILE):
         grid = None
         return grid
-    
+
     grid = fromfile(file_unit, count=rti.n_pixels, dtype=dtype)
     grid = reshape(grid, (rti.nrows, rti.ncols))
     if (rti.SWAP_ENDIAN):
-        grid.byteswap(True)        
+        grid.byteswap(True)
     return grid
 
 #   read_grid()
