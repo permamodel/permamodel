@@ -97,6 +97,14 @@ def test_get_cru_indexes_from_lon_lat():
     assert(i==4761)
     assert(j==2556)
 
+    # Test lower left corner
+    lon = 175.49893
+    lat = 49.106936
+    (i, j) = fn.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+    assert(i==0)
+    assert(j==2556)
+
+
 def test_get_lon_lat_from_cru_indexes():
     fn = frost_number.frostnumber_method()
     fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",SILENT=True)
