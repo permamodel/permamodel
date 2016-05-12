@@ -508,46 +508,9 @@ class permafrost_component( BMI_base.BMI_component ):
     #   close_input_files()
     #-------------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    def get_temperature_tiff_filename(self, year, month, datadir="/data/tas"):
-        # Generate the name of the CRU tiff file
-
-        filename = "%s/tas_mean_C_cru_TS31_%02d_%4d.tif" % \
-                (datadir, month, year)
-        if not os.path.isfile(filename):
-            print("Warning: this temperature tiff file does not exist: %s" %\
-                  filename)
-            exit(-1)
-
-        return filename
-
-    #   get_temperature_tiff_filename(year, month, [datadir])
-
-    def get_temperature_from_cru_indexes(self, i, j, m, y):
-        # Inputs are:
-        #    (i, j):  the location on the grid
-        #    m:       the month
-        #    y:       the year
-        temp_filename = self.get_temperature_tiff_filename(y, m)
-        ds = gdal.Open(temp_filename, GA_ReadOnly)
-
-        # Examine the tiff metadata, but it's just the Area or Point info
-        # print("Tiff Metadata:\n%s" % ds.GetMetadata())
-
-        # Verify that we are checking a point in the grid
-        xdim = ds.RasterXSize
-        ydim = ds.RasterYSize
-
-        assert(i<xdim)
-        assert(j<ydim)
-
-        band = ds.GetRasterBand(1)
-
-        temperatures = band.ReadAsArray(0, 0, xdim,
-                           ydim).astype(gdal.GetDataTypeName(band.DataType))
-
-        return temperatures[j][i]
-
+    # ----------------------------------------
+    # CRU geotiff file interpretation routines
+    # ----------------------------------------
 
     def get_cru_indexes_from_lon_lat(self, lon, lat, month, year):
         # Inspired by:
@@ -647,9 +610,104 @@ class permafrost_component( BMI_base.BMI_component ):
 
         return (lon, lat)
 
+
+    # ----------------------------------------
+    # Read precipitation routines from geotiff
+    # ----------------------------------------
+
+    def get_temperature_tiff_filename(self, year, month, datadir="/data/tas"):
+        # Generate the name of the CRU tiff file
+
+        filename = "%s/tas_mean_C_cru_TS31_%02d_%4d.tif" % \
+                (datadir, month, year)
+        if not os.path.isfile(filename):
+            print("Warning: this temperature tiff file does not exist: %s" %\
+                  filename)
+            exit(-1)
+
+        return filename
+
+    #   get_temperature_tiff_filename(year, month, [datadir])
+
+    def get_temperature_from_cru_indexes(self, i, j, m, y):
+        # Inputs are:
+        #    (i, j):  the location on the grid
+        #    m:       the month
+        #    y:       the year
+        temp_filename = self.get_temperature_tiff_filename(y, m)
+        ds = gdal.Open(temp_filename, GA_ReadOnly)
+
+        # Examine the tiff metadata, but it's just the Area or Point info
+        # print("Tiff Metadata:\n%s" % ds.GetMetadata())
+
+        # Verify that we are checking a point in the grid
+        xdim = ds.RasterXSize
+        ydim = ds.RasterYSize
+
+        assert(i<xdim)
+        assert(j<ydim)
+
+        band = ds.GetRasterBand(1)
+
+        temperatures = band.ReadAsArray(0, 0, xdim,
+                           ydim).astype(gdal.GetDataTypeName(band.DataType))
+
+        return temperatures[j][i]
+
+
     def get_temperature_from_cru(self, lon, lat, month, year):
         (i, j) = self.get_cru_indexes_from_lon_lat(lon, lat, month, year)
         temperature = self.get_temperature_from_cru_indexes(i, j, month, year)
         return temperature
 
+
+    # ----------------------------------------
+    # Read precipitation routines from geotiff
+    # ----------------------------------------
+
+    def get_precipitation_tiff_filename(self, year, month,
+                                        datadir="/data/pr_AK_CRU"):
+        # Generate the name of the CRU tiff file
+
+        filename = "%s/pr_total_mm_cru_TS31_%02d_%4d.tif" % \
+                (datadir, month, year)
+        if not os.path.isfile(filename):
+            print("Warning: this temperature tiff file does not exist: %s" %\
+                  filename)
+            exit(-1)
+
+        return filename
+
+    #   get_temperature_tiff_filename(year, month, [datadir])
+
+    def get_precipitation_from_cru_indexes(self, i, j, m, y):
+        # Inputs are:
+        #    (i, j):  the location on the grid
+        #    m:       the month
+        #    y:       the year
+        prec_filename = self.get_precipitation_tiff_filename(y, m)
+        ds = gdal.Open(prec_filename, GA_ReadOnly)
+
+        # Examine the tiff metadata, but it's just the Area or Point info
+        # print("Tiff Metadata:\n%s" % ds.GetMetadata())
+
+        # Verify that we are checking a point in the grid
+        xdim = ds.RasterXSize
+        ydim = ds.RasterYSize
+
+        assert(i<xdim)
+        assert(j<ydim)
+
+        band = ds.GetRasterBand(1)
+
+        precipitations = band.ReadAsArray(0, 0, xdim,
+                           ydim).astype(gdal.GetDataTypeName(band.DataType))
+
+        return precipitations[j][i]
+
+
+    def get_precipitation_from_cru(self, lon, lat, month, year):
+        (i, j) = self.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+        temperature = self.get_precipitation_from_cru_indexes(i, j, month, year)
+        return temperature
 
