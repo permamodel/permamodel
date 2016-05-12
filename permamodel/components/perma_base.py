@@ -45,6 +45,10 @@
 
 import numpy as np
 import os
+import gdal
+from gdalconst import *  # Import GDAL constants, eg GA_ReadOnly
+import osr
+from pyproj import Proj, transform
 
 from permamodel.utils import BMI_base
 from permamodel.utils import model_input
@@ -503,3 +507,149 @@ class permafrost_component( BMI_base.BMI_component ):
 
     #   close_input_files()
     #-------------------------------------------------------------------
+
+    #-------------------------------------------------------------------
+    def get_temperature_tiff_filename(self, year, month, datadir="/data/tas"):
+        # Generate the name of the CRU tiff file
+
+        filename = "%s/tas_mean_C_cru_TS31_%02d_%4d.tif" % \
+                (datadir, month, year)
+        if not os.path.isfile(filename):
+            print("Warning: this temperature tiff file does not exist: %s" %\
+                  filename)
+            exit(-1)
+
+        return filename
+
+    #   get_temperature_tiff_filename(year, month, [datadir])
+
+    def get_temperature_from_cru_indexes(self, i, j, m, y):
+        # Inputs are:
+        #    (i, j):  the location on the grid
+        #    m:       the month
+        #    y:       the year
+        temp_filename = self.get_temperature_tiff_filename(y, m)
+        ds = gdal.Open(temp_filename, GA_ReadOnly)
+
+        # Examine the tiff metadata, but it's just the Area or Point info
+        # print("Tiff Metadata:\n%s" % ds.GetMetadata())
+
+        # Verify that we are checking a point in the grid
+        xdim = ds.RasterXSize
+        ydim = ds.RasterYSize
+
+        assert(i<xdim)
+        assert(j<ydim)
+
+        band = ds.GetRasterBand(1)
+
+        temperatures = band.ReadAsArray(0, 0, xdim,
+                           ydim).astype(gdal.GetDataTypeName(band.DataType))
+
+        return temperatures[j][i]
+
+
+    def get_cru_indexes_from_lon_lat(self, lon, lat, month, year):
+        # Inspired by:
+        #   http://gis.stackexchange.com/questions/122335/using-gdals-getprojection-information-to-make-a-coordinate-conversion-in-pyproj
+        #   http://geoinformaticstutorial.blogspot.com/2012/09/
+        #          reading-raster-data-with-python-and-gdal.html
+
+        temp_filename = self.get_temperature_tiff_filename(year, month)
+
+        ds = gdal.Open(temp_filename, GA_ReadOnly)
+        tiff_proj_wkt = ds.GetProjection()
+        proj_converter = osr.SpatialReference()
+        proj_converter.ImportFromWkt(tiff_proj_wkt)
+        tiff_Proj4_string = proj_converter.ExportToProj4()
+        p1 = Proj(tiff_Proj4_string)
+
+        # (xm, ym) is the point on the projected grid in meters
+        (xm, ym) = p1(lon, lat)
+
+        xdim = ds.RasterXSize
+        ydim = ds.RasterYSize
+        geotransform = ds.GetGeoTransform()
+
+        # (originX, originY) is the upper left corner of the grid
+        #   Note: this is *not* the center of the UL gridcell
+        #   Note: in grid coordinates, the UL corner is at (-0.5, -0.5)
+        originX = geotransform[0]
+        originY = geotransform[3]
+        pixelWidth = geotransform[1]
+        pixelHeight = geotransform[5]  # Note this is negative for cru
+
+        # (zeroX, zeroY) is the center of the UL gridcell
+        zeroX = originX + 0.5*pixelWidth
+        zeroY = originY + 0.5*pixelHeight
+
+        # x and y are floating points
+        x = (xm - zeroX)/pixelWidth
+        y = (ym - zeroY)/pixelHeight
+
+        # i and j are the rounded index values
+        i = int(round(x))
+        j = int(round(y))
+
+        # Ensure that point is on the grid
+        assert(x>=-0.501)
+        assert(y>=-0.501)
+        assert(x<=xdim-1+0.501)
+        assert(y<=ydim-1+0.501)
+
+        # Ensure that the indexes are valid
+        i = max(i, 0)
+        j = max(j, 0)
+        i = min(i, xdim-1)
+        j = min(j, ydim-1)
+
+        return (i, j)
+
+
+    def get_lon_lat_from_cru_indexes(self, i, j, month, year):
+        # Based on:
+        #  http://gis.stackexchange.com/questions/122335/using-gdals-getprojection-information-to-make-a-coordinate-conversion-in-pyproj
+
+        # Note: i, j can be floating point
+
+        temp_filename = self.get_temperature_tiff_filename(year, month)
+
+        ds = gdal.Open(temp_filename, GA_ReadOnly)
+        tiff_proj_wkt = ds.GetProjection()
+        proj_converter = osr.SpatialReference()
+        proj_converter.ImportFromWkt(tiff_proj_wkt)
+        tiff_Proj4_string = proj_converter.ExportToProj4()
+        p1 = Proj(tiff_Proj4_string)
+
+        # Following:
+        #   http://geoinformaticstutorial.blogspot.com/2012/09/
+        #          reading-raster-data-with-python-and-gdal.html
+
+        xdim = ds.RasterXSize
+        ydim = ds.RasterYSize
+        geotransform = ds.GetGeoTransform()
+
+        # (originX, originY) is the upper left corner of the grid
+        #   Note: this is *not* the center of the UL gridcell
+        originX = geotransform[0]
+        originY = geotransform[3]
+        pixelWidth = geotransform[1]
+        pixelHeight = geotransform[5]  # Note this is negative for cru
+
+        # (zeroX, zeroY) is the center of the UL gridcell
+        zeroX = originX + 0.5*pixelWidth
+        zeroY = originY + 0.5*pixelHeight
+
+        # (xm, ym) is the point on the projected grid in meters
+        xm = zeroX + i * pixelWidth
+        ym = zeroY + j * pixelHeight
+        (lon, lat) = p1(xm, ym, inverse=True)
+
+        return (lon, lat)
+
+    def get_temperature_from_cru(self, lon, lat, month, year):
+        (i, j) = self.get_cru_indexes_from_lon_lat(lon, lat, month, year)
+        temperature = self.get_temperature_from_cru_indexes(i, j, month, year)
+        return temperature
+
+
