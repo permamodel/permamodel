@@ -51,5 +51,5 @@ def test_get_precipitation_from_cru():
     j = 1973
     (lon, lat) = fn.get_lon_lat_from_cru_indexes(i, j, month, year)
     precipitation = fn.get_precipitation_from_cru(lon, lat, month, year)
-    assert(abs(precipitation - 79.0) < 1e-3)
+    assert(abs(precipitation - 79.0) < 1e-3) #
 
