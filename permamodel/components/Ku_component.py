@@ -341,7 +341,7 @@ class Ku_method( perma_base.permafrost_component ):
 
         self.Ksn = (rho_sn/1000.)*(rho_sn/1000.)*3.233-1.01*(rho_sn/1000.)+0.138; # Unit: (W m-1 C-1)
 
-        self.Csn = rho_sn*2.09E3;                                                # Unit: J m-3 C-1
+        self.Csn = 2.09E3;                                                # Unit: J m-3 C-1
 
     #   update_ssnow_thermal_properties()
     #-------------------------------------------------------------------
@@ -354,7 +354,10 @@ class Ku_method( perma_base.permafrost_component ):
         #       Tvg -- mean annual temperature Page-129, Sazonova et al., 2003
         #       Avg -- amplitude bellow snow OR top of vegetation
         #--------------------------------------------------
-        temp = np.exp(-1.0*self.h_snow*np.sqrt(np.pi/(self.sec_per_year*self.Ksn)))
+        
+        K_diffusivity = self.Ksn/(self.rho_snow*self.Csn)
+        
+        temp = np.exp(-1.0*self.h_snow*np.sqrt(np.pi/(self.sec_per_year*K_diffusivity)))
         deta_Tsn = self.A_air*(1.0 - temp);
         deta_Asn = 2.0/np.pi*deta_Tsn;
 
@@ -387,7 +390,7 @@ class Ku_method( perma_base.permafrost_component ):
         #       eq-14, Anisimov et al. 1997
         #--------------------------------------------------
         Tps_numerator = 0.5*Tgs*(self.Kf+self.Kt)\
-                            +(Ags*(self.Kf-self.Kt)/np.pi\
+                            +(Ags*(self.Kt-self.Kf)/np.pi\
                             *(Tgs/Ags*np.arcsin(Tgs/Ags)\
                             +np.sqrt(1.-(np.pi**2.0/Ags**2.0))));
 
