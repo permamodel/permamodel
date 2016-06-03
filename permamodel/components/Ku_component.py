@@ -820,13 +820,21 @@ class Ku_method( perma_base.permafrost_component ):
             # Scalar value was entered by user already
             #-------------------------------------------
             data = None
+            
         elif (var_type.lower() == 'time_series'):
             #----------------------------------------------
             # Time series: Read scalar value from file.
             # File is ASCII text with one value per line.
             #----------------------------------------------
             data = np.loadtxt(file_name)
-    
+            
+        elif (var_type.lower() == 'grid'):
+            #----------------------------------------------
+            # Time series: Read scalar value from file.
+            # File is ASCII text with one value per line.
+            #----------------------------------------------
+            data = np.loadtxt(file_name)
+            
         else:
             raise RuntimeError('No match found for "var_type".')
             return None
