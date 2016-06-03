@@ -182,6 +182,7 @@ class Ku_method( perma_base.permafrost_component ):
     #-------------------------------------------------------------------
     def open_input_files(self):
         # this function will work only if filename is not empty
+    
         self.T_air_file       = self.in_directory + self.T_air_file
         self.A_air_file       = self.in_directory + self.A_air_file
         self.h_snow_file      = self.in_directory + self.h_snow_file
@@ -191,6 +192,8 @@ class Ku_method( perma_base.permafrost_component ):
         self.Hvgt_file        = self.in_directory + self.Hvgt_file
         self.Dvf_file         = self.in_directory + self.Dvf_file
         self.Dvt_file         = self.in_directory + self.Dvt_file
+        self.Lat_file         = self.in_directory + self.Lat_file
+        self.Lon_file         = self.in_directory + self.Lon_file
 
         self.T_air_unit       = model_input.open_file(self.T_air_type,  self.T_air_file)
         self.A_air_unit       = model_input.open_file(self.A_air_type,  self.A_air_file)
@@ -201,35 +204,81 @@ class Ku_method( perma_base.permafrost_component ):
         self.Hvgt_unit        = model_input.open_file(self.Hvgt_type,  self.Hvgt_file)
         self.Dvf_unit         = model_input.open_file(self.Dvf_type,  self.Dvf_file)
         self.Dvt_unit         = model_input.open_file(self.Dvt_type,  self.Dvt_file)
+        self.Lat_unit         = model_input.open_file(self.Lat_type,  self.Lat_file)
+        self.Lon_unit         = model_input.open_file(self.Lon_type,  self.Lon_file)
 
     #   open_input_files()
     #-------------------------------------------------------------------
-    #def read_input_files(self):
+    def read_input_files(self):
 
         #rti = self.rti # has a problem with loading rti: do not know where its been initialized
 
         #-------------------------------------------------------
         # All grids are assumed to have a data type of Float32.
-        #-------------------------------------------------------
-        #T_air = model_input.read_next(self.T_air_unit, self.T_air_type, rti)
-        #if (T_air != None): self.T_air = T_air
-        #print T_air
-
-        #T0 = model_input.read_next(self.T0_unit, self.T0_type, rti)
-        #if (T0 != None): self.T0 = T0
-
-        #rho_snow = model_input.read_next(self.rho_snow_unit, self.rho_snow_type, rti)
-        #if (rho_snow != None): self.rho_snow = rho_snow
-
-        #h0_snow = model_input.read_next(self.h0_snow_unit, self.h0_snow_type, rti)
-        #if (h0_snow != None): self.h0_snow = h0_snow
-
-       # h0_swe = model_input.read_next(self.h0_swe_unit, self.h0_swe_type, rti)
-        #if (h0_swe != None): self.h0_swe = h0_swe
-
+        #-------------------------------------------------------    
+               
+        Lon_list = np.loadtxt(self.Lon_file)
+        self.Lon_list = Lon_list
+        n_Lon = len(Lon_list)        
+        
+        Lat_list = np.loadtxt(self.Lat_file)
+        self.Lat_list = Lat_list
+        n_Lat = len(Lat_list)        
+        
+        T_air = np.loadtxt(self.T_air_file)
+        self.T_air = T_air
+        n_T_air = len(T_air)
+        
+        A_air = np.loadtxt(self.A_air_file)
+        self.A_air = A_air
+        n_A_air = len(A_air)
+        
+        h_snow = np.loadtxt(self.h_snow_file)
+        self.h_snow = h_snow
+        n_h_snow = len(h_snow)        
+        
+        rho_snow = np.loadtxt(self.rho_snow_file)
+        self.rho_snow = rho_snow
+        n_rho_snow = len(rho_snow)
+        
+        vwc_H2O = np.loadtxt(self.vwc_H2O_file)
+        self.vwc_H2O = vwc_H2O
+        n_vwc_H2O = len(vwc_H2O)
+        
+        Hvgf = np.loadtxt(self.Hvgf_file)
+        self.Hvgf = Hvgf
+        n_Hvgf = len(Hvgf)
+        
+        Hvgt = np.loadtxt(self.Hvgt_file)
+        self.Hvgt = Hvgt
+        n_Hvgt = len(Hvgt)
+        
+        Dvt = np.loadtxt(self.Dvt_file)
+        self.Dvt = Dvt
+        n_Dvt = len(Dvt)
+        
+        Dvf = np.loadtxt(self.Dvf_file)
+        self.Dvf = Dvf
+        n_Dvf = len(Dvf)
+        
+        # Check the number of grid in input files:
+        
+        num_check= np.array([n_Lat, n_Lon, n_T_air, n_A_air, n_h_snow, 
+                             n_rho_snow, n_vwc_H2O, n_Hvgf, n_Hvgt,
+                             n_Dvf, n_Dvt])
+                             
+        num_unique = np.unique(num_check)                  
+                             
+        if len(num_unique)>1:
+            print "Warning: Dimensions of input must agree!"
+            exit
+        else:
+            self.n_grid = num_unique;
+        
+        
+        
     #   read_input_files()
     #-------------------------------------------------------------------
-
 
     def update_soil_heat_capacity(self):
 
@@ -261,20 +310,21 @@ class Ku_method( perma_base.permafrost_component ):
         percent_peat = self.p_peat / tot_percent
 
         # Calculate heat capacity and bulk density of soil using exponential weighted.
-        Heat_Capacity =  Heat_Capacity_Texture[2]**percent_clay * \
-                         Heat_Capacity_Texture[1]**percent_sand * \
-                         Heat_Capacity_Texture[0]**percent_silt * \
-                         Heat_Capacity_Texture[3]**percent_peat       # Unit: J kg-1 C-1
+        Heat_Capacity =  Heat_Capacity_Texture[2]*percent_clay + \
+                         Heat_Capacity_Texture[1]*percent_sand + \
+                         Heat_Capacity_Texture[0]*percent_silt + \
+                         Heat_Capacity_Texture[3]*percent_peat       # Unit: J kg-1 C-1
 
-        Bulk_Density  =  Bulk_Density_Texture[2]**percent_clay * \
-                         Bulk_Density_Texture[1]**percent_sand * \
-                         Bulk_Density_Texture[0]**percent_silt * \
-                         Bulk_Density_Texture[3]**percent_peat        # Unit: kg m-3
+        Bulk_Density  =  Bulk_Density_Texture[2]*percent_clay + \
+                         Bulk_Density_Texture[1]*percent_sand + \
+                         Bulk_Density_Texture[0]*percent_silt + \
+                         Bulk_Density_Texture[3]*percent_peat        # Unit: kg m-3
+                         
         # Estimate heat capacity for composed soil
         # based on the empirical approaches suggested by Anisimov et al. (1997)
         self.Ct = Heat_Capacity*Bulk_Density + 4190.*self.vwc_H2O # eq-15, Anisimov et al. 1997; Unit: J m-3 C-1
         self.Cf = Heat_Capacity*Bulk_Density + 2025.*self.vwc_H2O # eq-15, Anisimov et al. 1997; Unit: J m-3 C-1
-
+       
     #   update_soil_heat_capacity()
     #-------------------------------------------------------------------
 
@@ -300,11 +350,12 @@ class Ku_method( perma_base.permafrost_component ):
 
         # Adjusting percent of sand, silt, clay and peat ==
         tot_percent = self.p_sand+self.p_clay+self.p_silt+self.p_peat
-
+        
         percent_sand = self.p_sand / tot_percent
         percent_clay = self.p_clay / tot_percent
         percent_silt = self.p_silt / tot_percent
         percent_peat = self.p_peat / tot_percent
+        
         # Estimate thermal conductivity for composed soil
         Kt_Soil =  Thermal_Conductivity_Thawed_Texture[0]**percent_silt * \
                Thermal_Conductivity_Thawed_Texture[2]**percent_clay * \
@@ -320,7 +371,7 @@ class Ku_method( perma_base.permafrost_component ):
         vwc=self.vwc_H2O
         self.Kt = Kt_Soil**(1.0-vwc)*0.54**vwc #   Unit: (W m-1 C-1)
         self.Kf = Kf_Soil**(1.0-vwc)*2.35**vwc #   Unit: (W m-1 C-1)
-
+        
     #   update_soil_thermal_conductivity()
     #-------------------------------------------------------------------
     def update_snow_thermal_properties(self):
@@ -341,7 +392,7 @@ class Ku_method( perma_base.permafrost_component ):
 
         self.Ksn = (rho_sn/1000.)*(rho_sn/1000.)*3.233-1.01*(rho_sn/1000.)+0.138; # Unit: (W m-1 C-1)
 
-        self.Csn = 2.09E3;                                                # Unit: J m-3 C-1
+        self.Csn = rho_sn *0.+ 2.09E3 ;                                                # Unit: J m-3 C-1
 
     #   update_ssnow_thermal_properties()
     #-------------------------------------------------------------------
@@ -354,10 +405,12 @@ class Ku_method( perma_base.permafrost_component ):
         #       Tvg -- mean annual temperature Page-129, Sazonova et al., 2003
         #       Avg -- amplitude bellow snow OR top of vegetation
         #--------------------------------------------------
+
+        tao = self.T_air*0.0 + self.sec_per_year;        
         
         K_diffusivity = self.Ksn/(self.rho_snow*self.Csn)
         
-        temp = np.exp(-1.0*self.h_snow*np.sqrt(np.pi/(self.sec_per_year*K_diffusivity)))
+        temp = np.exp(-1.0*self.h_snow*np.sqrt(np.pi/(tao*K_diffusivity)))
         deta_Tsn = self.A_air*(1.0 - temp);
         deta_Asn = 2.0/np.pi*deta_Tsn;
 
@@ -378,9 +431,9 @@ class Ku_method( perma_base.permafrost_component ):
         temp = 1.- np.exp(-1.*self.Hvgt*np.sqrt(np.pi/(self.Dvt*2.*self.tao2)))
         deta_A2 = (Avg  + Tvg) * temp;
 
-        deta_Av = (deta_A1*self.tao1+deta_A2*self.tao2) / self.sec_per_year;
+        deta_Av = (deta_A1*self.tao1+deta_A2*self.tao2) / tao;
 
-        deta_Tv = (deta_A1*self.tao1-deta_A2*self.tao2) / self.sec_per_year * (2. / np.pi)
+        deta_Tv = (deta_A1*self.tao1-deta_A2*self.tao2) / tao * (2. / np.pi)
 
         Tgs = Tvg + deta_Tv;
         Ags = Avg - deta_Av;
@@ -398,10 +451,9 @@ class Ku_method( perma_base.permafrost_component ):
         #   4.  Calculates temperature at the top of permafrost
         #       Tps -- eq-14 cont., Anisimov et al. 1997
         #--------------------------------------------------
-        if Tps_numerator<=0.0: # PERMAFROST
-            K_star = self.Kf;
-        else:                  # SEASONAL FROZEN GROUND
-            K_star = self.Kt;
+            
+        K_star = self.Kf
+        K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
 
         self.Tgs=Tgs
         self.Ags=Ags
@@ -420,29 +472,31 @@ class Ku_method( perma_base.permafrost_component ):
         #       Zal -- eq-3, Romanovsky et al. 1997
         #--------------------------------------------------
 
-        if self.Tps_numerator<=0.0:
-            print 'PERMAFROST'
-            K = self.Kf;
-            C = self.Kf;
-        else:
-            print 'SEASONAL FROZEN GROUND'
-            K = self.Kt;
-            C = self.Kt;
-            self.Zal = 999.9
-            self.Tps = 999.9
-            return
-
+        tao = self.T_air*0.0 + self.sec_per_year;         
+        
+        K = self.Kf
+        C = self.Cf       
+                
+        K[np.where(self.Tps_numerator>0.0)] = self.Kt[np.where(self.Tps_numerator>0.0)]
+        C[np.where(self.Tps_numerator>0.0)] = self.Ct[np.where(self.Tps_numerator>0.0)]
+                
         Aps = (self.Ags - abs(self.Tps))/np.log((self.Ags+self.L/(2.*C)) / \
                     (abs(self.Tps)+self.L/(2.*C))) - self.L/(2.*C);
 
-        Zc = (2.*(self.Ags - abs(self.Tps))*np.sqrt((K*self.sec_per_year*C)/np.pi)) / \
+        Zc = (2.*(self.Ags - abs(self.Tps))*np.sqrt((K*tao*C)/np.pi)) / \
                     (2.*Aps*C + self.L);
 
-        self.Zal = (2.*(self.Ags - abs(self.Tps))*np.sqrt(K*self.sec_per_year*C/np.pi) \
-                +(2.*Aps*C*Zc+self.L*Zc)*self.L*np.sqrt(K*self.sec_per_year/(np.pi*C)) \
-                /(2.*self.Ags*C*Zc + self.L*Zc +(2.*Aps*C+self.L)*np.sqrt(K*self.sec_per_year/(np.pi*C)))) \
+        Zal = (2.*(self.Ags - abs(self.Tps))*np.sqrt(K*tao*C/np.pi) \
+                +(2.*Aps*C*Zc+self.L*Zc)*self.L*np.sqrt(K*tao/(np.pi*C)) \
+                /(2.*self.Ags*C*Zc + self.L*Zc +(2.*Aps*C+self.L)*np.sqrt(K*tao/(np.pi*C)))) \
                 /(2.*Aps*C+ self.L);
-
+        
+        Zal[np.where(Zal<=0.)] = -999.99
+        Zal[np.where(self.Tps_numerator>0.0)] = -999.99 # Seasonal Frozen Ground
+        Zal[np.where(np.isnan(Zal))] = -999.99
+                
+        self.Zal = Zal;
+        
     #   update_ALT()
     #-------------------------------------------------------------------
     def update_ground_temperatures(self):
@@ -451,12 +505,14 @@ class Ku_method( perma_base.permafrost_component ):
         self.update_soil_heat_capacity()
         self.update_soil_thermal_conductivity()
         self.update_snow_thermal_properties()
+        
+        tao = self.T_air*0.0 + self.sec_per_year;
 
         # Update mean temperatures for warmes and coldest seasons similar to Nelson & Outcalt 87
         # Cold and Warm Season, Page-129, Sazonova, 2003
-        self.tao1 = self.sec_per_year*(0.5 - 1./np.pi*np.arcsin(self.T_air/self.A_air));
-        self.tao2 = self.sec_per_year - self.tao1;
-        self.L=self.Lf*self.vwc_H2O
+        self.tao1 = tao*(0.5 - 1./np.pi*np.arcsin(self.T_air/self.A_air));
+        self.tao2 = tao - self.tao1;
+        self.L=self.Lf*1000.*self.vwc_H2O
 
         self.update_TOP_temperatures()
 
@@ -473,6 +529,215 @@ class Ku_method( perma_base.permafrost_component ):
         if (self.Hvgt_type      != 'Scalar'): self.Hvgt_unit.close()
         if (self.Dvf_type       != 'Scalar'): self.Dvf_unit.close()
         if (self.Dvt_type       != 'Scalar'): self.Dvt_unit.close()
+        if (self.Lat_type       != 'Scalar'): self.Lat_unit.close()
+        if (self.Lon_type       != 'Scalar'): self.Lon_unit.close()    
 
     #   close_input_files()
     #-------------------------------------------------------------------
+    
+    def Extract_Soil_Texture_Loops(self):
+        
+        p_clay_list = self.Lat_list*0.;
+        p_sand_list = self.Lat_list*0.;
+        p_silt_list = self.Lat_list*0.;
+        p_peat_list = self.Lat_list*0.;
+        
+        n_grid = self.n_grid      
+        
+        for i in range(n_grid):           
+            
+            input_lat   = self.Lat_list[i]
+            input_lon   = self.Lon_list[i]
+            
+            [p_clay0, p_sand0, p_silt0, p_peat0] = self.Extract_Soil_Texture(input_lat, input_lon);
+        
+            p_clay_list[i] = p_clay0            
+            p_sand_list[i] = p_sand0        
+            p_silt_list[i] = p_silt0        
+            p_peat_list[i] = p_peat0                         
+                    
+        self.p_clay = p_clay_list
+        self.p_sand = p_sand_list
+        self.p_silt = p_silt_list
+        self.p_peat = p_peat_list
+        
+
+    def Extract_Soil_Texture(self, input_lat, input_lon): 
+    
+        """ 
+        The function is to extract the grid value from matrix,
+        according to input of latitude and longitude;
+        
+        INPUTs:
+                input_lat: Latitude;
+                input_lon: Longitude;
+                lon_grid : Array of longitude
+                lat_grid : Array of latitude
+                p_data   : Matrix of data (from NetCDF file)
+                
+        OUTPUTs:
+                q_data: grid value (SINGLE)   
+                        
+        DEPENDENTs:
+                None 
+        """
+            
+        import numpy as np
+        
+        lon_grid_scale = 0.05;
+        lat_grid_scale = 0.05;
+        
+        lon_grid_top = self.lon_grid + lon_grid_scale / 2.0;
+        lat_grid_top = self.lat_grid + lat_grid_scale / 2.0;
+        
+        lon_grid_bot = self.lon_grid - lon_grid_scale / 2.0;
+        lat_grid_bot = self.lat_grid - lat_grid_scale / 2.0;
+        
+        # Get the index of input location acccording to lat and lon inputed
+        
+        idx_lon = np.where((input_lon <= lon_grid_top) & (input_lon >= lon_grid_bot))          
+        idx_lat = np.where((input_lat <= lat_grid_top) & (input_lat >= lat_grid_bot))
+        
+        idx_lon = np.array(idx_lon)
+        idx_lat = np.array(idx_lat)
+        
+        if np.size(idx_lon) >= 1 and np.size(idx_lat) >= 1:
+            clay_perc  = self.Clay_percent[idx_lat[0,0], idx_lon[0,0]]
+            sand_perc  = self.Sand_percent[idx_lat[0,0], idx_lon[0,0]]
+            silt_perc  = self.Silt_percent[idx_lat[0,0], idx_lon[0,0]]
+            peat_perc  = self.Peat_percent[idx_lat[0,0], idx_lon[0,0]]
+        else:
+            clay_perc  = np.nan;
+            sand_perc  = np.nan;
+            silt_perc  = np.nan;
+            peat_perc  = np.nan;            
+    
+        return clay_perc, sand_perc, silt_perc, peat_perc
+
+
+    def read_whole_soil_texture_from_GSD(self):
+        
+        Clay_file = self.get_param_nc4_filename("T_CLAY",
+                                                self.permafrost_dir)
+        Sand_file = self.get_param_nc4_filename("T_SAND",
+                                                self.permafrost_dir)
+        Silt_file = self.get_param_nc4_filename("T_SILT",
+                                                self.permafrost_dir)
+        Peat_file = self.get_param_nc4_filename("T_OC",
+                                                self.permafrost_dir)
+                                                
+        lonname    = 'lon';
+        latname    = 'lat';
+        
+        varname    = 'T_CLAY';                                        
+        [lat_grid, lon_grid, Clay_percent] = self.import_ncfile(Clay_file, 
+                                                lonname, latname, varname)
+        varname    = 'T_SAND';                                        
+        [lat_grid, lon_grid, Sand_percent] = self.import_ncfile(Sand_file, 
+                                                lonname, latname, varname)
+         
+        varname    = 'T_SILT';                                        
+        [lat_grid, lon_grid, Silt_percent] = self.import_ncfile(Silt_file, 
+                                                lonname, latname, varname)
+                                                
+        varname    = 'T_OC';                                        
+        [lat_grid, lon_grid, Peat_percent] = self.import_ncfile(Peat_file, 
+                                                lonname, latname, varname)
+        
+        self.Clay_percent = Clay_percent;
+        self.Sand_percent = Sand_percent;
+        self.Silt_percent = Silt_percent;
+        self.Peat_percent = Peat_percent;
+        self.lon_grid     = lon_grid;
+        self.lat_grid     = lat_grid;
+    
+    def import_ncfile(self, input_file, lonname,  latname,  varname): 
+                                           
+        from netCDF4 import Dataset
+        
+        # Read the nc file 
+        
+        fh = Dataset(input_file, mode='r')
+        
+        # Get the lat and lon
+        
+        lon_grid = fh.variables[lonname][:]; 
+        lat_grid = fh.variables[latname][:];
+        
+        p_data  = fh.variables[varname][:];
+        
+        return lat_grid,lon_grid,p_data
+        
+    def initialize(self, cfg_file=None, mode="nondriver",
+                   SILENT=False):
+
+        #---------------------------------------------------------
+        # Notes:  Need to make sure than h_swe matches h_snow ?
+        #         User may have entered incompatible values.
+        #---------------------------------------------------------
+        # (3/14/07) If the Energy Balance method is used for ET,
+        # then we must initialize and track snow depth even if
+        # there is no snowmelt method because the snow depth
+        # affects the ET rate.  Otherwise, return to caller.
+        #---------------------------------------------------------
+        if not(SILENT):
+            print ' '
+            print 'Ku model component: Initializing...'
+
+        self.status     = 'initializing'  # (OpenMI 2.0 convention)
+        self.mode       = mode
+        self.cfg_file   = cfg_file
+        #print mode, cfg_file
+
+        #-----------------------------------------------
+        # Load component parameters from a config file
+        #-----------------------------------------------
+        self.set_constants()
+        self.initialize_config_vars()
+        # At this stage we are going to ignore read_grid_info b/c
+        # we do not have rti file associated with our model
+        # we also skipping the basin_vars which calls the outlets
+        #self.read_grid_info()
+        #self.initialize_basin_vars()
+        
+        #---------------------------------------------
+        # Open input files needed to initialize vars
+        #---------------------------------------------
+        self.open_input_files()
+        self.read_input_files()
+        
+        #---------------------------------------------
+        # Extract soil texture from Grid Soil Database (Netcdf files)
+        # according to locations
+        #---------------------------------------------
+        self.read_whole_soil_texture_from_GSD()  # import whole GSD      
+        self.Extract_Soil_Texture_Loops()        # Extract soil texture for each cell.
+
+        self.initialize_time_vars()
+
+        if (self.comp_status == 'Disabled'):
+            #########################################
+            #  DOUBLE CHECK THIS; SEE NOTES ABOVE
+            #########################################
+               ####### and (ep.method != 2):  ??????
+            if not(SILENT):
+                print 'Permafrost component: Disabled.'
+            self.lat    = self.initialize_scalar(0, dtype='float64')
+            self.lon    = self.initialize_scalar(0, dtype='float64')
+            self.T_air  = self.initialize_scalar(0, dtype='float64')
+            self.h_snow = self.initialize_scalar(0, dtype='float64')
+            self.vwc_H2O= self.initialize_scalar(0, dtype='float64')
+            self.Hvgf   = self.initialize_scalar(0, dtype='float64')
+            self.Hvgt   = self.initialize_scalar(0, dtype='float64')
+            self.Dvf    = self.initialize_scalar(0, dtype='float64')
+            self.Dvt    = self.initialize_scalar(0, dtype='float64')
+            self.DONE   = True
+            self.status = 'initialized'
+            return
+
+        #---------------------------
+        # Initialize computed vars
+        #---------------------------
+        # self.check_input_types()  # (maybe not used yet)
+
+        self.status = 'initialized'
