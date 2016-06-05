@@ -192,8 +192,8 @@ class Ku_method( perma_base.permafrost_component ):
         self.Hvgt_file        = self.in_directory + self.Hvgt_file
         self.Dvf_file         = self.in_directory + self.Dvf_file
         self.Dvt_file         = self.in_directory + self.Dvt_file
-        self.lat_file         = self.in_directory + self.lat_file
-        self.lon_file         = self.in_directory + self.lon_file
+#        self.lat_file         = self.in_directory + self.lat_file
+#        self.lon_file         = self.in_directory + self.lon_file
 
         self.T_air_unit       = model_input.open_file(self.T_air_type,  self.T_air_file)
         self.A_air_unit       = model_input.open_file(self.A_air_type,  self.A_air_file)
@@ -204,8 +204,8 @@ class Ku_method( perma_base.permafrost_component ):
         self.Hvgt_unit        = model_input.open_file(self.Hvgt_type,  self.Hvgt_file)
         self.Dvf_unit         = model_input.open_file(self.Dvf_type,  self.Dvf_file)
         self.Dvt_unit         = model_input.open_file(self.Dvt_type,  self.Dvt_file)
-        self.lat_unit         = model_input.open_file(self.lat_type,  self.lat_file)
-        self.lon_unit         = model_input.open_file(self.lon_type,  self.lon_file)
+#        self.lat_unit         = model_input.open_file(self.lat_type,  self.lat_file)
+#        self.lon_unit         = model_input.open_file(self.lon_type,  self.lon_file)
 
     #   open_input_files()
     #-------------------------------------------------------------------
@@ -217,60 +217,57 @@ class Ku_method( perma_base.permafrost_component ):
         # All grids are assumed to have a data type of Float32.
         #-------------------------------------------------------    
 
-        Lon_list = self.read_next_modified_KU(self.lon_file, self.lon_type)
-        if Lon_list is not None: 
-            self.lon = Lon_list
-            n_Lon = len(Lon_list) 
-        
-        Lat_list = self.read_next_modified_KU(self.lat_file, self.lat_type)
+        [Lat_list, Lon_list] = self.read_nc_lat_lon(self.T_air_file, self.T_air_type)
+        if Lon_list is not None:
+            self.lon = Lon_list 
         if (Lat_list is not None): 
             self.lat = Lat_list
-            n_Lat = len(Lat_list) 
+#            n_Lat = len(Lat_list) 
              
         T_air = self.read_next_modified_KU(self.T_air_file, self.T_air_type)
         if (T_air is not None): 
             self.T_air = T_air
-            n_T_air = len(T_air)
+#            n_T_air = len(T_air)
             
         A_air = self.read_next_modified_KU(self.A_air_file, self.A_air_type)
         if (A_air is not None): 
             self.A_air = A_air
-            n_A_air = len(A_air)
+#            n_A_air = len(A_air)
             
         h_snow = self.read_next_modified_KU(self.h_snow_file, self.h_snow_type)
         if (h_snow is not None): 
             self.h_snow = h_snow
-            n_h_snow = len(h_snow) 
+#            n_h_snow = len(h_snow) 
             
         rho_snow = self.read_next_modified_KU(self.rho_snow_file, self.rho_snow_type)
         if (rho_snow is not None): 
             self.rho_snow = rho_snow
-            n_rho_snow = len(rho_snow)
+#            n_rho_snow = len(rho_snow)
         
         vwc_H2O = self.read_next_modified_KU(self.vwc_H2O_file, self.vwc_H2O_type)
         if (vwc_H2O is not None): 
             self.vwc_H2O = vwc_H2O
-            n_vwc_H2O = len(vwc_H2O)
+#            n_vwc_H2O = len(vwc_H2O)
             
         Hvgf = self.read_next_modified_KU(self.Hvgf_file, self.Hvgf_type)
         if (Hvgf is not None): 
             self.Hvgf = Hvgf
-            n_Hvgf = len(Hvgf)
+#            n_Hvgf = len(Hvgf)
             
         Hvgt = self.read_next_modified_KU(self.Hvgt_file, self.Hvgt_type)
         if (Hvgt is not None): 
             self.Hvgt = Hvgt
-            n_Hvgt = len(Hvgt)
+#            n_Hvgt = len(Hvgt)
             
         Dvt = self.read_next_modified_KU(self.Dvt_file, self.Dvt_type)
         if (Dvt is not None): 
             self.Dvt = Dvt
-            n_Dvt = len(Dvt)
+#            n_Dvt = len(Dvt)
             
         Dvf = self.read_next_modified_KU(self.Dvf_file, self.Dvf_type)
         if (Dvf is not None): 
             self.Dvf = Dvf
-            n_Dvf = len(Dvf)
+#            n_Dvf = len(Dvf)
         
 #        # Check the number of grid in input files:
 #        
@@ -528,14 +525,14 @@ class Ku_method( perma_base.permafrost_component ):
 
         if n_grid > 1:        
         
-            Zal[np.where(Zal<=0.)] = -999.99
-            Zal[np.where(self.Tps_numerator>0.0)] = -999.99 # Seasonal Frozen Ground
-            Zal[np.where(np.isnan(Zal))] = -999.99
+            Zal[np.where(Zal<=0.)] = np.nan
+            Zal[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
+            Zal[np.where(np.isnan(Zal))] = np.nan
             
         else:
             
             if self.Tps_numerator>0.0 or Zal<=0.0 or np.isnan(Zal):
-                Zal = -999.99
+                Zal = np.nan
                 
         self.Zal = Zal;
         
@@ -571,34 +568,41 @@ class Ku_method( perma_base.permafrost_component ):
         if (self.Hvgt_type      != 'Scalar'): self.Hvgt_unit.close()
         if (self.Dvf_type       != 'Scalar'): self.Dvf_unit.close()
         if (self.Dvt_type       != 'Scalar'): self.Dvt_unit.close()
-        if (self.lat_type       != 'Scalar'): self.lat_unit.close()
-        if (self.lon_type       != 'Scalar'): self.lon_unit.close()    
+#        if (self.lat_type       != 'Scalar'): self.lat_unit.close()
+#        if (self.lon_type       != 'Scalar'): self.lon_unit.close()    
 
     #   close_input_files()
     #-------------------------------------------------------------------
     
     def Extract_Soil_Texture_Loops(self):
         
-        p_clay_list = self.lon*0.;
-        p_sand_list = self.lon*0.;
-        p_silt_list = self.lon*0.;
-        p_peat_list = self.lon*0.;
+        n_lat = np.size(self.lat)
+        n_lon = np.size(self.lon)
         
-        n_grid = np.size(p_clay_list)    
-
-        if n_grid > 1:        
+        n_grid = n_lat*n_lon     
         
-            for i in range(n_grid):           
-                
-                input_lat   = self.lat[i]
-                input_lon   = self.lon[i]
-                
-                [p_clay0, p_sand0, p_silt0, p_peat0] = self.Extract_Soil_Texture(input_lat, input_lon);
+        if n_grid > 1:
             
-                p_clay_list[i] = p_clay0            
-                p_sand_list[i] = p_sand0        
-                p_silt_list[i] = p_silt0        
-                p_peat_list[i] = p_peat0
+            p_clay_list = np.zeros((n_lat,n_lon));
+            p_sand_list = np.zeros((n_lat,n_lon));
+            p_silt_list = np.zeros((n_lat,n_lon));
+            p_peat_list = np.zeros((n_lat,n_lon));
+            
+#            lon = np.reshape(self.lon, n_grid,1)
+#            lat = np.reshape(self.lat, n_grid,1)
+        
+            for i in range(n_lon):
+                for j in range(n_lat):
+                
+                    input_lat   = self.lat[j]
+                    input_lon   = self.lon[i]
+                    
+                    [p_clay0, p_sand0, p_silt0, p_peat0] = self.Extract_Soil_Texture(input_lat, input_lon);
+                
+                    p_clay_list[j,i] = p_clay0            
+                    p_sand_list[j,i] = p_sand0        
+                    p_silt_list[j,i] = p_silt0        
+                    p_peat_list[j,i] = p_peat0
         else:
             
             input_lat   = self.lat
@@ -784,6 +788,8 @@ class Ku_method( perma_base.permafrost_component ):
         self.open_input_files()
         self.read_input_files()
         
+#        self.read_nc_lat_lon(self, file_name, var_type)
+        
         #---------------------------------------------
         # Extract soil texture from Grid Soil Database (Netcdf files)
         # according to locations
@@ -797,7 +803,41 @@ class Ku_method( perma_base.permafrost_component ):
         #self.check_input_types()  # (maybe not used yet)
 
         self.status = 'initialized'
+    
+    def read_nc_lat_lon(self, file_name, var_type):
+
+        if (var_type.lower() == 'scalar'):
+            #-------------------------------------------
+            # Scalar value was entered by user already
+            #-------------------------------------------
+            lat = None
+            lon = None
+            
+        elif (var_type.lower() == 'time_series'):
+            #----------------------------------------------
+            # Time series: Read scalar value from file.
+            # File is ASCII text with one value per line.
+            #----------------------------------------------
+            lat = None
+            lon = None
+            
+        elif (var_type.lower() == 'grid'):
+            
+            lat = self.ncread(file_name, 'lat')
+            lon = self.ncread(file_name, 'lon')
+            
+#            lat = np.float(lat)
+#            lon = np.float(lon)
+            
+        else:
+            raise RuntimeError('No match found for "var_type".')
+            return None            
         
+        if (lat is None):
+            return
+        else:
+            return lat,lon
+    
     def read_next_modified_KU(self, file_name, var_type, \
                   dtype='Float32', factor=1.0):
     
@@ -833,8 +873,11 @@ class Ku_method( perma_base.permafrost_component ):
             # Time series: Read scalar value from file.
             # File is ASCII text with one value per line.
             #----------------------------------------------
-            data = np.loadtxt(file_name)
+#            data = np.loadtxt(file_name)
             
+            s = file_name.split('/');s = s[-1];s = s[:-3]
+            data = self.ncread(file_name, s)
+                                   
         else:
             raise RuntimeError('No match found for "var_type".')
             return None
@@ -854,3 +897,15 @@ class Ku_method( perma_base.permafrost_component ):
             return
         else:
             return np.float64( data )
+
+    def ncread(self, input_file, varname):
+
+        from netCDF4 import Dataset
+        
+        f = Dataset(input_file, mode='r') # Open the nc file -> handle
+    
+        data  = f.variables[varname][:]
+    
+        f.close()
+    
+        return data
