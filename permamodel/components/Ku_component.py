@@ -463,7 +463,7 @@ class Ku_method( perma_base.permafrost_component ):
         #       Tps -- eq-14 cont., Anisimov et al. 1997
         #--------------------------------------------------
 
-        n_grid = np.size(self.lat)
+        n_grid = np.size(self.T_air)
         
         if n_grid >1 :               
         
@@ -496,7 +496,7 @@ class Ku_method( perma_base.permafrost_component ):
 
         tao = self.T_air*0.0 + self.sec_per_year;
 
-        n_grid = np.size(self.lat) 
+        n_grid = np.size(self.T_air) 
 
         if n_grid > 1:        
         
