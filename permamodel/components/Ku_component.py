@@ -909,3 +909,120 @@ class Ku_method( perma_base.permafrost_component ):
         f.close()
     
         return data
+        
+     ## def update(self, dt=-1.0, time_seconds=None):
+    def update(self, dt=-1.0):
+
+        #----------------------------------------------------------
+        # Note: The read_input_files() method is first called by
+        #       the initialize() method.  Then, the update()
+        #       method is called one or more times, and it calls
+        #       other update_*() methods to compute additional
+        #       variables using input data that was last read.
+        #       Based on this pattern, read_input_files() should
+        #       be called at end of update() method as done here.
+        #       If the input files don't contain any additional
+        #       data, the last data read persists by default.
+        #----------------------------------------------------------
+
+        #-------------------------------------------------
+        # Note: self.SM already set to 0 by initialize()
+        #-------------------------------------------------
+        if (self.comp_status == 'Disabled'): return
+        self.status = 'updating'  # (OpenMI)
+
+        #-------------------------
+        # Update computed values
+        #-------------------------
+        self.update_ground_temperatures()
+        self.update_ALT()
+
+        #-----------------------------------------
+        # Read next perm vars from input files ? NOTE: does not work see the read_input_files()
+        #-------------------------------------------
+        # Note that read_input_files() is called
+        # by initialize() and these values must be
+        # used for "update" calls before reading
+        # new ones.
+        #-------------------------------------------
+        if (self.time_index > 0):
+            self.read_input_files()
+
+        #----------------------------------------------
+        # Write user-specified data to output files ?
+        #----------------------------------------------
+        # Components use own self.time_sec by default.
+        #-----------------------------------------------
+        self.save_grids()
+
+        #-----------------------------
+        # Update internal clock
+        # after write_output_files()
+        #-----------------------------
+        self.update_time( dt )
+        self.status = 'updated'  # (OpenMI)
+
+    #   update()
+   
+    def save_grids(self):
+        # Saves the grid values based on the prescribed ones in cfg file
+
+        #if (self.SAVE_MR_GRIDS):
+        #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
+        self.ALT_file  = self.in_directory + self.ALT_file
+        
+        if (self.SAVE_ALT_GRIDS):
+            self.write_out_ncfile(self.ALT_file,self.Zal)
+
+        #if (self.SAVE_SW_GRIDS):
+        #    model_output.add_grid( self, self.Tps, 'Tps', self.time_min )
+
+        #if (self.SAVE_CC_GRIDS):
+        #    model_output.add_grid( self, self.Zal, 'Zal', self.time_min )
+
+    def close_output_files(self):
+        
+        tst = 'in progressing';
+
+        #if (self.SAVE_MR_GRIDS): model_output.close_gs_file( self, 'mr')
+#        if (self.SAVE_HS_GRIDS): model_output.close_gs_file( self, 'hs')
+        #if (self.SAVE_SW_GRIDS): model_output.close_gs_file( self, 'sw')
+        #if (self.SAVE_CC_GRIDS): model_output.close_gs_file( self, 'cc')
+        #-----------------------------------------------------------------
+        #if (self.SAVE_MR_PIXELS): model_output.close_ts_file( self, 'mr')
+        #if (self.SAVE_HS_PIXELS): model_output.close_ts_file( self, 'hs')
+        #if (self.SAVE_SW_PIXELS): model_output.close_ts_file( self, 'sw')
+        #if (self.SAVE_CC_PIXELS): model_output.close_ts_file( self, 'cc')
+        
+    def write_out_ncfile(self, output_file, varname):
+
+        from netCDF4 import Dataset
+        import numpy as np
+        
+        n_lat = np.size(self.lat)
+        n_lon = np.size(self.lon)
+        
+        # Open a file to save the final result
+        w_nc_fid = Dataset(output_file, 'w', format='NETCDF4');
+        
+        # ==== Latitude ====
+
+        w_nc_fid.createDimension('lat', n_lat) # Create Dimension
+        lats = w_nc_fid.createVariable('lat',np.dtype('float32').char,('lat',))
+        lats.units = 'degrees_north'
+        lats[:] = self.lat
+        
+        # ==== Longitude ====
+
+        w_nc_fid.createDimension('lon', n_lon) # Create Dimension
+        lons = w_nc_fid.createVariable('lon',np.dtype('float32').char,('lon',))
+        lons.units = 'degrees_east'
+        lons[:] = self.lon
+        
+        # ==== Data ====
+        temp = w_nc_fid.createVariable('ALT',np.dtype('float32').char,('lat','lon'))
+        temp.units = 'm'
+        temp.long_name = 'Active Layer Thickness'
+        temp[:] = self.Zal;
+#        
+        w_nc_fid.close()  # close the new file
