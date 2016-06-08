@@ -711,3 +711,13 @@ class permafrost_component( BMI_base.BMI_component ):
         temperature = self.get_precipitation_from_cru_indexes(i, j, month, year)
         return temperature
 
+    def get_permafrost_data_directory(self):
+        datadir = os.environ.get('PERMAMODEL_DATADIR')
+        if datadir is None:
+            print("Please set the environment variable PERMAMODEL_DATADIR")
+            print("  to the location of the Permafrost Model data")
+            print("  e.g. in ~/.bashrc:")
+            print("     export PERMAMODEL_DATADIR=/data/permafrost_data/")
+            assert(False)
+        return datadir
+

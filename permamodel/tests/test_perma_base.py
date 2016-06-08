@@ -53,3 +53,15 @@ def test_get_precipitation_from_cru():
     precipitation = fn.get_precipitation_from_cru(lon, lat, month, year)
     assert(abs(precipitation - 79.0) < 1e-3) #
 
+def test_data_directory_exists():
+    fn = frost_number.frostnumber_method()
+    datadir = fn.get_permafrost_data_directory()
+    # print("Data directory is: %s" % datadir)
+    try:
+        assert(os.path.isdir(datadir))
+    except:
+        print("Permafrost Data Directory does not exist:")
+        print("   %s" % datadir)
+        print("Note: this is set with the environment variable:")
+        print("   PERMAMODEL_DATADIR")
+
