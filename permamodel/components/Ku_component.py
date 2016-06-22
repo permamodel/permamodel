@@ -588,9 +588,9 @@ class Ku_method( perma_base.permafrost_component ):
             p_silt_list = np.zeros((n_lat,n_lon));
             p_peat_list = np.zeros((n_lat,n_lon));
             
-#            lon = np.reshape(self.lon, n_grid,1)
-#            lat = np.reshape(self.lat, n_grid,1)
-        
+#            lon = np.reshape(self.lon, (n_grid,1))
+#            lat = np.reshape(self.lat, (n_grid,1))
+                    
             for i in range(n_lon):
                 for j in range(n_lat):
                 
@@ -621,6 +621,14 @@ class Ku_method( perma_base.permafrost_component ):
         self.p_silt = p_silt_list
         self.p_peat = p_peat_list
         
+    def Extract_Soil_Texture_Loops_New(self):
+        
+        [p_clay_list, p_sand_list, p_silt_list, p_peat_list] = self.Extract_Soil_Texture2();
+        
+        self.p_clay = p_clay_list
+        self.p_sand = p_sand_list
+        self.p_silt = p_silt_list
+        self.p_peat = p_peat_list
 
     def Extract_Soil_Texture(self, input_lat, input_lon): 
     
@@ -674,7 +682,51 @@ class Ku_method( perma_base.permafrost_component ):
     
         return clay_perc, sand_perc, silt_perc, peat_perc
 
+    def Extract_Soil_Texture2(self): 
+        
+        import numpy as np
+        from affine import Affine
+    
+        lon_cell_size = abs(self.lon_grid[0] - self.lon_grid[1])
+        lat_cell_size = abs(self.lat_grid[0] - self.lat_grid[1])
+    
+        min_lon = min(self.lon_grid) - lon_cell_size/2.0*0.
+        min_lat = min(self.lat_grid) - lat_cell_size/2.0*0. 
+        
+        n_lat = np.size(self.lat)
+        n_lon = np.size(self.lon)
+    
+        aff = Affine.from_gdal(min_lon, lon_cell_size, 0.0, min_lat, 0.0, lat_cell_size)
+        
+        lon = np.reshape(np.repeat(self.lon,n_lat), (n_lon,n_lat));
+        lat = np.transpose(np.reshape(np.repeat(self.lat,n_lon), (n_lat,n_lon)));
+    
+        x_coords, y_coords = ~aff * (lon, lat)
+    
+        x_coords = np.round(x_coords).astype(np.int)
+        y_coords = np.round(y_coords).astype(np.int)
 
+        if np.size(x_coords) >= 1 and np.size(y_coords) >= 1:
+            
+            clay_perc0  = self.Clay_percent[y_coords, x_coords]
+            sand_perc0  = self.Sand_percent[y_coords, x_coords]
+            silt_perc0  = self.Silt_percent[y_coords, x_coords]
+            peat_perc0  = self.Peat_percent[y_coords, x_coords]
+
+            clay_perc  =  np.transpose(np.reshape(clay_perc0, (n_lon, n_lat)))
+            sand_perc  =  np.transpose(np.reshape(sand_perc0, (n_lon, n_lat)))           
+            silt_perc  =  np.transpose(np.reshape(silt_perc0, (n_lon, n_lat)))
+            peat_perc  =  np.transpose(np.reshape(peat_perc0, (n_lon, n_lat)))
+            
+            
+        else:
+            clay_perc  = np.nan;
+            sand_perc  = np.nan;
+            silt_perc  = np.nan;
+            peat_perc  = np.nan;
+            
+        return clay_perc, sand_perc, silt_perc, peat_perc
+        
     def read_whole_soil_texture_from_GSD(self):
         
         Clay_file = self.get_param_nc4_filename("T_CLAY",
@@ -795,7 +847,7 @@ class Ku_method( perma_base.permafrost_component ):
         # according to locations
         #---------------------------------------------
         self.read_whole_soil_texture_from_GSD()  # import whole GSD      
-        self.Extract_Soil_Texture_Loops()        # Extract soil texture for each cell.
+        self.Extract_Soil_Texture_Loops_New()        # Extract soil texture for each cell.
         
         #---------------------------
         # Initialize computed vars
@@ -1002,6 +1054,10 @@ class Ku_method( perma_base.permafrost_component ):
         n_lat = np.size(self.lat)
         n_lon = np.size(self.lon)
         
+        ALT = self.Zal+0.;
+        idx = np.where(np.isnan(ALT))
+        ALT[idx] = -999.99;
+        
         # Open a file to save the final result
         w_nc_fid = Dataset(output_file, 'w', format='NETCDF4');
         
@@ -1022,7 +1078,8 @@ class Ku_method( perma_base.permafrost_component ):
         # ==== Data ====
         temp = w_nc_fid.createVariable('ALT',np.dtype('float32').char,('lat','lon'))
         temp.units = 'm'
+        temp.missing_value = '-999.99'
         temp.long_name = 'Active Layer Thickness'
-        temp[:] = self.Zal;
+        temp[:] = ALT;
 #        
         w_nc_fid.close()  # close the new file
