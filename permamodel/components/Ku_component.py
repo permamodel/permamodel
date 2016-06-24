@@ -217,12 +217,15 @@ class Ku_method( perma_base.permafrost_component ):
         # All grids are assumed to have a data type of Float32.
         #-------------------------------------------------------    
 
-        [Lat_list, Lon_list] = self.read_nc_lat_lon(self.T_air_file, self.T_air_type)
-        if Lon_list is not None:
-            self.lon = Lon_list 
-        if (Lat_list is not None): 
-            self.lat = Lat_list
-#            n_Lat = len(Lat_list) 
+        if self.T_air_type.lower() == 'grid': # these lines just available for GRID inputs
+
+            [Lat_list, Lon_list] = self.read_nc_lat_lon(self.T_air_file, self.T_air_type)
+                        
+            if Lon_list is not None:
+                self.lon = Lon_list 
+            if (Lat_list is not None): 
+                self.lat = Lat_list                
+            
              
         T_air = self.read_next_modified_KU(self.T_air_file, self.T_air_type)
         if (T_air is not None): 
@@ -303,6 +306,7 @@ class Ku_method( perma_base.permafrost_component ):
         #--------------------------------------------------
         # I do not like this input file here need fix later
         #input_file = 'Parameters/Typical_Thermal_Parameters.csv'
+
         input_file = self.permafrost_dir + '/permamodel/components/Parameters/Typical_Thermal_Parameters.csv'
         s_data = np.genfromtxt(input_file, names = True, delimiter=',', dtype=None)
 
@@ -353,9 +357,55 @@ class Ku_method( perma_base.permafrost_component ):
         input_file = self.permafrost_dir + '/permamodel/components/Parameters/Typical_Thermal_Parameters.csv'
         s_data = np.genfromtxt(input_file, names = True, delimiter=',', dtype=None)
 
-        Thermal_Conductivity_Thawed_Texture = s_data['Thermal_Conductivity_Thawed']
-        Thermal_Conductivity_Frozen_Texture = s_data['Thermal_Conductivity_Frozen']
+        vwc=self.vwc_H2O
+                
+        KT_DRY = s_data['KT_DRY'] # DRY soil thermal conductivity in THAWED states
+        KT_WET = s_data['KT_WET'] # WET soil thermal conductivity in THAWED states
+        KF_DRY = s_data['KF_DRY'] # DRY soil thermal conductivity in FROZEN states 
+        KF_WET = s_data['KF_WET'] # WET soil thermal conductivity in FROZEN states
+        
+        kt_dry_silt = KT_DRY[0]
+        kt_wet_silt = KT_WET[0]
+        
+        kt_dry_sand = KT_DRY[1]
+        kt_wet_sand = KT_WET[1]
+        
+        kt_dry_clay = KT_DRY[2]
+        kt_wet_clay = KT_WET[2]
+        
+        kt_dry_peat = KT_DRY[3]
+        kt_wet_peat = KT_WET[3]
+        
+        #===
+        
+        kf_dry_silt = KF_DRY[0]
+        kf_wet_silt = KF_WET[0]
+        
+        kf_dry_sand = KF_DRY[1]
+        kf_wet_sand = KF_WET[1]
+        
+        kf_dry_clay = KF_DRY[2] 
+        kf_wet_clay = KF_WET[2]
+        
+        kf_dry_peat = KF_DRY[3]
+        kf_wet_peat = KF_WET[3]
 
+        #=== Estimate soil thermal conductivity according to water content:
+        #    Here we assumed  a linear correlation from dry to wet.
+
+#        uwc = 0.00;
+#        
+#        kt_silt = kt_dry_silt+(kt_wet_silt-kt_dry_silt)*(vwc-uwc)
+#        kt_sand = kt_dry_sand+(kt_wet_sand-kt_dry_sand)*(vwc-uwc)
+#        kt_clay = kt_dry_clay+(kt_wet_clay-kt_dry_clay)*(vwc-uwc)
+#        kt_peat = kt_dry_peat+(kt_wet_peat-kt_dry_peat)*(vwc-uwc)
+#        
+#        kf_silt = kf_dry_silt+(kf_wet_silt-kf_dry_silt)*(vwc-uwc)
+#        kf_sand = kf_dry_sand+(kf_wet_sand-kf_dry_sand)*(vwc-uwc)
+#        kf_clay = kf_dry_clay+(kf_wet_clay-kf_dry_clay)*(vwc-uwc)
+#        kf_peat = kf_dry_peat+(kf_wet_peat-kf_dry_peat)*(vwc-uwc)       
+
+              
         # Adjusting percent of sand, silt, clay and peat ==
         tot_percent = self.p_sand+self.p_clay+self.p_silt+self.p_peat
         
@@ -365,20 +415,48 @@ class Ku_method( perma_base.permafrost_component ):
         percent_peat = self.p_peat / tot_percent
         
         # Estimate thermal conductivity for composed soil
-        Kt_Soil =  Thermal_Conductivity_Thawed_Texture[0]**percent_silt * \
-               Thermal_Conductivity_Thawed_Texture[2]**percent_clay * \
-               Thermal_Conductivity_Thawed_Texture[1]**percent_sand * \
-               Thermal_Conductivity_Thawed_Texture[3]**percent_peat
+            
+#        Kt_Soil =  kt_silt**percent_silt * \
+#               kt_clay**percent_clay * \
+#               kt_sand**percent_sand * \
+#               kt_peat**percent_peat
+#
+#        Kf_Soil =  kf_silt**percent_silt * \
+#               kf_clay**percent_clay * \
+#               kf_sand**percent_sand * \
+#               kf_peat**percent_peat
+               
+        Kt_Soil_dry = kt_dry_silt**percent_silt * \
+               kt_dry_clay**percent_clay * \
+               kt_dry_sand**percent_sand * \
+               kt_dry_peat**percent_peat
+               
+        Kt_Soil_wet = kt_wet_silt**percent_silt * \
+               kt_wet_clay**percent_clay * \
+               kt_wet_sand**percent_sand * \
+               kt_wet_peat**percent_peat
+               
+        Kt_Soil = Kt_Soil_dry +(Kt_Soil_wet - Kt_Soil_dry) * vwc;
 
-        Kf_Soil =  Thermal_Conductivity_Frozen_Texture[0]**percent_silt * \
-               Thermal_Conductivity_Frozen_Texture[2]**percent_clay * \
-               Thermal_Conductivity_Frozen_Texture[1]**percent_sand * \
-               Thermal_Conductivity_Frozen_Texture[3]**percent_peat
-
+        Kf_Soil_dry = kf_dry_silt**percent_silt * \
+               kf_dry_clay**percent_clay * \
+               kf_dry_sand**percent_sand * \
+               kf_dry_peat**percent_peat
+               
+        Kf_Soil_wet = kf_wet_silt**percent_silt * \
+               kf_wet_clay**percent_clay * \
+               kf_wet_sand**percent_sand * \
+               kf_wet_peat**percent_peat
+               
+        Kf_Soil = Kf_Soil_dry +(Kf_Soil_wet - Kf_Soil_dry) * vwc;        
+        
         # Consider the effect of water content on thermal conductivity
-        vwc=self.vwc_H2O
-        self.Kt = Kt_Soil**(1.0-vwc)*0.54**vwc #   Unit: (W m-1 C-1)
-        self.Kf = Kf_Soil**(1.0-vwc)*2.35**vwc #   Unit: (W m-1 C-1)
+        
+        self.Kt = Kt_Soil;
+        self.Kf = Kf_Soil;
+        
+#        self.Kt = Kt_Soil**(1.0-vwc)*0.54**vwc #   Unit: (W m-1 C-1)
+#        self.Kf = Kf_Soil**(1.0-vwc-0.0)*2.35**(vwc-0.0)*0.54**0.0 #   Unit: (W m-1 C-1)
         
     #   update_soil_thermal_conductivity()
     #-------------------------------------------------------------------
@@ -400,7 +478,7 @@ class Ku_method( perma_base.permafrost_component ):
 
         self.Ksn = (rho_sn/1000.)*(rho_sn/1000.)*3.233-1.01*(rho_sn/1000.)+0.138; # Unit: (W m-1 C-1)
 
-        self.Csn = rho_sn *0.+ 2.09E3 ;                                                # Unit: J m-3 C-1
+        self.Csn = 2.09E3 ;                                                # Unit: J m-3 C-1
 
     #   update_ssnow_thermal_properties()
     #-------------------------------------------------------------------
@@ -613,7 +691,7 @@ class Ku_method( perma_base.permafrost_component ):
             p_clay_list = p_clay0            
             p_sand_list = p_sand0        
             p_silt_list = p_silt0        
-            p_peat_list = p_peat0
+            p_peat_list = p_peat0*0.
                          
                     
         self.p_clay = p_clay_list
@@ -628,7 +706,7 @@ class Ku_method( perma_base.permafrost_component ):
         self.p_clay = p_clay_list
         self.p_sand = p_sand_list
         self.p_silt = p_silt_list
-        self.p_peat = p_peat_list
+        self.p_peat = p_peat_list*1.0
 
     def Extract_Soil_Texture(self, input_lat, input_lon): 
     
@@ -705,7 +783,7 @@ class Ku_method( perma_base.permafrost_component ):
     
         x_coords = np.round(x_coords).astype(np.int)
         y_coords = np.round(y_coords).astype(np.int)
-
+    
         if np.size(x_coords) >= 1 and np.size(y_coords) >= 1:
             
             clay_perc0  = self.Clay_percent[y_coords, x_coords]
@@ -840,7 +918,7 @@ class Ku_method( perma_base.permafrost_component ):
         self.open_input_files()
         self.read_input_files()
         
-#        self.read_nc_lat_lon(self, file_name, var_type)
+        #        self.read_nc_lat_lon(self, file_name, var_type)
         
         #---------------------------------------------
         # Extract soil texture from Grid Soil Database (Netcdf files)
@@ -857,7 +935,7 @@ class Ku_method( perma_base.permafrost_component ):
         self.status = 'initialized'
     
     def read_nc_lat_lon(self, file_name, var_type):
-
+        
         if (var_type.lower() == 'scalar'):
             #-------------------------------------------
             # Scalar value was entered by user already
@@ -1005,7 +1083,8 @@ class Ku_method( perma_base.permafrost_component ):
         #----------------------------------------------
         # Components use own self.time_sec by default.
         #-----------------------------------------------
-        self.save_grids()
+        if (self.SAVE_ALT_GRIDS):       
+            self.save_grids()
 
         #-----------------------------
         # Update internal clock
