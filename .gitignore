@@ -63,3 +63,9 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+*.nc
+
+*.nc
+
+*.nc
