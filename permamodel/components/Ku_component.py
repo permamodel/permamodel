@@ -364,14 +364,19 @@ class Ku_method( perma_base.permafrost_component ):
         KF_DRY = s_data['KF_DRY'] # DRY soil thermal conductivity in FROZEN states 
         KF_WET = s_data['KF_WET'] # WET soil thermal conductivity in FROZEN states
         
+        KT_DRY = KT_DRY * 1;
+        KT_WET = KT_WET * 1;
+        KF_DRY = KF_DRY * 1;
+        KF_WET = KF_WET * 1;
+        
         kt_dry_silt = KT_DRY[0]
         kt_wet_silt = KT_WET[0]
         
-        kt_dry_sand = KT_DRY[1]
-        kt_wet_sand = KT_WET[1]
+        kt_dry_sand = KT_DRY[1]*1
+        kt_wet_sand = KT_WET[1]*1
         
-        kt_dry_clay = KT_DRY[2]
-        kt_wet_clay = KT_WET[2]
+        kt_dry_clay = KT_DRY[2]*1
+        kt_wet_clay = KT_WET[2]*1
         
         kt_dry_peat = KT_DRY[3]
         kt_wet_peat = KT_WET[3]
@@ -381,31 +386,18 @@ class Ku_method( perma_base.permafrost_component ):
         kf_dry_silt = KF_DRY[0]
         kf_wet_silt = KF_WET[0]
         
-        kf_dry_sand = KF_DRY[1]
-        kf_wet_sand = KF_WET[1]
+        kf_dry_sand = KF_DRY[1]*1
+        kf_wet_sand = KF_WET[1]*1
         
-        kf_dry_clay = KF_DRY[2] 
-        kf_wet_clay = KF_WET[2]
+        kf_dry_clay = KF_DRY[2]*1 
+        kf_wet_clay = KF_WET[2]*1
         
         kf_dry_peat = KF_DRY[3]
         kf_wet_peat = KF_WET[3]
 
         #=== Estimate soil thermal conductivity according to water content:
-        #    Here we assumed  a linear correlation from dry to wet.
-
-#        uwc = 0.00;
-#        
-#        kt_silt = kt_dry_silt+(kt_wet_silt-kt_dry_silt)*(vwc-uwc)
-#        kt_sand = kt_dry_sand+(kt_wet_sand-kt_dry_sand)*(vwc-uwc)
-#        kt_clay = kt_dry_clay+(kt_wet_clay-kt_dry_clay)*(vwc-uwc)
-#        kt_peat = kt_dry_peat+(kt_wet_peat-kt_dry_peat)*(vwc-uwc)
-#        
-#        kf_silt = kf_dry_silt+(kf_wet_silt-kf_dry_silt)*(vwc-uwc)
-#        kf_sand = kf_dry_sand+(kf_wet_sand-kf_dry_sand)*(vwc-uwc)
-#        kf_clay = kf_dry_clay+(kf_wet_clay-kf_dry_clay)*(vwc-uwc)
-#        kf_peat = kf_dry_peat+(kf_wet_peat-kf_dry_peat)*(vwc-uwc)       
-
-              
+        #    Here we assumed  a linear correlation from dry to wet
+        
         # Adjusting percent of sand, silt, clay and peat ==
         tot_percent = self.p_sand+self.p_clay+self.p_silt+self.p_peat
         
@@ -415,41 +407,75 @@ class Ku_method( perma_base.permafrost_component ):
         percent_peat = self.p_peat / tot_percent
         
         # Estimate thermal conductivity for composed soil
-            
-#        Kt_Soil =  kt_silt**percent_silt * \
-#               kt_clay**percent_clay * \
-#               kt_sand**percent_sand * \
-#               kt_peat**percent_peat
-#
-#        Kf_Soil =  kf_silt**percent_silt * \
-#               kf_clay**percent_clay * \
-#               kf_sand**percent_sand * \
-#               kf_peat**percent_peat
-               
-        Kt_Soil_dry = kt_dry_silt**percent_silt * \
-               kt_dry_clay**percent_clay * \
-               kt_dry_sand**percent_sand * \
-               kt_dry_peat**percent_peat
-               
-        Kt_Soil_wet = kt_wet_silt**percent_silt * \
-               kt_wet_clay**percent_clay * \
-               kt_wet_sand**percent_sand * \
-               kt_wet_peat**percent_peat
-               
-        Kt_Soil = Kt_Soil_dry +(Kt_Soil_wet - Kt_Soil_dry) * vwc;
-
-        Kf_Soil_dry = kf_dry_silt**percent_silt * \
-               kf_dry_clay**percent_clay * \
-               kf_dry_sand**percent_sand * \
-               kf_dry_peat**percent_peat
-               
-        Kf_Soil_wet = kf_wet_silt**percent_silt * \
-               kf_wet_clay**percent_clay * \
-               kf_wet_sand**percent_sand * \
-               kf_wet_peat**percent_peat
-               
-        Kf_Soil = Kf_Soil_dry +(Kf_Soil_wet - Kf_Soil_dry) * vwc;        
         
+        method_shift = 3
+        
+        if method_shift == 1:
+                     
+            Kt_Soil_dry = kt_dry_silt**percent_silt * \
+                   kt_dry_clay**percent_clay * \
+                   kt_dry_sand**percent_sand * \
+                   kt_dry_peat**percent_peat 
+
+            Kt_Soil_wet = kt_wet_silt**percent_silt * \
+                   kt_wet_clay**percent_clay * \
+                   kt_wet_sand**percent_sand * \
+                   kt_wet_peat**percent_peat
+
+            Kt_Soil = Kt_Soil_dry +(Kt_Soil_wet - Kt_Soil_dry) * vwc;
+            #Kt_Soil = Kt_Soil_dry**(1.0-vwc)*0.54**vwc;
+
+            Kf_Soil_dry = kf_dry_silt**percent_silt * \
+                   kf_dry_clay**percent_clay * \
+                   kf_dry_sand**percent_sand * \
+                   kf_dry_peat**percent_peat
+
+            Kf_Soil_wet = kf_wet_silt**percent_silt * \
+                   kf_wet_clay**percent_clay * \
+                   kf_wet_sand**percent_sand * \
+                   kf_wet_peat**percent_peat
+
+            Kf_Soil = Kf_Soil_dry +(Kf_Soil_wet - Kf_Soil_dry) * vwc; 
+            #Kf_Soil = Kf_Soil_dry**(1.0-vwc)*2.35**vwc;
+        
+        if method_shift == 2:
+            
+            kt_silt = kt_dry_silt + (kt_wet_silt - kt_dry_silt) * vwc;
+            kt_sand = kt_dry_sand + (kt_wet_sand - kt_dry_sand) * vwc;
+            kt_clay = kt_dry_clay + (kt_wet_clay - kt_dry_clay) * vwc;
+            kt_peat = kt_dry_peat + (kt_wet_peat - kt_dry_peat) * vwc;
+            
+            kf_silt = kf_dry_silt + (kf_wet_silt - kf_dry_silt) * vwc;
+            kf_sand = kf_dry_sand + (kf_wet_sand - kf_dry_sand) * vwc;
+            kf_clay = kf_dry_clay + (kf_wet_clay - kf_dry_clay) * vwc;
+            kf_peat = kf_dry_peat + (kf_wet_peat - kf_dry_peat) * vwc;
+                     
+            Kt_Soil = kt_silt**percent_silt * \
+                   kt_clay**percent_clay * \
+                   kt_sand**percent_sand * \
+                   kt_peat**percent_peat 
+
+            Kf_Soil = kf_silt**percent_silt * \
+                   kf_clay**percent_clay * \
+                   kf_sand**percent_sand * \
+                   kf_peat**percent_peat           
+        
+        if method_shift == 3:
+                     
+            Kt_Soil_dry = kt_dry_silt**percent_silt * \
+                   kt_dry_clay**percent_clay * \
+                   kt_dry_sand**percent_sand * \
+                   kt_dry_peat**percent_peat 
+
+            Kt_Soil = Kt_Soil_dry**(1.0-vwc)*0.54**vwc;
+
+            Kf_Soil_dry = kf_dry_silt**percent_silt * \
+                   kf_dry_clay**percent_clay * \
+                   kf_dry_sand**percent_sand * \
+                   kf_dry_peat**percent_peat
+
+            Kf_Soil = Kf_Soil_dry**(1.0-vwc)*2.35**vwc;
+            
         # Consider the effect of water content on thermal conductivity
         
         self.Kt = Kt_Soil;
@@ -476,7 +502,7 @@ class Ku_method( perma_base.permafrost_component ):
         #--------------------------------------------------
         rho_sn=self.rho_snow
 
-        self.Ksn = (rho_sn/1000.)*(rho_sn/1000.)*3.233-1.01*(rho_sn/1000.)+0.138; # Unit: (W m-1 C-1)
+        self.Ksn = (rho_sn/1000.)**2*3.233-1.01*(rho_sn/1000.)+0.138; # Unit: (W m-1 C-1)
 
         self.Csn = 2.09E3 ;                                                # Unit: J m-3 C-1
 
@@ -498,10 +524,13 @@ class Ku_method( perma_base.permafrost_component ):
         
         temp = np.exp(-1.0*self.h_snow*np.sqrt(np.pi/(tao*K_diffusivity)))
         deta_Tsn = self.A_air*(1.0 - temp);
-        deta_Asn = 2.0/np.pi*deta_Tsn;
+        deta_Asn = deta_Tsn*2.0/np.pi;
 
         Tvg = self.T_air + deta_Tsn;
         Avg = self.A_air - deta_Asn;
+        
+        self.deta_Tsn = deta_Tsn;
+        self.deta_Asn = deta_Asn;
 
         #---------------------------------------------------------
         #   2.  Estimating Snow Effects
@@ -706,7 +735,7 @@ class Ku_method( perma_base.permafrost_component ):
         self.p_clay = p_clay_list
         self.p_sand = p_sand_list
         self.p_silt = p_silt_list
-        self.p_peat = p_peat_list*1.0
+        self.p_peat = p_peat_list*0.0
 
     def Extract_Soil_Texture(self, input_lat, input_lon): 
     
