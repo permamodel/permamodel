@@ -334,9 +334,13 @@ class Ku_method( perma_base.permafrost_component ):
                          
         # Estimate heat capacity for composed soil
         # based on the empirical approaches suggested by Anisimov et al. (1997)
-        self.Ct = Heat_Capacity*Bulk_Density + 4190.*self.vwc_H2O # eq-15, Anisimov et al. 1997; Unit: J m-3 C-1
-        self.Cf = Heat_Capacity*Bulk_Density + 2025.*self.vwc_H2O # eq-15, Anisimov et al. 1997; Unit: J m-3 C-1
-       
+        self.Ct = (Heat_Capacity*Bulk_Density + 4190.*self.vwc_H2O) # eq-15, Anisimov et al. 1997; Unit: J m-3 C-1
+        self.Cf = (Heat_Capacity*Bulk_Density + 2025.*self.vwc_H2O) # eq-15, Anisimov et al. 1997; Unit: J m-3 C-1
+#        self.Bulk_Density = Bulk_Density;
+#        self.Heat_Capacity = Heat_Capacity;
+#        self.Ct = Heat_Capacity*0.+2500000
+#        self.Cf = Heat_Capacity*0.+1300000
+        
     #   update_soil_heat_capacity()
     #-------------------------------------------------------------------
 
@@ -372,11 +376,11 @@ class Ku_method( perma_base.permafrost_component ):
         kt_dry_silt = KT_DRY[0]
         kt_wet_silt = KT_WET[0]
         
-        kt_dry_sand = KT_DRY[1]*1
-        kt_wet_sand = KT_WET[1]*1
+        kt_dry_sand = KT_DRY[1]
+        kt_wet_sand = KT_WET[1]
         
-        kt_dry_clay = KT_DRY[2]*1
-        kt_wet_clay = KT_WET[2]*1
+        kt_dry_clay = KT_DRY[2]
+        kt_wet_clay = KT_WET[2]
         
         kt_dry_peat = KT_DRY[3]
         kt_wet_peat = KT_WET[3]
@@ -386,11 +390,11 @@ class Ku_method( perma_base.permafrost_component ):
         kf_dry_silt = KF_DRY[0]
         kf_wet_silt = KF_WET[0]
         
-        kf_dry_sand = KF_DRY[1]*1
-        kf_wet_sand = KF_WET[1]*1
+        kf_dry_sand = KF_DRY[1]
+        kf_wet_sand = KF_WET[1]
         
-        kf_dry_clay = KF_DRY[2]*1 
-        kf_wet_clay = KF_WET[2]*1
+        kf_dry_clay = KF_DRY[2]
+        kf_wet_clay = KF_WET[2]
         
         kf_dry_peat = KF_DRY[3]
         kf_wet_peat = KF_WET[3]
@@ -466,6 +470,8 @@ class Ku_method( perma_base.permafrost_component ):
                    kt_dry_clay**percent_clay * \
                    kt_dry_sand**percent_sand * \
                    kt_dry_peat**percent_peat 
+                   
+            uwc = 0.05;
 
             Kt_Soil = Kt_Soil_dry**(1.0-vwc)*0.54**vwc;
 
@@ -474,9 +480,13 @@ class Ku_method( perma_base.permafrost_component ):
                    kf_dry_sand**percent_sand * \
                    kf_dry_peat**percent_peat
 
-            Kf_Soil = Kf_Soil_dry**(1.0-vwc)*2.35**vwc;
+            Kf_Soil = Kf_Soil_dry**(1.0-vwc)*2.35**(vwc-uwc)*0.54**(uwc);
             
-        # Consider the effect of water content on thermal conductivity
+
+#            Kf_Soil = Kf_Soil*0.+1.38
+#            Kt_Soil = Kf_Soil*0.+0.85
+            
+        # Consider the effect of water content on thermal conductivity        
         
         self.Kt = Kt_Soil;
         self.Kf = Kf_Soil;
@@ -604,27 +614,27 @@ class Ku_method( perma_base.permafrost_component ):
 
         if n_grid > 1:        
         
-            K = self.Kf
-            C = self.Cf       
+            K = self.Kt
+            C = self.Ct       
                     
-            K[np.where(self.Tps_numerator>0.0)] = self.Kt[np.where(self.Tps_numerator>0.0)]
-            C[np.where(self.Tps_numerator>0.0)] = self.Ct[np.where(self.Tps_numerator>0.0)]
+            K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
+            C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
             
         else:
             
             if self.Tps_numerator<=0.0:
-                K = self.Kf
-                C = self.Cf
-            else:
                 K = self.Kt
                 C = self.Ct
+            else:
+                K = self.Kf
+                C = self.Cf
                 
         Aps = (self.Ags - abs(self.Tps))/np.log((self.Ags+self.L/(2.*C)) / \
                     (abs(self.Tps)+self.L/(2.*C))) - self.L/(2.*C);
 
         Zc = (2.*(self.Ags - abs(self.Tps))*np.sqrt((K*tao*C)/np.pi)) / \
                     (2.*Aps*C + self.L);
-
+                    
         Zal = (2.*(self.Ags - abs(self.Tps))*np.sqrt(K*tao*C/np.pi) \
                 +(2.*Aps*C*Zc+self.L*Zc)*self.L*np.sqrt(K*tao/(np.pi*C)) \
                 /(2.*self.Ags*C*Zc + self.L*Zc +(2.*Aps*C+self.L)*np.sqrt(K*tao/(np.pi*C)))) \
@@ -640,7 +650,9 @@ class Ku_method( perma_base.permafrost_component ):
             
             if self.Tps_numerator>0.0 or Zal<=0.0 or np.isnan(Zal):
                 Zal = np.nan
-                
+
+        self.Aps = Aps;
+        self.Zc  = Zc;
         self.Zal = Zal;
         
     #   update_ALT()
@@ -658,7 +670,7 @@ class Ku_method( perma_base.permafrost_component ):
         # Cold and Warm Season, Page-129, Sazonova, 2003
         self.tao1 = tao*(0.5 - 1./np.pi*np.arcsin(self.T_air/self.A_air));
         self.tao2 = tao - self.tao1;
-        self.L=self.Lf*1000.*self.vwc_H2O
+        self.L=334000.*1000.*self.vwc_H2O
 
         self.update_TOP_temperatures()
 
@@ -1174,6 +1186,9 @@ class Ku_method( perma_base.permafrost_component ):
         w_nc_fid.createDimension('lat', n_lat) # Create Dimension
         lats = w_nc_fid.createVariable('lat',np.dtype('float32').char,('lat',))
         lats.units = 'degrees_north'
+        lats.standard_name = 'latitude'
+        lats.long_name = 'latitude'
+        lats.axis = 'Y'
         lats[:] = self.lat
         
         # ==== Longitude ====
@@ -1181,6 +1196,9 @@ class Ku_method( perma_base.permafrost_component ):
         w_nc_fid.createDimension('lon', n_lon) # Create Dimension
         lons = w_nc_fid.createVariable('lon',np.dtype('float32').char,('lon',))
         lons.units = 'degrees_east'
+        lons.standard_name = 'longitude'
+        lons.long_name = 'longitude'
+        lons.axis = 'X'
         lons[:] = self.lon
         
         # ==== Data ====
