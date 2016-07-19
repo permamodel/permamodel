@@ -1,0 +1,6 @@
+bmi_paths:
+  - .bmi/frost_number
+  - .bmi/ku
+
+build:
+  - python setup.py develop
