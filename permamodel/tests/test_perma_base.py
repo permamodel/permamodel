@@ -12,16 +12,17 @@ import numpy as np
 # ---------------------------------------------------
 def test_can_get_precipitation_filename_from_date_and_location():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",
-                 SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR'),
+                            'Fairbanks_frostnumber_method.cfg')
+    fn.initialize(cfg_file=cfg_file, SILENT=True)
     # Given year and month, calculate the tiff_filename
     fname = fn.get_precipitation_tiff_filename(fn.year, 6)
     assert(fname != None)
 
 def test_get_precipitation_from_cru_indexes():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",
-                 SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR'),
+                            'Fairbanks_frostnumber_method.cfg')
 
     # Test using data file for June of 2009
     month = 6
@@ -41,7 +42,8 @@ def test_get_precipitation_from_cru_indexes():
 
 def test_get_precipitation_from_cru():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR'),
+                            'Fairbanks_frostnumber_method.cfg')
     month = 6
     year = 2009
 

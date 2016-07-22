@@ -25,6 +25,17 @@ def test_have_output_var_names():
     fn = frost_number.frostnumber_method
     assert(fn._output_var_names != None)
 
+# ---------------------------------------------------
+# Test that environment variables have been set
+# ---------------------------------------------------
+def test_environment_variables_set():
+    env_var_to_test = "PERMAMODEL_EXAMPLEDIR"
+    if not os.environ.get(env_var_to_test):
+        raise ValueError('Environment variable %s not set', env_var_to_test)
+
+    env_var_to_test = "PERMAMODEL_DATADIR"
+    if not os.environ.get(env_var_to_test):
+        raise ValueError('Environment variable %s not set', env_var_to_test)
 
 # ---------------------------------------------------
 # Tests that input data is being read correctly
@@ -35,7 +46,10 @@ def test_can_initialize_frostnumber_method_from_file():
 
 def test_frostnumber_method_has_date_and_location():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg", SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
+                                '/examples/'),
+                 'Fairbanks_frostnumber_method.cfg')
+    fn.initialize(cfg_file=cfg_file, SILENT=True)
     assert(fn.year >= 0)
     assert(fn.year == fn.start_year)
 
@@ -49,8 +63,10 @@ def test_can_get_temperature_filename_from_date_and_location():
 
 def test_get_temperature_from_cru_indexes():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",
-                 SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
+                                '/examples/'),
+                 'Fairbanks_frostnumber_method.cfg')
+    fn.initialize(cfg_file=cfg_file, SILENT=True)
 
     # Test using data file for June of 2009
     month = 6
