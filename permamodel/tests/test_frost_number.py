@@ -42,7 +42,10 @@ def test_environment_variables_set():
 # ---------------------------------------------------
 def test_can_initialize_frostnumber_method_from_file():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg", SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
+                                '/examples/'),
+                 'Fairbanks_frostnumber_method.cfg')
+    fn.initialize(cfg_file=cfg_file, SILENT=True)
 
 def test_frostnumber_method_has_date_and_location():
     fn = frost_number.frostnumber_method()
@@ -55,8 +58,14 @@ def test_frostnumber_method_has_date_and_location():
 
 def test_can_get_temperature_filename_from_date_and_location():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",
-                 SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
+                                '/examples/'),
+                 'Fairbanks_frostnumber_method.cfg')
+    fn.initialize(cfg_file=cfg_file, SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
+                                '/examples/'),
+                 'Fairbanks_frostnumber_method.cfg')
+    fn.initialize(cfg_file=cfg_file, SILENT=True)
     # Given year and month, calculate the tiff_filename
     fname = fn.get_temperature_tiff_filename(fn.year, 6)
     assert(fname != None)
@@ -86,7 +95,10 @@ def test_get_temperature_from_cru_indexes():
 
 def test_get_cru_indexes_from_lon_lat():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
+                                '/examples/'),
+                 'Fairbanks_frostnumber_method.cfg')
+    fn.initialize(cfg_file=cfg_file, SILENT=True)
 
     # Test using CRU tiff file for June 2009
     month = 6
@@ -123,7 +135,10 @@ def test_get_cru_indexes_from_lon_lat():
 
 def test_get_lon_lat_from_cru_indexes():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
+                                '/examples/'),
+                 'Fairbanks_frostnumber_method.cfg')
+    fn.initialize(cfg_file=cfg_file, SILENT=True)
 
     # Try to get the upper left corner indexes
     month = 6
@@ -146,7 +161,10 @@ def test_get_lon_lat_from_cru_indexes():
 
 def test_get_temperature_from_cru():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file="/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg",SILENT=True)
+    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
+                                '/examples/'),
+                 'Fairbanks_frostnumber_method.cfg')
+    fn.initialize(cfg_file=cfg_file, SILENT=True)
     month = 6
     year = 2009
 
