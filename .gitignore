@@ -63,3 +63,10 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# NetCDF data files
+*.nc
+
+# Emacs backups
+*~
+
