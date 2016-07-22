@@ -615,8 +615,11 @@ class permafrost_component( BMI_base.BMI_component ):
     # Read precipitation routines from geotiff
     # ----------------------------------------
 
-    def get_temperature_tiff_filename(self, year, month, datadir="/data/tas"):
+    def get_temperature_tiff_filename(self, year, month, datadir=None):
         # Generate the name of the CRU tiff file
+
+        datadir = datadir or os.path.join(os.environ.get('PERMAMODEL_DATADIR', 
+                                                         '/data'), 'tas')
 
         filename = "%s/tas_mean_C_cru_TS31_%02d_%4d.tif" % \
                 (datadir, month, year)
@@ -665,9 +668,10 @@ class permafrost_component( BMI_base.BMI_component ):
     # Read precipitation routines from geotiff
     # ----------------------------------------
 
-    def get_precipitation_tiff_filename(self, year, month,
-                                        datadir="/data/pr_AK_CRU"):
-        # Generate the name of the CRU tiff file
+    def get_precipitation_tiff_filename(self, year, month, datadir=None):
+        datadir = datadir or os.path.join(os.environ.get('PERMAMODEL_DATADIR', 
+                                                         '/data'), 'pr_AK_CRU')
+        # Generate the name of the CRU precipitation tiff file
 
         filename = "%s/pr_total_mm_cru_TS31_%02d_%4d.tif" % \
                 (datadir, month, year)
