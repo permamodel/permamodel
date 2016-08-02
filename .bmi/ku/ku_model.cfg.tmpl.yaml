@@ -1,0 +1,39 @@
+#===============================================================================
+# PermaModel Config File for: Ku_method
+#===============================================================================
+# Input
+comp_status         | Enabled        | string           | component status {Enabled; Disabled}
+in_directory        | .              | string           | input directory
+out_directory       | .              | string           | output directory
+permafrost_dir      | .              | string           | root permafrost code directory
+site_prefix         | {site_prefix}	 | string           | file prefix for the study site
+case_prefix         | {case_prefix}  | string           | file prefix for the model scenario
+lat_type            | {lat_type}  	 | string           | allowed input types {Scalar; Grid; Time_Series; 
+lat           		| {lat}          | {typeof_lat}     | 64.8378° N, 147.7164° W
+lon_type            | {lon_type}  	 | string           | allowed input types {Scalar; Grid; Time_Series; 
+lon           		| {lon}          | {typeof_lon}     | GIS coordinates
+start_year          | {start_year}   | long             | begining of the simulation time [year]
+end_year            | {end_year}     | long             | begining of the simulation time [year]
+dt                  | {dt}           | float            | timestep for permafrost process [year]
+T_air_type        	| {T_air_type} 	 | string           | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+T_air             	| {T_air}        | {typeof_T_air}   | Mean annual air temperature [C]
+A_air_type        	| {A_air_type} 	 | string           | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+A_air             	| {A_air}        | {typeof_A_air}   | Mean annual amplitude of air temperature [C]
+h_snow_type       	| {h_snow_type}  | string           | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+h_snow            	| {h_snow}       | {typeof_h_snow}  | depth of snow [m]
+rho_snow_type       | {rho_snow_type}| string           | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+rho_snow            | {rho_snow}     | {typeof_rho_snow}| density of snow [kg m-3]
+vwc_H2O_type       	| {vwc_H2O_type} | string           | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+vwc_H2O            	| {vwc_H2O}      | {typeof_vwc_H2O} | soil volumetric water content [m3 m-3]
+Hvgf_type           | {Hvgf_type}    | string           | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+Hvgf                | {Hvgf}         | {typeof_Hvgf}    | Height of vegetation in frozen period [m]
+Hvgt_type           | {Hvgt_type}    | string           | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+Hvgt                | {Hvgt}         | {typeof_Hvgt}    | Height of vegetation in thawed period [m]
+Dvf_type        	| {Dvf_type}     | string           | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+Dvf             	| {Dvf}          | {typeof_Dvf}     | Thermal diffusivity of vegetation in frozen period [m2 s]
+Dvt_type         	| {Dvt_type}     | string           | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+Dvt              	| {Dvt}          | {typeof_Dvt}     | Thermal diffusivity of vegetation in thawed period[m2 s]
+#===============================================================================
+# Output
+SAVE_ALT_GRIDS    | No               | string           | option to save grids of snow depth {Yes; No}
+ALT_file          | {ALT_file}       | string           | filename for grid stack of snow depth [m]

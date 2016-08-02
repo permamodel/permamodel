@@ -1,0 +1,336 @@
+Input:
+- key: comp_status
+  name: Component status
+  description: Component status
+  value:
+    type: choice
+    default: Enabled
+    choices:
+    - Enabled
+    - Disabled
+    units: '-'
+- key: in_directory
+  name: Input directory
+  description: Input directory
+  value:
+    type: string
+    default: /Users/kang/Desktop/permamodel/permamodel/examples
+    units: '-'
+- key: out_directory
+  name: Output directory
+  description: Output directory
+  value:
+    type: string
+    default: ~/CMT_Output/
+    units: '-'
+- key: permafrost_dir
+  name: permafrost directory
+  description: permafrost directory
+  value:
+    type: string
+    default: /Users/kang/Desktop/permamodel
+    units: '-'    
+- key: site_prefix
+  name: Site prefix
+  description: File prefix for the study site
+  value:
+    type: string
+    default: Test
+    units: '-'
+- key: case_prefix
+  name: Case prefix
+  description: File prefix for the model scenario
+  value:
+    type: string
+    default: Case_test
+    units: '-'
+- key: lat_type
+  name: lat type
+  description: latitude 
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    units: '-'
+- key: lat
+  name: lat
+  description: latitude
+  value:
+    type: float
+    default: '64.8378 '
+    range:
+      min: '-90.0'
+      max: 90
+    units: '-'    
+- key: lon_type
+  name: lon type
+  description: longitude 
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    units: '-'
+- key: lon
+  name: lon
+  description: longitude
+  value:
+    type: float
+    default: '-147.7164'
+    range:
+      min: '-180.0'
+      max: 180
+    units: '-'
+- key: start_year
+  name: start year
+  description: begining of the simulation time 
+  value:
+    type: float
+    default: '2010'
+    range:
+      min: '0'
+      max: 100000000
+    units: year
+- key: end_year
+  name: end year
+  description: end of the simulation time 
+  value:
+    type: float
+    default: '2014'
+    range:
+      min: '0'
+      max: 100000000
+    units: year
+- key: dt
+  name: Time step
+  description: Timestep for infiltration process
+  value:
+    type: float
+    default: '60.000'
+    range:
+      min: '0'
+      max: 1e3
+    units: sec
+- key: T_air_type
+  name: T_air type
+  description: Near Surface Air Temperature input types
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    - Time_Series
+    - Grid_Sequence
+    units: '-'
+- key: T_air
+  name: T_air
+  description: Near Surface Air Temperature
+  value:
+    type: float
+    default: '-9.0'
+    range:
+      min: '-100.0'
+      max: 100
+    units: degC
+- key: A_air_type
+  name: A_air type
+  description: Near Surface Air Temperature Amplitude input types
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    - Time_Series
+    - Grid_Sequence
+    units: '-'
+- key: A_air
+  name: A_air
+  description: Near Surface Air Temperature Amplitude
+  value:
+    type: float
+    default: '15.4'
+    range:
+      min: '-100.0'
+      max: 100
+    units: degC
+- key: h_snow_type
+  name: h_snow type
+  description: Allowed input types
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    - Time_Series
+    - Grid_Sequence
+    units: '-'
+- key: h0_snow
+  name: h0_snow
+  description: Depth of snow
+  value:
+    type: float
+    default: '0.500'
+    range:
+      min: '0.0'
+      max: '20.0'
+    units: m
+- key: rho_snow_type
+  name: rho_snow type
+  description: Allowed input types
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    - Time_Series
+    - Grid_Sequence
+    units: '-'
+- key: rho_snow
+  name: rho_snow
+  description: Density of snow
+  value:
+    type: float
+    default: '240.000'
+    range:
+      min: '0.0'
+      max: 1e3
+    units: kg/m^3
+- key: vwc_H2O_type
+  name: vwc_H2O type
+  description: Allowed input types
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    - Time_Series
+    - Grid_Sequence
+    units: '-'
+- key: vwc_H2O
+  name: vwc_H2O
+  description: Soil volumetric water content
+  value:
+    type: float
+    default: '0.40'
+    range:
+      min: '0.0'
+      max: '1.0'
+    units: '-'
+- key: Hvgf_type 
+  name: Hvgf type 
+  description: Allowed input types
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    - Time_Series
+    - Grid_Sequence
+    units: '-'
+- key: Hvgf_type 
+  name: Hvgf_type 
+  description: Height of vegetation in frozen period
+  value:
+    type: float
+    default: '0.00'
+    range:
+      min: '0.0'
+      max: '1.0'
+    units: 'm'
+- key: Hvgt_type 
+  name: Hvgt type 
+  description: Allowed input types
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    - Time_Series
+    - Grid_Sequence
+    units: '-'
+- key: Hvgt_type 
+  name: Hvgt_type 
+  description: Height of vegetation in thawed period
+  value:
+    type: float
+    default: '0.00'
+    range:
+      min: '0.0'
+      max: '1.0'
+    units: 'm'
+- key: Dvf_type 
+  name: Dvf type 
+  description: Allowed input types
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    - Time_Series
+    - Grid_Sequence
+    units: '-'
+- key: Dvf_type 
+  name: Dvf_type 
+  description: Thermal diffusivity of vegetation in frozen period
+  value:
+    type: float
+    default: '139.00'
+    range:
+      min: '0.0'
+      max: '1.0'
+    units: 'm2 s'
+- key: Dvt_type 
+  name: Dvt type 
+  description: Allowed input types
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Scalar
+    - Grid
+    - Time_Series
+    - Grid_Sequence
+    units: '-'
+- key: Dvt_type 
+  name: Dvt_type 
+  description: Thermal diffusivity of vegetation in frozen period
+  value:
+    type: float
+    default: '5.560'
+    range:
+      min: '0.0'
+      max: '1.0'
+    units: 'm2 s'
+About:
+- key: ModelName
+  name: Model name
+  description: Name of the model
+  value:
+    type: String
+    default: Ku_model
+    units: '-'
+- key: ModelAuthor
+  name: Author name
+  description: Name of the model author
+  value:
+    type: String
+    default: 'Kang Wang'
+    units: '-'
+- key: HTML_HELP_FILE
+  name: HTML help file
+  description: Url for html help file
+  value:
+    type: String
+    default: http://csdms.colorado.edu/wiki/
+    units: '-'

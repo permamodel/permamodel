@@ -1,0 +1,8 @@
+name: Ku_model
+language: python
+
+package: permamodel
+class: Ku_method
+
+build:
+  - python setup.py install
