@@ -412,9 +412,9 @@ class Ku_method( perma_base.permafrost_component ):
         
         # Estimate thermal conductivity for composed soil
         
-        method_shift = 3
+        method_option = 3
         
-        if method_shift == 1:
+        if method_option == 1:
                      
             Kt_Soil_dry = kt_dry_silt**percent_silt * \
                    kt_dry_clay**percent_clay * \
@@ -442,7 +442,7 @@ class Ku_method( perma_base.permafrost_component ):
             Kf_Soil = Kf_Soil_dry +(Kf_Soil_wet - Kf_Soil_dry) * vwc; 
             #Kf_Soil = Kf_Soil_dry**(1.0-vwc)*2.35**vwc;
         
-        if method_shift == 2:
+        if method_option == 2:
             
             kt_silt = kt_dry_silt + (kt_wet_silt - kt_dry_silt) * vwc;
             kt_sand = kt_dry_sand + (kt_wet_sand - kt_dry_sand) * vwc;
@@ -464,7 +464,7 @@ class Ku_method( perma_base.permafrost_component ):
                    kf_sand**percent_sand * \
                    kf_peat**percent_peat           
         
-        if method_shift == 3:
+        if method_option == 3:
                      
             Kt_Soil_dry = kt_dry_silt**percent_silt * \
                    kt_dry_clay**percent_clay * \
@@ -562,6 +562,9 @@ class Ku_method( perma_base.permafrost_component ):
 
         Tgs = Tvg + deta_Tv;
         Ags = Avg - deta_Av;
+        
+        self.deta_Tv = deta_Tv;
+        self.deta_Av = deta_Av;
 
         #---------------------------------------------------------
         #   3.  Calculates Tps_Numerator;
@@ -637,7 +640,7 @@ class Ku_method( perma_base.permafrost_component ):
                     
         Zal = (2.*(self.Ags - abs(self.Tps))*np.sqrt(K*tao*C/np.pi) \
                 +(2.*Aps*C*Zc+self.L*Zc)*self.L*np.sqrt(K*tao/(np.pi*C)) \
-                /(2.*self.Ags*C*Zc + self.L*Zc +(2.*Aps*C+self.L)*np.sqrt(K*tao/(np.pi*C)))) \
+                /(2.*Aps*C*Zc + self.L*Zc +(2.*Aps*C+self.L)*np.sqrt(K*tao/(np.pi*C)))) \
                 /(2.*Aps*C+ self.L);
 
         if n_grid > 1:        
