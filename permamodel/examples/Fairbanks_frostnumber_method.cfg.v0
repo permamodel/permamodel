@@ -1,0 +1,48 @@
+#===============================================================================
+# PermaModel Config File for: Ku_method
+#===============================================================================
+# Input
+permafrost_dir      | /home/scotts/permamodel/  | string    | Set to root dir
+comp_status         | Enabled      | string    | component status {Enabled; Disabled}
+in_directory        | permamodel/examples/    | string    | input directory
+out_directory       | .    | string    | output directory
+site_prefix         | test      	| string    | file prefix for the study site
+case_prefix         | case_test     | string    | file prefix for the model scenario
+lat           		| 64.8378       | float    | 64.8378° N, 147.7164° W
+lon           		| -147.7164      | float    | GIS coordinates
+start_year          | 2000          | long     | begining of the simulation time [year]
+end_year            | 2004          | long     | begining of the simulation time [year]
+year            | 0          | long     | current simulation time [year]
+dt                  | 1.0        | float    | timestep for permafrost process [year]
+T_air_type     		| Time_Series     	| string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+T_air          		| temp.txt        | string     | Mean annual air temperature [C]
+T_air_min_type     	| Scalar     	| string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+T_air_min          	| -20.0        | float     | Mean annual air temperature [C]
+T_air_max_type     	| Scalar     	| string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+T_air_max          	| 10.0        | float     | Mean annual air temperature [C]
+A_air_type        	| Scalar     	| string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+A_air             	| 15.4        | float     | Mean annual amplitude of air temperature [C]
+h_snow_type       	| Scalar    	| string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+h_snow            	| 0.5         | float     | depth of snow [m]
+rho_snow_type       | Scalar    	| string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+rho_snow            | 240         | float     | density of snow [kg m-3]
+vwc_H2O_type       	| Scalar    	| string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+vwc_H2O            	| 0.4         | float     | soil volumetric water content [m3 m-3]
+Hvgf_type           | Scalar          | string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+Hvgf                | 0.0               | float     | Height of vegetation in frozen period [m]
+Hvgt_type           | Scalar          | string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+Hvgt                | 0.0               | float     | Height of vegetation in thawed period [m]
+Dvf_type        	| Scalar     | string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+Dvf             	| 139.0          | float     | Thermal diffusivity of vegetation in frozen period [m2 s]
+Dvt_type         	| Scalar      | string    | allowed input types {Scalar; Grid; Time_Series; Grid_Sequence}
+Dvt              	| 5.56           | float     | Thermal diffusivity of vegetation in thawed period[m2 s]
+#===============================================================================
+# Output 1
+save_grid_dt        | 60.0     | float     | time interval between saved grids [sec]
+SAVE_HS_GRIDS       | No    | string    | option to save grids of snow depth {Yes; No}
+hs_gs_file          | [case_prefix]_2D-hsnow.nc       | string    | filename for grid stack of snow depth [m]
+#===============================================================================
+# Output 2
+save_pixels_dt      | 60.0   | float     | time interval between time series values [sec]
+SAVE_HS_PIXELS      | No   | string    | option to save time series of snow depth {Yes; No}
+hs_ts_file          | [case_prefix]_0D-hsnow.txt       | string    | filename for time series of snow depth [m]

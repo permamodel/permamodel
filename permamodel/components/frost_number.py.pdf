@@ -1,0 +1,1392 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 18 36 594 756
+%%Title: Enscript Output
+%%Creator: GNU Enscript 1.6.5.90
+%%CreationDate: Thu Aug  4 15:28:13 2016
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6.5 90
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6.5 90
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 10 10 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6.5 90
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      5 0 moveto fname show
+      45 0 rmoveto fmodstr show
+      45 0 rmoveto pagenumstr show
+    } ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 720 def
+/d_page_h 576 def
+/d_header_x 0 def
+/d_header_y 561 def
+/d_header_w 720 def
+/d_header_h 15 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 720 def
+/d_footer_h 0 def
+/d_output_w 720 def
+/d_output_h 561 def
+/cols 1 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 1 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 548 M
+(# -*- coding: utf-8 -*-) s
+5 537 M
+("""  Frost Number by Nelson and Outcalt 1983. DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363) s
+5 526 M
+(""") s
+5 504 M
+(import numpy as np) s
+5 493 M
+(from permamodel.utils import model_input) s
+5 482 M
+(from permamodel.components import perma_base) s
+5 471 M
+(import os) s
+5 460 M
+(import gdal) s
+5 449 M
+(from gdalconst import *  # Import standard constants, such as GA_ReadOnly) s
+5 438 M
+(import osr) s
+5 427 M
+(from pyproj import Proj, transform) s
+5 405 M
+(class frostnumber_method\( perma_base.permafrost_component \):) s
+5 383 M
+(    #-------------------------------------------------------------------) s
+5 372 M
+(    _att_map = {) s
+5 361 M
+(    # NOTE: this will change in the future) s
+5 350 M
+(        'model_name':         'PermaModel_frostnumber_method',) s
+5 339 M
+(        'version':            '0.1',) s
+5 328 M
+(        'author_name':        'Scott Stewart and Elchin Jafarov',) s
+5 317 M
+(        'grid_type':          'none',) s
+5 306 M
+(        'time_step_type':     'fixed',) s
+5 295 M
+(        'step_method':        'explicit',) s
+5 284 M
+(        #-------------------------------------------------------------) s
+5 273 M
+(        'comp_name':          'frostnumber',) s
+5 262 M
+(        'model_family':       'PermaModel',) s
+5 251 M
+(        'cfg_extension':      '_frostnumber_model.cfg',) s
+5 240 M
+(        'cmt_var_prefix':     '/input/',) s
+5 229 M
+(        'gui_yaml_file':      '/input/frostnumber_model.yaml',) s
+5 218 M
+(        'time_units':         'years' }) s
+5 196 M
+(    _input_var_names = [) s
+5 185 M
+(        'latitude',) s
+5 174 M
+(        'longitude',) s
+5 163 M
+(        'atmosphere_bottom_air__temperature_min',) s
+5 152 M
+(        'atmosphere_bottom_air__temperature_max',) s
+5 141 M
+(        'datetime__start',) s
+5 130 M
+(        'datetime__end']) s
+5 108 M
+(    _output_var_names = [) s
+5 97 M
+(        'frostnumber__air',            # Air Frost number) s
+5 86 M
+(        'frostnumber__surface',        # Surface Frost number) s
+5 75 M
+(        'frostnumber__stefan' ]        # Stefan Frost number) s
+5 53 M
+(    _var_name_map = {) s
+5 42 M
+(    # NOTE: we need to look up for the corresponding standard names) s
+5 31 M
+(        'latitude':                                  'lat',) s
+5 20 M
+(        'longitude':                                 'lon',) s
+5 9 M
+(        'atmosphere_bottom_air__temperature_min':    'T_air_min',) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 2 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 548 M
+(        'atmosphere_bottom_air__temperature_max':    'T_air_max',) s
+5 537 M
+(        'datetime__start':                           'start_year',) s
+5 526 M
+(        'datetime__end':                             'end_year',) s
+5 515 M
+(        'frostnumber__air':                          'frostnumber_air',) s
+5 504 M
+(        'frostnumber__surface':                      'frostnumber_surface',) s
+5 493 M
+(        'frostnumber__stefan':                       'frostnumber_stefan'}) s
+5 471 M
+(    _var_units_map = {) s
+5 460 M
+(        'latitude':                                           'deg',) s
+5 449 M
+(        'longitude':                                          'deg',) s
+5 438 M
+(        'atmosphere_bottom_air__temperature_min':             'deg_C',) s
+5 427 M
+(        'atmosphere_bottom_air__temperature_max':             'deg_C',) s
+5 416 M
+(        'datetime__start':                                    'year',) s
+5 405 M
+(        'datetime__end':                                      'end',) s
+5 394 M
+(        'frostnumber__air':                                   '',) s
+5 383 M
+(        'frostnumber__surface':                               '',) s
+5 372 M
+(        'frostnumber__stefan':                                '' }) s
+5 350 M
+(    #-------------------------------------------------------------------) s
+5 339 M
+(    def get_attribute\(self, att_name\):) s
+5 317 M
+(        try:) s
+5 306 M
+(            return self._att_map[ att_name.lower\(\) ]) s
+5 295 M
+(        except:) s
+5 284 M
+(            print '###################################################') s
+5 273 M
+(            print ' ERROR: Could not find attribute: ' + att_name) s
+5 262 M
+(            print '###################################################') s
+5 251 M
+(            print ' ') s
+5 229 M
+(    #   get_attribute\(\)) s
+5 218 M
+(    #-------------------------------------------------------------------) s
+5 207 M
+(    def get_input_var_names\(self\):) s
+5 185 M
+(        #--------------------------------------------------------) s
+5 174 M
+(        # Note: These are currently variables needed from other) s
+5 163 M
+(        #       components vs. those read from files or GUI.) s
+5 152 M
+(        #--------------------------------------------------------) s
+5 141 M
+(        return self._input_var_names) s
+5 119 M
+(    #   get_input_var_names\(\)) s
+5 108 M
+(    #-------------------------------------------------------------------) s
+5 97 M
+(    def get_output_var_names\(self\):) s
+5 75 M
+(        return self._output_var_names) s
+5 53 M
+(    #   get_output_var_names\(\)) s
+5 42 M
+(    #-------------------------------------------------------------------) s
+5 31 M
+(    def get_var_name\(self, long_var_name\):) s
+5 9 M
+(        return self._var_name_map[ long_var_name ]) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 3 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (3) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 537 M
+(    #   get_var_name\(\)) s
+5 526 M
+(    #-------------------------------------------------------------------) s
+5 515 M
+(    def get_var_units\(self, long_var_name\):) s
+5 493 M
+(        return self._var_units_map[ long_var_name ]) s
+5 471 M
+(    #   get_var_units\(\)) s
+5 460 M
+(    #-------------------------------------------------------------------) s
+5 449 M
+(    def check_input_types\(self\):) s
+5 427 M
+(        #--------------------------------------------------) s
+5 416 M
+(        # Notes: rho_H2O, Cp_snow, rho_air and Cp_air are) s
+5 405 M
+(        #        currently always scalars.) s
+5 394 M
+(        #--------------------------------------------------) s
+5 383 M
+(        are_scalars = np.array\([) s
+5 372 M
+(                          self.is_scalar\('lat'\),) s
+5 361 M
+(                          self.is_scalar\('lon'\),) s
+5 350 M
+(                          self.is_scalar\('T_air_min'\),) s
+5 339 M
+(                          self.is_scalar\('T_air_max'\),) s
+5 328 M
+(                          self.is_scalar\('start_year'\),) s
+5 317 M
+(                          self.is_scalar\('end_year'\) ]\)) s
+5 295 M
+(        self.ALL_SCALARS = np.all\(are_scalars\)) s
+5 273 M
+(    #   check_input_types\(\)) s
+5 262 M
+(    #-------------------------------------------------------------------) s
+5 251 M
+(    def open_input_files\(self\):) s
+5 240 M
+(        # this function will work only if filename is not empty) s
+5 229 M
+(        self.T_air_min_file   = './permamodel/examples/fn_t_air_min.dat') s
+5 218 M
+(        self.T_air_min_unit = open\(self.T_air_min_file, "r"\)) s
+5 196 M
+(        self.T_air_max_file   = './permamodel/examples/fn_t_air_min.dat') s
+5 185 M
+(        self.T_air_max_unit = open\(self.T_air_max_file, "r"\)) s
+5 163 M
+(        self.start_year_file   = './permamodel/examples/fn_start_year.dat') s
+5 152 M
+(        self.start_year_unit = open\(self.start_year_file, "r"\)) s
+5 130 M
+(        self.end_year_file   = './permamodel/examples/fn_end_year.dat') s
+5 119 M
+(        self.end_year_unit = open\(self.end_year_file, "r"\)) s
+5 97 M
+(        # lat and lon not implemented yet) s
+5 75 M
+(        #self.lat_file   = './permamodel/examples/fn_lat.dat') s
+5 64 M
+(        #self.lat_unit = open\(self.lat_file, "r"\)) s
+5 42 M
+(        #self.lon_file   = './permamodel/examples/fn_lon.dat') s
+5 31 M
+(        #self.lon_unit = open\(self.lon_file, "r"\)) s
+5 9 M
+(        # This isn't exactly "opening an input file", but it is an init) s
+_R
+S
+%%Page: (4) 4
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 4 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (4) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 548 M
+(        #self.year = self.start_year) s
+5 526 M
+(    #   open_input_files\(\)) s
+5 515 M
+(    #-------------------------------------------------------------------) s
+5 493 M
+(    def read_input_files\(self\):) s
+5 482 M
+(        #print\("in read_input_files for year %d" % self.year\)) s
+5 460 M
+(        #rti = self.rti # has a problem with loading rti: do not know where its been initialized) s
+5 438 M
+(        #-------------------------------------------------------) s
+5 427 M
+(        # All grids are assumed to have a data type of Float32.) s
+5 416 M
+(        #-------------------------------------------------------) s
+5 405 M
+(        T_air_min = model_input.read_next_modified\(self.T_air_min_unit,) s
+5 394 M
+(                                                   'scalar'\)) s
+5 383 M
+(        if \(T_air_min != None\): self.T_air_min = T_air_min) s
+5 361 M
+(        T_air_max = model_input.read_next_modified\(self.T_air_max_unit,) s
+5 350 M
+(                                                   'scalar'\)) s
+5 339 M
+(        if \(T_air_max != None\): self.T_air_max = T_air_max) s
+5 317 M
+(        start_year = model_input.read_next_modified\(self.start_year_unit,) s
+5 306 M
+(                                                    'scalar'\)) s
+5 295 M
+(        if \(start_year != None\): self.start_year = start_year) s
+5 273 M
+(        end_year = model_input.read_next_modified\(self.end_year_unit,) s
+5 262 M
+(                                                  'scalar'\)) s
+5 251 M
+(        if \(end_year != None\): self.end_year = end_year) s
+5 229 M
+(        # Initialize the year to the start year) s
+5 218 M
+(        self.year = self.start_year) s
+5 196 M
+(    #   read_input_files\(\)) s
+5 185 M
+(    #-------------------------------------------------------------------) s
+5 152 M
+(    def update_dd\(self\):) s
+5 130 M
+(        # Input: T_hot \(avg temp of warmest month\)) s
+5 119 M
+(        #        T_cold \(avg temp of coldest month\)) s
+5 97 M
+(        # Output: ddf \(degree freezing days\)) s
+5 86 M
+(        #         ddt \(degree thawing days\)) s
+5 64 M
+(        # In the first test case, we used T_air_max and T_air_min) s
+5 53 M
+(        T_cold=self.T_air_min) s
+5 42 M
+(        T_hot=self.T_air_max) s
+5 20 M
+(        '''  this section is for later when reading temp values from CRU data) s
+5 9 M
+(        # Now, we use the values from the temperature CRU tiff files) s
+_R
+S
+%%Page: (5) 5
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 5 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (5) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 548 M
+(        # Assume that warmest month is July and coldest is the following Jan) s
+5 537 M
+(        print\("Lon: %f" % self.lon\)) s
+5 526 M
+(        print\("Lat: %f" % self.lat\)) s
+5 515 M
+(        T_hot = self.get_temperature_from_cru\(self.lon, self.lat, 7, self.year\)) s
+5 504 M
+(        T_cold = self.get_temperature_from_cru\(self.lon, self.lat, 1, self.year+1\)) s
+5 493 M
+(        ''') s
+5 471 M
+(        print\("In update_dd, year=%d" % self.year\)) s
+5 460 M
+(        assert\(T_hot > T_cold\)) s
+5 449 M
+(        T_avg = \(T_hot + T_cold\) / 2.0) s
+5 438 M
+(        # Note that these conditions should cover T_hot == T_cold) s
+5 427 M
+(        if T_hot <= 0:) s
+5 416 M
+(            # Always freezing) s
+5 405 M
+(            # Negative sign because ddf is + and T_avg \(here\) is -) s
+5 394 M
+(            ddf = -365.0 * T_avg) s
+5 383 M
+(            ddt = 0) s
+5 372 M
+(        elif T_cold>0:) s
+5 361 M
+(            # Never freezing) s
+5 350 M
+(            ddf = 0) s
+5 339 M
+(            ddt = 365.0 * T_avg) s
+5 328 M
+(        elif \(self.T_air_type != 'Scalar'\):) s
+5 317 M
+(            #wk = np.loadtxt\('examples/temp_copy.txt', skiprows=1,unpack=False\)) s
+5 306 M
+(            temperature_filename = self.permafrost_dir +\\) s
+5 295 M
+(                "permamodel/examples/temp_copy.txt") s
+5 284 M
+(            wk = np.loadtxt\(temperature_filename, skiprows=1,unpack=False\)) s
+5 273 M
+(            t_month = wk[:,0]) s
+5 262 M
+(            T_month = wk[:,1]) s
+5 251 M
+(            Th=max\(T_month\)) s
+5 240 M
+(            Tc=min\(T_month\)) s
+5 229 M
+(            T=\(Th+Tc\)/2                                             #\(eqn. 2.1\)) s
+5 218 M
+(            A=\(Th-Tc\)/2                                             #\(eqn. 2.2\)) s
+5 207 M
+(            beta=np.arccos\(-T/A\)                                    #\(eqn. 2.3\)) s
+5 196 M
+(            Ts=T+A*np.sin\(beta/beta\)                                #\(eqn. 2.4\)) s
+5 185 M
+(            Tw=T-A*np.sin\(beta/\(np.pi-beta\)\)                        #\(eqn. 2.5\)) s
+5 174 M
+(            Ls=365*\(beta/np.pi\)                                     #\(eqn. 2.6\)) s
+5 163 M
+(            Lw = 365-Ls                                             #\(eqn. 2.7\)) s
+5 152 M
+(            print\('winter length:',Lw,'summer length:',Ls\)) s
+5 141 M
+(            ddt = Ts*Ls                                             #\(eqn. 2.8\)) s
+5 130 M
+(            ddf = -Tw*Lw                                            #\(eqn. 2.9\)) s
+5 119 M
+(            print Th,Tc) s
+5 108 M
+(        else:) s
+5 97 M
+(            # Assume cosine fit for temp series) s
+5 86 M
+(            A = \(T_hot - T_cold\) / 2.0) s
+5 75 M
+(            Beta = np.arccos\(-T_avg / A\)) s
+5 64 M
+(            T_summer = T_avg + A * np.sin\(Beta\) / Beta) s
+5 53 M
+(            T_winter = T_avg - A * np.sin\(Beta\) / \(np.pi - Beta\)) s
+5 42 M
+(            L_summer = 365.0 * Beta / np.pi) s
+5 31 M
+(            L_winter = 365.0 - L_summer) s
+5 20 M
+(            ddt = T_summer * L_summer) s
+5 9 M
+(            ddf = -T_winter * L_winter) s
+_R
+S
+%%Page: (6) 6
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 6 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (6) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 548 M
+(        self.Lw=Lw) s
+5 537 M
+(        self.beta=beta) s
+5 526 M
+(        self.T_air=T) s
+5 515 M
+(        self.A_air=A) s
+5 504 M
+(        self.Tw=Tw) s
+5 493 M
+(        self.ta_month=T_month) s
+5 482 M
+(        self.ddt=ddt) s
+5 471 M
+(        self.ddf=ddf) s
+5 460 M
+(    #   update_dd_from_annual_minmax_temp\(\)) s
+5 449 M
+(    #-------------------------------------------------------------------) s
+5 438 M
+(    def update_air_frost_number\(self\):) s
+5 427 M
+(        # Calculating Reduced Air Frost Number \(pages 280-281\).) s
+5 416 M
+(        # The reduced frost number is close 0 for long summers and close to 1 for long winters.) s
+5 405 M
+(        self.air_frost_number = np.sqrt\(self.ddf\) / \( np.sqrt\( self.ddf\) + np.sqrt\( self.ddt\) \)) s
+5 383 M
+(    #   update_air_frost_number\(\)) s
+5 372 M
+(    #-------------------------------------------------------------------) s
+5 350 M
+(    def update_snow_prop\(self\):) s
+5 339 M
+(        # find indexes for which temp > 0 and make precip = 0) s
+5 328 M
+(        if \(self.T_air_type != 'Scalar'\): # if not should stop) s
+5 317 M
+(            #wk = np.loadtxt\('examples/prec.txt', skiprows=1,unpack=False\)) s
+5 306 M
+(            precipitation_filename = self.permafrost_dir +\\) s
+5 295 M
+(                "permamodel/examples/prec.txt") s
+5 284 M
+(            wk = np.loadtxt\(precipitation_filename, skiprows=1,unpack=False\)) s
+5 273 M
+(            t_month = wk[:,0]) s
+5 262 M
+(            prec_month = wk[:,1]) s
+5 240 M
+(        pos_temp_ind=np.array\(np.where\(self.ta_month>0\)\)) s
+5 229 M
+(        prec_month[pos_temp_ind]=0) s
+5 218 M
+(        neg_temp_ind=np.array\(np.where\(self.ta_month<=0\)\)) s
+5 196 M
+(        if not pos_temp_ind.any\(\):) s
+5 185 M
+(        # monthly temp is always below zero) s
+5 174 M
+(        # i.e. it constantly snows over whole year) s
+5 163 M
+(        # the point associated with glaciaer and needs to excluded) s
+5 152 M
+(            print 'snows constatly: stop!') s
+5 130 M
+(        m=np.size\(neg_temp_ind\)) s
+5 119 M
+(        pp=0.5; # assume only 50% of precip change to at the beg and end of the snow season) s
+5 97 M
+(        # this is portions of the code assumes a perfect winter season) s
+5 86 M
+(        # needs to be used with care when there is a warm month during snow season) s
+5 75 M
+(        if \(m==1\):) s
+5 64 M
+(            s_idx=neg_temp_ind[:,0]) s
+5 53 M
+(            e_idx=neg_temp_ind[:,m-1]) s
+5 42 M
+(            prec_month[s_idx]=prec_month[s_idx]*pp) s
+5 31 M
+(        else:) s
+5 20 M
+(            s_idx=neg_temp_ind[:,0]) s
+5 9 M
+(            e_idx=neg_temp_ind[:,m-1]) s
+_R
+S
+%%Page: (7) 7
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 7 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (7) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 548 M
+(            prec_month[s_idx]=prec_month[s_idx]*pp) s
+5 537 M
+(            prec_month[e_idx]=prec_month[e_idx]*pp) s
+5 515 M
+(        # sum up precip to get SWE) s
+5 504 M
+(        j=0; s=0; swe=np.zeros\(m\);) s
+5 493 M
+(        for i in range\(s_idx,e_idx+1\):) s
+5 482 M
+(            s=s+prec_month[i]) s
+5 471 M
+(            swe[j]=s) s
+5 460 M
+(            j=j+1) s
+5 438 M
+(        #calculating snow density, depth and thermal counductivity) s
+5 427 M
+(        r_snow=np.zeros\(m\); # snow density in kg/m3) s
+5 416 M
+(        h_snow=np.zeros\(m\); # snow depth in m) s
+5 405 M
+(        c_snow=np.zeros\(m\); # snow depth in W/mK) s
+5 383 M
+(        rho_sn_min=200; rho_sn_max=300 # allowed min and max snow density) s
+5 372 M
+(        tauf=0.24 # e-folding value \(see Verseghy, 1991\)) s
+5 350 M
+(        s=rho_sn_min) s
+5 339 M
+(        s=\(\(s - rho_sn_max\)*np.exp\(-tauf\)\) + rho_sn_max) s
+5 328 M
+(        r_snow[0] = s) s
+5 317 M
+(        for i in range\(1,m\):) s
+5 306 M
+(        # starting from month 2 tauf should be multpled by the 30 days) s
+5 295 M
+(        # otherwise snow thermal conductivity can be low and insulate ground well enough over the season) s
+5 284 M
+(        # usually we assume constant max snow thermal conductivity over snow season) s
+5 273 M
+(            s=\(\(s - rho_sn_max\)*np.exp\(-tauf\)\) + rho_sn_max) s
+5 262 M
+(            r_snow[i] = s) s
+5 240 M
+(        h_snow  = \(swe/\(r_snow*0.001\)\)) s
+5 229 M
+(        # snow thermal conductivity according to M. Sturm, 1997.) s
+5 218 M
+(        c_snow = \(0.138-1.01*r_snow + 3.233*\(r_snow**2\)\)*1e-6) s
+5 196 M
+(        self.r_snow=r_snow) s
+5 185 M
+(        self.h_snow=h_snow) s
+5 174 M
+(        self.c_snow=c_snow) s
+5 152 M
+(    #   update_snow_prop\(\)) s
+5 141 M
+(    #-------------------------------------------------------------------) s
+5 130 M
+(    def update_surface_frost_number\(self\):) s
+5 119 M
+(        # phi [scalar]: sites latitude) s
+5 108 M
+(        # Zs [scalar]: an average winter snow thickness) s
+5 97 M
+(        # Zss [scalar]: a damping depth in snow) s
+5 86 M
+(        # P [scalar]: length of an annual temperature cycle) s
+5 75 M
+(        # k [scalar]: number of winter months) s
+5 64 M
+(        # rho_s [scalar]: density of snow [kg m-3]) s
+5 53 M
+(        # lambda_s [scalar]: snow thermal conductivity [W m-1 C-1]) s
+5 42 M
+(        # c_s [scalar]: snow specific heat capacity [J kg-1 C-1]) s
+5 31 M
+(        # alpha_s [scalar]: thermal diffusivity of snow) s
+5 20 M
+(        # Uw [scalar]: mean winter wind speed [m s-1]) s
+5 9 M
+(        # Aplus [scalar]: temperature amplitude at the surface with snow) s
+_R
+S
+%%Page: (8) 8
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 8 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (8) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 548 M
+(        # Twplus [scalar]: the mean winter surface temperature) s
+5 537 M
+(        # DDFplus [scalar]: freezing index at the surface) s
+5 526 M
+(        # Tplus [scalar]: mean annual tempratures at the surface) s
+5 515 M
+(        # Fplus [scalar] : surface frost number) s
+5 493 M
+(        rho_s=np.mean\(self.r_snow\)) s
+5 482 M
+(        lambda_s=np.mean\(self.c_snow\)) s
+5 471 M
+(        Zs=np.mean\(self.h_snow\)) s
+5 460 M
+(        P=2*np.pi/365; # i am not sure what they mean by length of the annual temprature cycle) s
+5 449 M
+(        # Something worthwhile discussing) s
+5 427 M
+(        c_s=7.79*self.Tw+2115                                               #\(eqn. 7\)) s
+5 416 M
+(        alpha_s=lambda_s/\(c_s*rho_s\)                                        #\(eqn. 8\)) s
+5 405 M
+(        Zss=np.sqrt\(alpha_s*P/np.pi\)                                        #\(eqn. 10\)) s
+5 394 M
+(        Aplus=self.A_air*np.exp\(-Zs/Zss\)                                    #\(eqn. 9\)) s
+5 383 M
+(        Twplus=self.T_air-Aplus*np.sin\(self.beta/\(np.pi-self.beta\)\)         #\(eqn. 11\)) s
+5 372 M
+(        # Twplus is a mean winter surface temprature, I think, should be warmer than air temperature?) s
+5 361 M
+(        # Here is another problem. DDFplus degree days winter should be positive.) s
+5 350 M
+(        # The way it is written in the paper is wrong. I added a minus sign to fix it \(see eqn. 2.9\)) s
+5 339 M
+(        DDFplus=-Twplus*self.Lw                                             #\(eqn. 12\)) s
+5 328 M
+(        Tplus=\(self.ddt-DDFplus\)/365                                        #\(eqn. 13\)) s
+5 317 M
+(        #Nevertheless the surface frost number is smaller than air which looks resonable to me.) s
+5 306 M
+(        self.Fplus=np.sqrt\(DDFplus\)/\(np.sqrt\(self.ddt\)+np.sqrt\(DDFplus\)\)    #\(eqn. 14\)) s
+5 295 M
+(        self.Twplus=Twplus) s
+5 273 M
+(    #   update_surface_frost_number\(\)) s
+5 262 M
+(    #-------------------------------------------------------------------) s
+5 251 M
+(    def update_stefan_frost_number\(self\):) s
+5 240 M
+(        # Zfplus [scalar]: the depth [m] to which forst extends) s
+5 229 M
+(        # lambda_f [scalar]: frozen soil thermal conductivity [W m-1 C-1]) s
+5 218 M
+(        # S [scalar]: is a const scalar factor [s d-1]) s
+5 207 M
+(        # rho_d [scalar]: dry density of soil [kg m-3]) s
+5 196 M
+(        # wf [scalar] : soil water content \(proportion of dry weight\)) s
+5 185 M
+(        # L [scalar] : is a latent heat of fusion of water [J kg-1]) s
+5 163 M
+(        lambda_f=1.67 # some dummy thermal conductivity) s
+5 152 M
+(        # https://shop.bgs.ac.uk/GeoReports/examples/modules/C012.pdf) s
+5 141 M
+(        sec_per_day=86400) s
+5 130 M
+(        rho_d=2.798  # dry density of silt) s
+5 119 M
+(        wf=0.4       # tipical for silty soils) s
+5 108 M
+(        denominator=rho_d*wf*self.Lf) s
+5 97 M
+(        self.Zfplus=np.sqrt\(2*lambda_f*sec_per_day*np.abs\(self.Twplus\)*self.Lw/denominator\)               #\(eqn. 15\)) s
+5 86 M
+(        print 'Zfplus=',self.Zfplus) s
+5 64 M
+(        # assuming 3 soil layers with thickness 0.25, 0.5 and 1.75 m) s
+5 53 M
+(        # and thermal conductivities 0.08, 1.5, and 2.1) s
+5 42 M
+(        soil_thick=np.array\([0.25, 0.5 , 1.75]\)) s
+5 31 M
+(        lambda_b=np.array\([0.08, 1.5, 2.1]\)) s
+5 20 M
+(        # resistivity R) s
+5 9 M
+(        R=soil_thick/lambda_b) s
+_R
+S
+%%Page: (9) 9
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 9 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (9) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 548 M
+(        QL=self.Lf/1000 # volumetric latent heat, 1000 s a density of water) s
+5 537 M
+(        #partial freezing thawing index DD) s
+5 526 M
+(        DD=np.zeros\(3\)) s
+5 515 M
+(        Z=np.zeros\(3\)) s
+5 504 M
+(        DD[0]=0.5*QL*soil_thick[0]*R[0]/sec_per_day) s
+5 493 M
+(        S=0;) s
+5 482 M
+(        for i in range\(1,3\):) s
+5 471 M
+(            S=R[i]+S) s
+5 460 M
+(            DD[i]=\(S+0.5*R[i-1]\)*QL*soil_thick[i]/sec_per_day) s
+5 449 M
+(            #The depth of the frost thaw penetration) s
+5 438 M
+(        S=0; Z_tot=0) s
+5 427 M
+(        for i in range\(0,3\):) s
+5 416 M
+(            #The depth of the frost thaw penetration) s
+5 405 M
+(            Z[i]=np.sqrt\(2*lambda_b[i]*sec_per_day*DD[i]/QL + lambda_b[i]**2*S**2\) \\) s
+5 394 M
+(                - lambda_b[i]*S) s
+5 383 M
+(            S=R[i]+S) s
+5 372 M
+(            Z_tot=Z_tot + Z[i]) s
+5 350 M
+(        self.Z_tot=Z_tot) s
+5 339 M
+(        self.stefan_number = np.sqrt\(self.Fplus\) / \( np.sqrt\( self.Fplus\) + np.sqrt\( self.Z_tot\) \)) s
+5 317 M
+(    #   update_stefan_frost_number\(\)) s
+5 306 M
+(    #-------------------------------------------------------------------) s
+5 284 M
+(    def update_ALT\(self\):) s
+5 262 M
+(        #---------------------------------------------------------) s
+5 251 M
+(        #       coming up) s
+5 240 M
+(        #--------------------------------------------------) s
+5 229 M
+(        print 'OK') s
+5 207 M
+(    #   update_ALT\(\)) s
+5 196 M
+(    #-------------------------------------------------------------------) s
+5 185 M
+(    def update_ground_temperatures\(self\):) s
+5 174 M
+(        # This method does not update temps instead it does frost numbers) s
+5 163 M
+(        self.update_dd\(\)) s
+5 152 M
+(        self.update_air_frost_number\(\)) s
+5 141 M
+(        self.update_snow_prop\(\)) s
+5 130 M
+(        self.update_surface_frost_number\(\)) s
+5 119 M
+(        self.update_stefan_frost_number\(\)) s
+5 97 M
+(    #   update_ground_temperatures\(\)) s
+5 86 M
+(    #-------------------------------------------------------------------) s
+5 75 M
+(    def close_input_files\(self\):) s
+5 53 M
+(        if \(self.T_air_type     != 'Scalar'\): self.T_air_unit.close\(\)) s
+5 42 M
+(        if \(self.A_air_type     != 'Scalar'\): self.A_air_unit.close\(\)) s
+5 20 M
+(    #   close_input_files\(\)) s
+5 9 M
+(    #-------------------------------------------------------------------) s
+_R
+S
+%%Page: (10) 10
+%%BeginPageSetup
+_S
+90 rotate
+36 -594 translate
+/pagenum 10 def
+/fname (frost_number.py) def
+/fdir (.) def
+/ftail (frost_number.py) def
+% User defined strings:
+/fmodstr (Thu Aug 04 15:25:25 2016) def
+/pagenumstr (10) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+_R
+S
+%%Trailer
+%%Pages: 10
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF

@@ -578,7 +578,7 @@ class BMI_component:
 
         var_name = self.get_var_name( long_var_name )  # (2/20/12)
 
-        exec("rank = np.rank(self." + var_name + ")")
+        exec("rank = np.ndim(self." + var_name + ")")
 
         ### print '######## rank(' + var_name + ') =', rank
 
@@ -1927,7 +1927,7 @@ class BMI_component:
         #------------------------------------------------
         # NB!  Case in var_name must be an exact match.
         #-------------------------------------------------
-        exec("n = np.rank(self." + var_name + ")")
+        exec("n = np.ndim(self." + var_name + ")")
         return (n == 0)
 
     #   is_scalar()
@@ -1937,7 +1937,7 @@ class BMI_component:
         #------------------------------------------------
         # NB!  Case in var_name must be an exact match.
         #------------------------------------------------
-        exec("n = np.rank(self." + var_name + ")")
+        exec("n = np.ndim(self." + var_name + ")")
         return (n == 1)
 
     #   is_vector()
@@ -1967,7 +1967,7 @@ class BMI_component:
 ##            print 'ERROR: type(' + var_name + ') =' + type_str
 ##            return False
         #-------------------------------------------------------
-        exec("n = np.rank(self." + var_name + ")")
+        exec("n = np.ndim(self." + var_name + ")")
         return (n == 2)
 
     #   is_grid()

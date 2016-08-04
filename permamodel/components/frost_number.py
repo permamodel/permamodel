@@ -16,7 +16,7 @@ class frostnumber_method( perma_base.permafrost_component ):
     #-------------------------------------------------------------------
     _att_map = {
     # NOTE: this will change in the future
-        'model_name':         'PermaModel_Kudryavtsev_method',
+        'model_name':         'PermaModel_frostnumber_method',
         'version':            '0.1',
         'author_name':        'Scott Stewart and Elchin Jafarov',
         'grid_type':          'none',
@@ -33,51 +33,38 @@ class frostnumber_method( perma_base.permafrost_component ):
     _input_var_names = [
         'latitude',
         'longitude',
-        'atmosphere_bottom_air__temperature',
         'atmosphere_bottom_air__temperature_min',
         'atmosphere_bottom_air__temperature_max',
-        'atmosphere_bottom_air__temperature_amplitude',
-        'snowpack__depth',
-        'snowpack__density',
-        'water-liquid__volumetric-water-content-soil',
-        'vegetation__Hvgf',
-        'vegetation__Hvgt',
-        'vegetation__Dvf',
-        'vegetation__Dvt' ]
+        'datetime__start',
+        'datetime__end']
 
     _output_var_names = [
-        'soil__temperature',                                  # Tps
-        'soil__active_layer_thickness' ]                      # Zal
+        'frostnumber__air',            # Air Frost number
+        'frostnumber__surface',        # Surface Frost number
+        'frostnumber__stefan' ]        # Stefan Frost number
 
     _var_name_map = {
     # NOTE: we need to look up for the corresponding standard names
-        'latitude':                                           'lat',
-        'longitude':                                          'lon',
-        'atmosphere_bottom_air__temperature':                 'T_air',
-        'atmosphere_bottom_air__temperature_min':             'T_air_min',
-        'atmosphere_bottom_air__temperature_max':             'T_air_max',
-        'atmosphere_bottom_air__temperature_amplitude':       'A_air',
-        'snowpack__depth':                                    'h_snow',
-        'snowpack__density':                                  'rho_snow',
-        'water-liquid__volumetric-water-content-soil':        'vwc_H2O',
-        'vegetation__Hvgf':                                   'Hvgf',
-        'vegetation__Hvgt':                                   'Hvgt',
-        'vegetation__Dvf':                                    'Dvf',
-        'vegetation__Dvt':                                    'Dvt' }
+        'latitude':                                  'lat',
+        'longitude':                                 'lon',
+        'atmosphere_bottom_air__temperature_min':    'T_air_min',
+        'atmosphere_bottom_air__temperature_max':    'T_air_max',
+        'datetime__start':                           'start_year',
+        'datetime__end':                             'end_year',
+        'frostnumber__air':                          'frostnumber_air',
+        'frostnumber__surface':                      'frostnumber_surface',
+        'frostnumber__stefan':                       'frostnumber_stefan'}
 
     _var_units_map = {
-    # NOTE: Kang please complete the vegetation info both on var names and units
-        'latitude':                                           'lat',
-        'longitude':                                          'lon',
-        'atmosphere_bottom_air__temperature':                 'deg_C',
-        'atmosphere_bottom_air__temperature_amplitude':       'deg_C',
-        'snowpack__depth':                                    'm',
-        'snowpack__density':                                  'kg m-3',
-        'water-liquid__volumetric-water-content-soil':        'm3 m-3',
-        'vegetation__Hvgf':                                   'm',
-        'vegetation__Hvgt':                                   'm',
-        'vegetation__Dvf':                                    'm2 s',
-        'vegetation__Dvt':                                    'm2 s' }
+        'latitude':                                           'deg',
+        'longitude':                                          'deg',
+        'atmosphere_bottom_air__temperature_min':             'deg_C',
+        'atmosphere_bottom_air__temperature_max':             'deg_C',
+        'datetime__start':                                    'year',
+        'datetime__end':                                      'end',
+        'frostnumber__air':                                   '',
+        'frostnumber__surface':                               '',
+        'frostnumber__stefan':                                '' }
 
     #-------------------------------------------------------------------
     def get_attribute(self, att_name):
@@ -131,14 +118,8 @@ class frostnumber_method( perma_base.permafrost_component ):
                           self.is_scalar('lon'),
                           self.is_scalar('T_air_min'),
                           self.is_scalar('T_air_max'),
-                          self.is_scalar('A_air'),
-                          self.is_scalar('h_snow'),
-                          self.is_scalar('rho_snow'),
-                          self.is_scalar('vwc_H2O'),
-                          self.is_scalar('Hvgf'),
-                          self.is_scalar('Hvgt'),
-                          self.is_scalar('Dvf'),
-                          self.is_scalar('Dvt') ])
+                          self.is_scalar('start_year'),
+                          self.is_scalar('end_year') ])
 
         self.ALL_SCALARS = np.all(are_scalars)
 
@@ -146,29 +127,28 @@ class frostnumber_method( perma_base.permafrost_component ):
     #-------------------------------------------------------------------
     def open_input_files(self):
         # this function will work only if filename is not empty
-        # I am temporarily comment T_air since in this case it is T_air_minmax
-        self.T_air_file       = self.permafrost_dir + self.in_directory + self.T_air_file
-        self.A_air_file       = self.permafrost_dir + self.in_directory + self.A_air_file
-        self.h_snow_file      = self.permafrost_dir + self.in_directory + self.h_snow_file
-        self.rho_snow_file    = self.permafrost_dir + self.in_directory + self.rho_snow_file
-        self.vwc_H2O_file     = self.permafrost_dir + self.in_directory + self.vwc_H2O_file
-        self.Hvgf_file        = self.permafrost_dir + self.in_directory + self.Hvgf_file
-        self.Hvgt_file        = self.permafrost_dir + self.in_directory + self.Hvgt_file
-        self.Dvf_file         = self.permafrost_dir + self.in_directory + self.Dvf_file
-        self.Dvt_file         = self.permafrost_dir + self.in_directory + self.Dvt_file
+        self.T_air_min_file   = './permamodel/examples/fn_t_air_min.dat'
+        self.T_air_min_unit = open(self.T_air_min_file, "r")
 
-        self.T_air_unit       = model_input.open_file(self.T_air_type,  self.T_air_file)
-        self.A_air_unit       = model_input.open_file(self.A_air_type,  self.A_air_file)
-        self.h_snow_unit      = model_input.open_file(self.h_snow_type,  self.h_snow_file)
-        self.rho_snow_unit    = model_input.open_file(self.rho_snow_type,  self.rho_snow_file)
-        self.vwc_H2O_unit     = model_input.open_file(self.vwc_H2O_type,  self.vwc_H2O_file)
-        self.Hvgf_unit        = model_input.open_file(self.Hvgf_type,  self.Hvgf_file)
-        self.Hvgt_unit        = model_input.open_file(self.Hvgt_type,  self.Hvgt_file)
-        self.Dvf_unit         = model_input.open_file(self.Dvf_type,  self.Dvf_file)
-        self.Dvt_unit         = model_input.open_file(self.Dvt_type,  self.Dvt_file)
+        self.T_air_max_file   = './permamodel/examples/fn_t_air_min.dat'
+        self.T_air_max_unit = open(self.T_air_max_file, "r")
+
+        self.start_year_file   = './permamodel/examples/fn_start_year.dat'
+        self.start_year_unit = open(self.start_year_file, "r")
+
+        self.end_year_file   = './permamodel/examples/fn_end_year.dat'
+        self.end_year_unit = open(self.end_year_file, "r")
+
+        # lat and lon not implemented yet
+
+        #self.lat_file   = './permamodel/examples/fn_lat.dat'
+        #self.lat_unit = open(self.lat_file, "r")
+
+        #self.lon_file   = './permamodel/examples/fn_lon.dat'
+        #self.lon_unit = open(self.lon_file, "r")
 
         # This isn't exactly "opening an input file", but it is an init
-        self.year = self.start_year
+        #self.year = self.start_year
 
     #   open_input_files()
     #-------------------------------------------------------------------
@@ -181,21 +161,24 @@ class frostnumber_method( perma_base.permafrost_component ):
         #-------------------------------------------------------
         # All grids are assumed to have a data type of Float32.
         #-------------------------------------------------------
-        T_air = model_input.read_next_modified(self.T_air_unit, self.T_air_type)
-        if (T_air != None): self.T_air = T_air
-        #print("T_air in frost_number: %f" % T_air)
+        T_air_min = model_input.read_next_modified(self.T_air_min_unit,
+                                                   'scalar')
+        if (T_air_min != None): self.T_air_min = T_air_min
 
-        #T0 = model_input.read_next(self.T0_unit, self.T0_type, rti)
-        #if (T0 != None): self.T0 = T0
+        T_air_max = model_input.read_next_modified(self.T_air_max_unit,
+                                                   'scalar')
+        if (T_air_max != None): self.T_air_max = T_air_max
 
-        #rho_snow = model_input.read_next(self.rho_snow_unit, self.rho_snow_type, rti)
-        #if (rho_snow != None): self.rho_snow = rho_snow
+        start_year = model_input.read_next_modified(self.start_year_unit,
+                                                    'scalar')
+        if (start_year != None): self.start_year = start_year
 
-        #h0_snow = model_input.read_next(self.h0_snow_unit, self.h0_snow_type, rti)
-        #if (h0_snow != None): self.h0_snow = h0_snow
+        end_year = model_input.read_next_modified(self.end_year_unit,
+                                                  'scalar')
+        if (end_year != None): self.end_year = end_year
 
-       # h0_swe = model_input.read_next(self.h0_swe_unit, self.h0_swe_type, rti)
-        #if (h0_swe != None): self.h0_swe = h0_swe
+        # Initialize the year to the start year
+        self.year = self.start_year
 
     #   read_input_files()
     #-------------------------------------------------------------------
@@ -210,15 +193,17 @@ class frostnumber_method( perma_base.permafrost_component ):
         #         ddt (degree thawing days)
 
         # In the first test case, we used T_air_max and T_air_min
-        T_hot=self.T_air_max
         T_cold=self.T_air_min
+        T_hot=self.T_air_max
 
+        '''  this section is for later when reading temp values from CRU data
         # Now, we use the values from the temperature CRU tiff files
         # Assume that warmest month is July and coldest is the following Jan
         print("Lon: %f" % self.lon)
         print("Lat: %f" % self.lat)
         T_hot = self.get_temperature_from_cru(self.lon, self.lat, 7, self.year)
         T_cold = self.get_temperature_from_cru(self.lon, self.lat, 1, self.year+1)
+        '''
 
         print("In update_dd, year=%d" % self.year)
         assert(T_hot > T_cold)
@@ -460,13 +445,6 @@ class frostnumber_method( perma_base.permafrost_component ):
 
         if (self.T_air_type     != 'Scalar'): self.T_air_unit.close()
         if (self.A_air_type     != 'Scalar'): self.A_air_unit.close()
-        if (self.h_snow_type    != 'Scalar'): self.h_snow_unit.close()
-        if (self.rho_snow_type  != 'Scalar'): self.rho_snow_unit.close()
-        if (self.vwc_H2O_type   != 'Scalar'): self.vwc_H2O_unit.close()
-        if (self.Hvgf_type      != 'Scalar'): self.Hvgf_unit.close()
-        if (self.Hvgt_type      != 'Scalar'): self.Hvgt_unit.close()
-        if (self.Dvf_type       != 'Scalar'): self.Dvf_unit.close()
-        if (self.Dvt_type       != 'Scalar'): self.Dvt_unit.close()
 
     #   close_input_files()
     #-------------------------------------------------------------------

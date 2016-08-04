@@ -1,7 +1,7 @@
 author: J. Scott Stewart
 doi:
-email:
-license:
-summary:
+email: james.stewart@colorado.edu
+license: GPL
+summary: Frost Number model per Nelson and Outcalt 1987
 url:
-version:
+version: 0.0.1

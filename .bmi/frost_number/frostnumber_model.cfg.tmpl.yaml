@@ -1,0 +1,16 @@
+#===============================================================================
+# PermaModel Config File for: frostnumber_method
+#===============================================================================
+# Input
+# lat and lon not implemented yet
+#lat           		| {lat}          | float     | 64.8378 (if specified)
+#lon           		| {lon}          | float     | 147.7164 (if specified)
+T_air_min         | {T_air_min}    | float     | Mean month air temperature coldest month [C]
+T_air_max         | {T_air_max}    | float     | Mean month air temperature warmest month [C]
+start_year        | {start_year}   | int       | begining of the simulation time [year]
+end_year          | {end_year}     | int       | end of the simulation time [year]
+#===============================================================================
+# Output
+frostnumber_air       | {frostnumber_air}      | float  | Air frost number
+frostnumber_surface   | {frostnumber_surface}  | float  | Surface frost number (if computed)
+frostnumber_stefan    | {frostnumber_stefan}   | float  | Stefan frost number (if computed)
