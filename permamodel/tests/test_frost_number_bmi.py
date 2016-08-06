@@ -14,8 +14,45 @@ import numpy as np
 def test_frost_number_has_initialize():
     # Can we call an initialize function?
     fn = frost_number.frostnumber_method()
-    print(fn)
-    fn.initialize()
+    # With hard-coded cfg filename
+    #fn.initialize(cfg_file='/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
+    # With relative cfg filename
+    fn.initialize(cfg_file='./permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
+
+def test_frost_number_initialize_sets_year():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file='./permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
+
+    # Assert the values from the cfg file
+    assert(fn.year == 2000)
+
+def test_frost_number_initialize_sets_air_min_and_max():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file='./permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
+
+    # Assert the values from the cfg file
+    assert(fn.T_air_min == -20.0)
+    assert(fn.T_air_max == 10.0)
+
+def test_frost_number_update_increments_year():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file='./permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
+
+    print("Before update...")
+    print("fn year: %d" % fn.year)
+    print("fn end_year: %d" % fn.end_year)
+    print("fn dt: %d" % fn.dt)
+
+    fn.update(dt=fn.dt)
+
+    print("After update...")
+    print("fn year: %d" % fn.year)
+    print("fn end_year: %d" % fn.end_year)
+    print("fn dt: %d" % fn.dt)
+    
+    
+
+    pass
 
 """
 # ---------------------------------------------------

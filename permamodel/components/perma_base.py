@@ -93,8 +93,7 @@ class permafrost_component( BMI_base.BMI_component ):
         # implement its own versions of these.
         #------------------------------------------------------
         print 'ERROR: open_input_files() for permafrost component'
-        print '       has not been implemented.'
-        print ' Ignoring this message for now.'
+        print '       has not been implemented for this component.'
 
     #   open_input_files()
     #-------------------------------------------------------------------
@@ -167,6 +166,11 @@ class permafrost_component( BMI_base.BMI_component ):
             exit(-1)
         return filename
 
+    def initialize_permafrost_component(self):
+        # Each PermaModel component may have its own initialization needs
+        #   Those should be moved to that component instead of perma_base
+        pass
+
     def initialize(self, cfg_file=None, mode="nondriver",
                    SILENT=False):
 
@@ -193,6 +197,7 @@ class permafrost_component( BMI_base.BMI_component ):
         #-----------------------------------------------
         self.set_constants()
         self.initialize_config_vars()
+
         # At this stage we are going to ignore read_grid_info b/c
         # we do not have rti file associated with our model
         # we also skipping the basin_vars which calls the outlets
@@ -203,6 +208,8 @@ class permafrost_component( BMI_base.BMI_component ):
         # Extract soil texture from Grid Soil Database (Netcdf files)
         # according to locations
         #---------------------------------------------
+        # ScottNote: this isn't needed for all models, 
+        #   and so should be moved to the specific component that uses it
         self.initialize_soil_texture_from_GSD()
 
         self.initialize_time_vars()
@@ -238,11 +245,17 @@ class permafrost_component( BMI_base.BMI_component ):
         #---------------------------
         self.check_input_types()  # (maybe not used yet)
 
+        #-----------------------------------------------
+        # Load component-specific parameters
+        #-----------------------------------------------
+        self.initialize_permafrost_component()
+
         self.status = 'initialized'
 
     #   initialize()
     #-------------------------------------------------------------------
     def initialize_soil_texture_from_GSD(self):
+        # ScottNote: this should be moved to the component that needs it
 
         #Clay_file = '../permamodel/components/Parameters/T_CLAY.nc4'
         #Sand_file = '../permamodel/components/Parameters/T_SAND.nc4'

@@ -130,14 +130,8 @@ class frostnumber_method( perma_base.permafrost_component ):
         self.T_air_min_file   = './permamodel/examples/fn_t_air_min.dat'
         self.T_air_min_unit = open(self.T_air_min_file, "r")
 
-        self.T_air_max_file   = './permamodel/examples/fn_t_air_min.dat'
+        self.T_air_max_file   = './permamodel/examples/fn_t_air_max.dat'
         self.T_air_max_unit = open(self.T_air_max_file, "r")
-
-        self.start_year_file   = './permamodel/examples/fn_start_year.dat'
-        self.start_year_unit = open(self.start_year_file, "r")
-
-        self.end_year_file   = './permamodel/examples/fn_end_year.dat'
-        self.end_year_unit = open(self.end_year_file, "r")
 
         # lat and lon not implemented yet
 
@@ -162,26 +156,23 @@ class frostnumber_method( perma_base.permafrost_component ):
         # All grids are assumed to have a data type of Float32.
         #-------------------------------------------------------
         T_air_min = model_input.read_next_modified(self.T_air_min_unit,
-                                                   'scalar')
+                                                   self.T_air_min_type)
         if (T_air_min != None): self.T_air_min = T_air_min
 
         T_air_max = model_input.read_next_modified(self.T_air_max_unit,
-                                                   'scalar')
+                                                   self.T_air_max_type)
         if (T_air_max != None): self.T_air_max = T_air_max
-
-        start_year = model_input.read_next_modified(self.start_year_unit,
-                                                    'scalar')
-        if (start_year != None): self.start_year = start_year
-
-        end_year = model_input.read_next_modified(self.end_year_unit,
-                                                  'scalar')
-        if (end_year != None): self.end_year = end_year
-
-        # Initialize the year to the start year
-        self.year = self.start_year
 
     #   read_input_files()
     #-------------------------------------------------------------------
+
+    def initialize_permafrost_component(self):
+        # Here, initialize the variables which are unique to the
+        #   frost_number component 
+
+        # Initialize the year to the start year
+        self.year = self.start_year
+        print("type of year: %s" % type(self.year))
 
     def update(self, dt=-1.0):
         # Ensure that we've already initialized the run
