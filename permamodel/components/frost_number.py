@@ -172,14 +172,34 @@ class frostnumber_method( perma_base.permafrost_component ):
 
         # Initialize the year to the start year
         self.year = self.start_year
-        print("type of year: %s" % type(self.year))
+
+        # Here, we should calculate the initial values of all the frost numbers
+        self.calculate_frost_numbers()
+
+    def calculate_frost_numbers(self):
+        # Calculate all the frost numbers using the current data
+        self.calculate_air_frost_number()
+        self.calculate_surface_frost_number()
+        self.calculate_stefan_frost_number()
+
+    def calculate_air_frost_number(self):
+        print("here 2")
+        self.compute_degree_days()
+        self.compute_air_frost_number()
+        pass
+
+    def calculate_surface_frost_number(self):
+        pass
+
+    def calculate_stefan_frost_number(self):
+        pass
 
     def update(self, dt=-1.0):
         # Ensure that we've already initialized the run
         assert(self.status == 'initialized')
-        print("In frost_number.py's 'update'")
+        self.year += dt
 
-    def update_dd(self):
+    def compute_degree_days(self):
 
         # Input: T_hot (avg temp of warmest month)
         #        T_cold (avg temp of coldest month)
@@ -200,9 +220,10 @@ class frostnumber_method( perma_base.permafrost_component ):
         T_cold = self.get_temperature_from_cru(self.lon, self.lat, 1, self.year+1)
         '''
 
-        print("In update_dd, year=%d" % self.year)
+        print("In compute_degree_days, year=%d" % self.year)
         assert(T_hot > T_cold)
         T_avg = (T_hot + T_cold) / 2.0
+
         # Note that these conditions should cover T_hot == T_cold
         if T_hot <= 0:
             # Always freezing
@@ -213,6 +234,8 @@ class frostnumber_method( perma_base.permafrost_component ):
             # Never freezing
             ddf = 0
             ddt = 365.0 * T_avg
+
+            """ this section shows how to read a series of temperatures 
         elif (self.T_air_type != 'Scalar'):
             #wk = np.loadtxt('examples/temp_copy.txt', skiprows=1,unpack=False)
             temperature_filename = self.permafrost_dir +\
@@ -233,6 +256,7 @@ class frostnumber_method( perma_base.permafrost_component ):
             ddt = Ts*Ls                                             #(eqn. 2.8)
             ddf = -Tw*Lw                                            #(eqn. 2.9)
             print Th,Tc
+        """
         else:
             # Assume cosine fit for temp series
             A = (T_hot - T_cold) / 2.0
@@ -251,9 +275,9 @@ class frostnumber_method( perma_base.permafrost_component ):
         self.ta_month=T_month
         self.ddt=ddt
         self.ddf=ddf
-    #   update_dd_from_annual_minmax_temp()
+    #   compute_degree_days()
     #-------------------------------------------------------------------
-    def update_air_frost_number(self):
+    def compute_air_frost_number(self):
         # Calculating Reduced Air Frost Number (pages 280-281).
         # The reduced frost number is close 0 for long summers and close to 1 for long winters.
         self.air_frost_number = np.sqrt(self.ddf) / ( np.sqrt( self.ddf) + np.sqrt( self.ddt) )
@@ -427,8 +451,9 @@ class frostnumber_method( perma_base.permafrost_component ):
     #   update_ALT()
     #-------------------------------------------------------------------
     def update_ground_temperatures(self):
+        print("In frost_number.update_ground_temperatures")
         # This method does not update temps instead it does frost numbers
-        self.update_dd()
+        self.compute_degree_days()
         self.update_air_frost_number()
         self.update_snow_prop()
         self.update_surface_frost_number()

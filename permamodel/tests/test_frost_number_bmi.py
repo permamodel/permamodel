@@ -38,21 +38,9 @@ def test_frost_number_update_increments_year():
     fn = frost_number.frostnumber_method()
     fn.initialize(cfg_file='./permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
 
-    print("Before update...")
-    print("fn year: %d" % fn.year)
-    print("fn end_year: %d" % fn.end_year)
-    print("fn dt: %d" % fn.dt)
-
     fn.update(dt=fn.dt)
-
-    print("After update...")
-    print("fn year: %d" % fn.year)
-    print("fn end_year: %d" % fn.end_year)
-    print("fn dt: %d" % fn.dt)
-    
-    
-
-    pass
+    assert(fn.year == fn.start_year + fn.dt)
+    assert(fn.year != fn.start_year)
 
 """
 # ---------------------------------------------------
