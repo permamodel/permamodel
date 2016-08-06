@@ -183,10 +183,8 @@ class frostnumber_method( perma_base.permafrost_component ):
         self.calculate_stefan_frost_number()
 
     def calculate_air_frost_number(self):
-        print("here 2")
         self.compute_degree_days()
         self.compute_air_frost_number()
-        pass
 
     def calculate_surface_frost_number(self):
         pass
@@ -220,7 +218,6 @@ class frostnumber_method( perma_base.permafrost_component ):
         T_cold = self.get_temperature_from_cru(self.lon, self.lat, 1, self.year+1)
         '''
 
-        print("In compute_degree_days, year=%d" % self.year)
         assert(T_hot > T_cold)
         T_avg = (T_hot + T_cold) / 2.0
 
@@ -230,10 +227,18 @@ class frostnumber_method( perma_base.permafrost_component ):
             # Negative sign because ddf is + and T_avg (here) is -
             ddf = -365.0 * T_avg
             ddt = 0
+            L_winter=365.0
+            L_summer=0.0
+            T_average=(Th + Tc) / 2.0
+            T_amplitude=(Th - Tc) / 2.0
         elif T_cold>0:
             # Never freezing
             ddf = 0
             ddt = 365.0 * T_avg
+            L_winter=0.0
+            L_summer=365.0
+            T_average=(Th + Tc) / 2.0
+            T_amplitude=(Th - Tc) / 2.0
 
             """ this section shows how to read a series of temperatures 
         elif (self.T_air_type != 'Scalar'):
@@ -247,32 +252,29 @@ class frostnumber_method( perma_base.permafrost_component ):
             Tc=min(T_month)
             T=(Th+Tc)/2                                             #(eqn. 2.1)
             A=(Th-Tc)/2                                             #(eqn. 2.2)
-            beta=np.arccos(-T/A)                                    #(eqn. 2.3)
-            Ts=T+A*np.sin(beta/beta)                                #(eqn. 2.4)
-            Tw=T-A*np.sin(beta/(np.pi-beta))                        #(eqn. 2.5)
-            Ls=365*(beta/np.pi)                                     #(eqn. 2.6)
-            Lw = 365-Ls                                             #(eqn. 2.7)
+            Beta=np.arccos(-T/A)                                    #(eqn. 2.3)
+            Ts=T+A*np.sin(Beta/Beta)                                #(eqn. 2.4)
+            Tw=T-A*np.sin(Beta/(np.pi-Beta))                        #(eqn. 2.5)
+            L_summer=365*(Beta/np.pi)                               #(eqn. 2.6)
+            L_winter = 365-L_summer                                 #(eqn. 2.7)
             print('winter length:',Lw,'summer length:',Ls)
-            ddt = Ts*Ls                                             #(eqn. 2.8)
-            ddf = -Tw*Lw                                            #(eqn. 2.9)
+            ddt = Ts*L_summer                                             #(eqn. 2.8)
+            ddf = -Tw*L_winter                                            #(eqn. 2.9)
             print Th,Tc
         """
         else:
             # Assume cosine fit for temp series
-            A = (T_hot - T_cold) / 2.0
-            Beta = np.arccos(-T_avg / A)
-            T_summer = T_avg + A * np.sin(Beta) / Beta
-            T_winter = T_avg - A * np.sin(Beta) / (np.pi - Beta)
+            T_average = (T_hot + T_cold) / 2.0
+            T_amplitude = (T_hot - T_cold) / 2.0
+            Beta = np.arccos(-T_average / T_amplitude)
+            T_summer = T_average + T_amplitude * np.sin(Beta) / Beta
+            T_winter = T_average - T_amplitude * np.sin(Beta) / (np.pi - Beta)
             L_summer = 365.0 * Beta / np.pi
             L_winter = 365.0 - L_summer
             ddt = T_summer * L_summer
             ddf = -T_winter * L_winter
-        self.Lw=Lw
-        self.beta=beta
-        self.T_air=T
-        self.A_air=A
-        self.Tw=Tw
-        self.ta_month=T_month
+        self.T_average=T_average
+        self.T_amplitude=T_amplitude
         self.ddt=ddt
         self.ddf=ddf
     #   compute_degree_days()
