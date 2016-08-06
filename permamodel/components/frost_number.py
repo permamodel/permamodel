@@ -183,6 +183,10 @@ class frostnumber_method( perma_base.permafrost_component ):
     #   read_input_files()
     #-------------------------------------------------------------------
 
+    def update(self, dt=-1.0):
+        # Ensure that we've already initialized the run
+        assert(self.status == 'initialized')
+        print("In frost_number.py's 'update'")
 
     def update_dd(self):
 

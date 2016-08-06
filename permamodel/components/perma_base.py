@@ -167,6 +167,81 @@ class permafrost_component( BMI_base.BMI_component ):
             exit(-1)
         return filename
 
+    def initialize(self, cfg_file=None, mode="nondriver",
+                   SILENT=False):
+
+        #---------------------------------------------------------
+        # Notes:  Need to make sure than h_swe matches h_snow ?
+        #         User may have entered incompatible values.
+        #---------------------------------------------------------
+        # (3/14/07) If the Energy Balance method is used for ET,
+        # then we must initialize and track snow depth even if
+        # there is no snowmelt method because the snow depth
+        # affects the ET rate.  Otherwise, return to caller.
+        #---------------------------------------------------------
+        if not(SILENT):
+            print ' '
+            print 'Permafrost component: Initializing...'
+
+        self.status     = 'initializing'  # (OpenMI 2.0 convention)
+        self.mode       = mode
+        self.cfg_file   = cfg_file
+        #print mode, cfg_file
+
+        #-----------------------------------------------
+        # Load component parameters from a config file
+        #-----------------------------------------------
+        self.set_constants()
+        self.initialize_config_vars()
+        # At this stage we are going to ignore read_grid_info b/c
+        # we do not have rti file associated with our model
+        # we also skipping the basin_vars which calls the outlets
+        #self.read_grid_info()
+        #self.initialize_basin_vars()
+
+        #---------------------------------------------
+        # Extract soil texture from Grid Soil Database (Netcdf files)
+        # according to locations
+        #---------------------------------------------
+        self.initialize_soil_texture_from_GSD()
+
+        self.initialize_time_vars()
+
+        if (self.comp_status == 'Disabled'):
+            #########################################
+            #  DOUBLE CHECK THIS; SEE NOTES ABOVE
+            #########################################
+               ####### and (ep.method != 2):  ??????
+            if not(SILENT):
+                print 'Permafrost component: Disabled.'
+            self.lat    = self.initialize_scalar(0, dtype='float64')
+            self.lon    = self.initialize_scalar(0, dtype='float64')
+            self.T_air  = self.initialize_scalar(0, dtype='float64')
+            self.h_snow = self.initialize_scalar(0, dtype='float64')
+            self.vwc_H2O= self.initialize_scalar(0, dtype='float64')
+            self.Hvgf   = self.initialize_scalar(0, dtype='float64')
+            self.Hvgt   = self.initialize_scalar(0, dtype='float64')
+            self.Dvf    = self.initialize_scalar(0, dtype='float64')
+            self.Dvt    = self.initialize_scalar(0, dtype='float64')
+            self.DONE   = True
+            self.status = 'initialized'
+            return
+
+        #---------------------------------------------
+        # Open input files needed to initialize vars
+        #---------------------------------------------
+        self.open_input_files()
+        self.read_input_files()
+
+        #---------------------------
+        # Initialize computed vars
+        #---------------------------
+        self.check_input_types()  # (maybe not used yet)
+
+        self.status = 'initialized'
+
+    #   initialize()
+    #-------------------------------------------------------------------
     def initialize_soil_texture_from_GSD(self):
 
         #Clay_file = '../permamodel/components/Parameters/T_CLAY.nc4'
@@ -247,81 +322,6 @@ class permafrost_component( BMI_base.BMI_component ):
     #   check_input_types()
     #-------------------------------------------------------------------
 
-    def initialize(self, cfg_file=None, mode="nondriver",
-                   SILENT=False):
-
-        #---------------------------------------------------------
-        # Notes:  Need to make sure than h_swe matches h_snow ?
-        #         User may have entered incompatible values.
-        #---------------------------------------------------------
-        # (3/14/07) If the Energy Balance method is used for ET,
-        # then we must initialize and track snow depth even if
-        # there is no snowmelt method because the snow depth
-        # affects the ET rate.  Otherwise, return to caller.
-        #---------------------------------------------------------
-        if not(SILENT):
-            print ' '
-            print 'Permafrost component: Initializing...'
-
-        self.status     = 'initializing'  # (OpenMI 2.0 convention)
-        self.mode       = mode
-        self.cfg_file   = cfg_file
-        #print mode, cfg_file
-
-        #-----------------------------------------------
-        # Load component parameters from a config file
-        #-----------------------------------------------
-        self.set_constants()
-        self.initialize_config_vars()
-        # At this stage we are going to ignore read_grid_info b/c
-        # we do not have rti file associated with our model
-        # we also skipping the basin_vars which calls the outlets
-        #self.read_grid_info()
-        #self.initialize_basin_vars()
-
-        #---------------------------------------------
-        # Extract soil texture from Grid Soil Database (Netcdf files)
-        # according to locations
-        #---------------------------------------------
-        self.initialize_soil_texture_from_GSD()
-
-        self.initialize_time_vars()
-
-        if (self.comp_status == 'Disabled'):
-            #########################################
-            #  DOUBLE CHECK THIS; SEE NOTES ABOVE
-            #########################################
-               ####### and (ep.method != 2):  ??????
-            if not(SILENT):
-                print 'Permafrost component: Disabled.'
-            self.lat    = self.initialize_scalar(0, dtype='float64')
-            self.lon    = self.initialize_scalar(0, dtype='float64')
-            self.T_air  = self.initialize_scalar(0, dtype='float64')
-            self.h_snow = self.initialize_scalar(0, dtype='float64')
-            self.vwc_H2O= self.initialize_scalar(0, dtype='float64')
-            self.Hvgf   = self.initialize_scalar(0, dtype='float64')
-            self.Hvgt   = self.initialize_scalar(0, dtype='float64')
-            self.Dvf    = self.initialize_scalar(0, dtype='float64')
-            self.Dvt    = self.initialize_scalar(0, dtype='float64')
-            self.DONE   = True
-            self.status = 'initialized'
-            return
-
-        #---------------------------------------------
-        # Open input files needed to initialize vars
-        #---------------------------------------------
-        self.open_input_files()
-        self.read_input_files()
-
-        #---------------------------
-        # Initialize computed vars
-        #---------------------------
-        self.check_input_types()  # (maybe not used yet)
-
-        self.status = 'initialized'
-
-    #   initialize()
-    #-------------------------------------------------------------------
     def update_ALT(self):
 
         #---------------------------------------------------------
