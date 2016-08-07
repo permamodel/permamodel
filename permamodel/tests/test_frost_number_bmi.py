@@ -17,18 +17,18 @@ def test_frost_number_has_initialize():
     # With hard-coded cfg filename
     #fn.initialize(cfg_file='/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
     # With relative cfg filename
-    fn.initialize(cfg_file='./permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
+    fn.initialize(cfg_file='./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg', SILENT=True)
 
 def test_frost_number_initialize_sets_year():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file='./permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
+    fn.initialize(cfg_file='./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg', SILENT=True)
 
     # Assert the values from the cfg file
     assert(fn.year == 2000)
 
 def test_frost_number_initialize_sets_air_min_and_max():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file='./permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
+    fn.initialize(cfg_file='./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg', SILENT=True)
 
     # Assert the values from the cfg file
     assert(fn.T_air_min == -20.0)
@@ -36,13 +36,42 @@ def test_frost_number_initialize_sets_air_min_and_max():
 
 def test_frost_number_update_increments_year():
     fn = frost_number.frostnumber_method()
-    fn.initialize(cfg_file='./permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
+    fn.initialize(cfg_file='./permamodel/examples/Frostnumber_example_singlesite_multiyear.cfg', SILENT=True)
 
     fn.update(dt=fn.dt)
     assert(fn.year == fn.start_year + fn.dt)
     assert(fn.year != fn.start_year)
 
-"""
+def test_frost_number_update_changes_air_frost_number():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file='./permamodel/examples/Frostnumber_example_singlesite_multiyear.cfg', SILENT=True)
+
+    afn0 = fn.air_frost_number
+    fn.update(dt=fn.dt)
+    afn1 = fn.air_frost_number
+    assert(afn0 != afn1)
+
+def test_frost_number_runs_several_years():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file='./permamodel/examples/Frostnumber_example_singlesite_multiyear.cfg', SILENT=True)
+
+    while fn.year < fn.end_year:
+        fn.update(dt=fn.dt)
+
+    assert(fn.output is not None)
+
+    # Ensure that each year exists in the output dictionary
+    year = fn.start_year
+    while year < fn.end_year:
+        assert(year in fn.output.keys())
+        year += 1
+
+    # print the output to check it
+    #fn.print_frost_numbers()
+
+
+
+""" ------------DELETED CODE---------------------------
 # ---------------------------------------------------
 # Tests that the frost_number module is importing
 # ---------------------------------------------------

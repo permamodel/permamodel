@@ -108,11 +108,16 @@ class frostnumber_method( perma_base.permafrost_component ):
     #   get_var_units()
     #-------------------------------------------------------------------
     def check_input_types(self):
+        """
+        this functionality is not used for frostnumber_method
+        """
+        return
 
         #--------------------------------------------------
         # Notes: rho_H2O, Cp_snow, rho_air and Cp_air are
         #        currently always scalars.
         #--------------------------------------------------
+        """
         are_scalars = np.array([
                           self.is_scalar('lat'),
                           self.is_scalar('lon'),
@@ -122,6 +127,7 @@ class frostnumber_method( perma_base.permafrost_component ):
                           self.is_scalar('end_year') ])
 
         self.ALL_SCALARS = np.all(are_scalars)
+        """
 
     #   check_input_types()
     #-------------------------------------------------------------------
@@ -157,11 +163,16 @@ class frostnumber_method( perma_base.permafrost_component ):
         #-------------------------------------------------------
         T_air_min = model_input.read_next_modified(self.T_air_min_unit,
                                                    self.T_air_min_type)
-        if (T_air_min != None): self.T_air_min = T_air_min
+        if (T_air_min != None): 
+            self.T_air_min = T_air_min
 
         T_air_max = model_input.read_next_modified(self.T_air_max_unit,
                                                    self.T_air_max_type)
-        if (T_air_max != None): self.T_air_max = T_air_max
+        if (T_air_max != None): 
+            self.T_air_max = T_air_max
+
+        # <If we were getting Temperature values from a file, we'd do that here
+        pass
 
     #   read_input_files()
     #-------------------------------------------------------------------
@@ -171,7 +182,25 @@ class frostnumber_method( perma_base.permafrost_component ):
         #   frost_number component 
 
         # Initialize the year to the start year
-        self.year = self.start_year
+        #  or to zero if it doesn't exist
+        try:
+            self.year = self.start_year
+        except AttributeError:
+            self.year = 0
+            self.start_year = 0
+            self.end_year = 0
+
+        # Ensure that the end_year is not before the start_year
+        # If no end_year is given, 
+        #   it is assumed that this will run for one year 
+        #   so the end_year is the same as the start_year
+        try:
+            assert(self.end_year >= self.start_year)
+        except AttributeError:
+            self.end_year = self.start_year
+
+        # Create a dictionary to hold the output values
+        self.output = {}
 
         # Here, we should calculate the initial values of all the frost numbers
         self.calculate_frost_numbers()
@@ -182,20 +211,47 @@ class frostnumber_method( perma_base.permafrost_component ):
         self.calculate_surface_frost_number()
         self.calculate_stefan_frost_number()
 
+        # Add these frost numbers to the output dictionary
+        self.output[self.year] = ("%5.3f" % self.air_frost_number,
+                                  "%5.3f" % self.surface_frost_number,
+                                  "%5.3f" % self.stefan_frost_number)
+
+        #self.print_frost_numbers(self.year)
+
+    def print_frost_numbers(self, year=-1):
+        # if year is -1, then use the current year of self
+        # otherwise, use the specified year
+        if year > 0:
+            print("Year: %d  F_air=%5.3f  F_surface=%5.3f  F_stefan=%5.3f" %
+              (self.year, self.air_frost_number, self.surface_frost_number,
+               self.stefan_frost_number))
+        else:
+            for year in sorted(self.output.keys()):
+                print("Year: %d  output=%s" % (year, self.output[year]))
+
     def calculate_air_frost_number(self):
         self.compute_degree_days()
         self.compute_air_frost_number()
 
     def calculate_surface_frost_number(self):
-        pass
+        # For now, a dummy value
+        self.surface_frost_number = -1.0
 
     def calculate_stefan_frost_number(self):
-        pass
+        self.stefan_frost_number = -1.0
 
     def update(self, dt=-1.0):
         # Ensure that we've already initialized the run
         assert(self.status == 'initialized')
+
+        # Update the time
         self.year += dt
+
+        # Get new input values
+        self.read_input_files()
+
+        # Calculate the new frost number values
+        self.calculate_frost_numbers()
 
     def compute_degree_days(self):
 
@@ -377,14 +433,15 @@ class frostnumber_method( perma_base.permafrost_component ):
         rho_s=np.mean(self.r_snow)
         lambda_s=np.mean(self.c_snow)
         Zs=np.mean(self.h_snow)
-        P=2*np.pi/365; # i am not sure what they mean by length of the annual temprature cycle
+        # i am not sure what they mean by length of the annual temprature cycle
         # Something worthwhile discussing
+        P=2*np.pi/365; 
 
-        c_s=7.79*self.Tw+2115                                               #(eqn. 7)
-        alpha_s=lambda_s/(c_s*rho_s)                                        #(eqn. 8)
-        Zss=np.sqrt(alpha_s*P/np.pi)                                        #(eqn. 10)
-        Aplus=self.A_air*np.exp(-Zs/Zss)                                    #(eqn. 9)
-        Twplus=self.T_air-Aplus*np.sin(self.beta/(np.pi-self.beta))         #(eqn. 11)
+        c_s=7.79*self.Tw+2115                 #(eqn. 7)
+        alpha_s=lambda_s/(c_s*rho_s)          #(eqn. 8)
+        Zss=np.sqrt(alpha_s*P/np.pi)          #(eqn. 10)
+        Aplus=self.A_air*np.exp(-Zs/Zss)      #(eqn. 9)
+        Twplus=self.T_air-Aplus*np.sin(self.beta/(np.pi-self.beta)) #(eqn. 11)
         # Twplus is a mean winter surface temprature, I think, should be warmer than air temperature?
         # Here is another problem. DDFplus degree days winter should be positive.
         # The way it is written in the paper is wrong. I added a minus sign to fix it (see eqn. 2.9)
@@ -443,30 +500,10 @@ class frostnumber_method( perma_base.permafrost_component ):
     #   update_stefan_frost_number()
     #-------------------------------------------------------------------
 
-    def update_ALT(self):
-
-        #---------------------------------------------------------
-        #       coming up
-        #--------------------------------------------------
-        print 'OK'
-
-    #   update_ALT()
-    #-------------------------------------------------------------------
-    def update_ground_temperatures(self):
-        print("In frost_number.update_ground_temperatures")
-        # This method does not update temps instead it does frost numbers
-        self.compute_degree_days()
-        self.update_air_frost_number()
-        self.update_snow_prop()
-        self.update_surface_frost_number()
-        self.update_stefan_frost_number()
-
-    #   update_ground_temperatures()
-    #-------------------------------------------------------------------
     def close_input_files(self):
 
-        if (self.T_air_type     != 'Scalar'): self.T_air_unit.close()
-        if (self.A_air_type     != 'Scalar'): self.A_air_unit.close()
+        if (self.T_air_min_type     != 'Scalar'): self.T_air_unit.close()
+        if (self.T_air_max_type     != 'Scalar'): self.A_air_unit.close()
 
     #   close_input_files()
     #-------------------------------------------------------------------
