@@ -253,6 +253,24 @@ class frostnumber_method( perma_base.permafrost_component ):
         # Calculate the new frost number values
         self.calculate_frost_numbers()
 
+    def update_until(self, stop_year):
+        # Ensure that stop_year is at least the current year
+        if stop_year < self.year:
+            print("Warning: update_until year is less than current year")
+            print("  no update run")
+            return
+
+        if stop_year > self.end_year:
+            print("Warning: update_until year was greater than end_year")
+            print("  setting stop_year to end_year")
+            stop_year = self.end_year
+
+        # Implement the loop to update until stop_year
+        year = self.year
+        while year < stop_year:
+            self.update(dt=self.dt)
+            year = self.year
+
     def compute_degree_days(self):
 
         # Input: T_hot (avg temp of warmest month)
