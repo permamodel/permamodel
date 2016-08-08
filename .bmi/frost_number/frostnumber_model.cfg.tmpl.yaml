@@ -2,15 +2,28 @@
 # PermaModel Config File for: frostnumber_method
 #===============================================================================
 # Input
-# lat and lon not implemented yet
-#lat           		| {lat}          | float     | 64.8378 (if specified)
-#lon           		| {lon}          | float     | 147.7164 (if specified)
-T_air_min         | {T_air_min}    | float     | Mean month air temperature coldest month [C]
-T_air_max         | {T_air_max}    | float     | Mean month air temperature warmest month [C]
-start_year        | {start_year}   | int       | begining of the simulation time [year]
-end_year          | {end_year}     | int       | end of the simulation time [year]
+permafrost_dir  | {permafrost_dir}          | string   | Set to root dir
+comp_status     | {comp_status}             | string   | component status {Enabled; Disabled}
+in_directory    | {in_directory}            | string   | input directory
+out_directory   | {out_directory}           | string   | output directory
+site_prefix     | {site_prefix}             | string   | file prefix for the study site
+case_prefix     | {case_prefix}             | string   | file prefix for the model scenario
+T_air_min_type  | {T_air_min_type}          | string               | allowed: {Scalar; Time_Series}
+T_air_min       | {T_air_min}               | {typeof_T_air_min}   | Mean month air temperature coldest month [C]
+T_air_max_type  | {T_air_max_type}          | string               | allowed: {Scalar; Time_Series}
+T_air_max       | {T_air_max}               | {typeof_T_air_max}   | Mean month air temperature warmest month [C]
+start_year      | {start_year}              | long     | begining of the simulation time [year]
+end_year        | {end_year}                | long     | end of the simulation time [year]
+dt              | {dt}                      | float    | Timestep for permafrost process [year]
 #===============================================================================
-# Output
-frostnumber_air       | {frostnumber_air}      | float  | Air frost number
-frostnumber_surface   | {frostnumber_surface}  | float  | Surface frost number (if computed)
-frostnumber_stefan    | {frostnumber_stefan}   | float  | Stefan frost number (if computed)
+# Output available to other models
+#===============================================================================
+frostnumber_air       | {air_frost_number}      | float  | Air frost number
+frostnumber_surface   | {surface_frost_number}  | float  | Surface frost number (if computed)
+frostnumber_stefan    | {stefan_frost_number}   | float  | Stefan frost number (if computed)
+#===============================================================================
+# Output saved for user
+#===============================================================================
+output_dictionary     | {output}            | dictionary   | dictionary with year as keys, list of frost numbers as values
+fn_out_filename       | {fn_out_filename}   | string       | Name of output file
+
