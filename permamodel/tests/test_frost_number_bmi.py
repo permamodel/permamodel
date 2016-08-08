@@ -77,12 +77,19 @@ def test_frost_number_runs_several_years():
 
 def test_frost_number_implements_update_until():
     fn = frost_number.frostnumber_method()
-    #fn.initialize(cfg_file='./permamodel/examples/Frostnumber_example_singlesite_multiyear.cfg', SILENT=True)
     fn.initialize(cfg_file=onesite_multiyear_filename, SILENT=True)
 
     fn.update_until(fn.end_year)
 
+    # Check the output, if desired
     #fn.print_frost_numbers()
+
+def test_frost_number_implements_finalize():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file=onesite_multiyear_filename, SILENT=True)
+    fn.update_until(fn.end_year)
+    fn.finalize()
+
 
 
 

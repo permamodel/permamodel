@@ -209,8 +209,8 @@ class permafrost_component( BMI_base.BMI_component ):
         # according to locations
         #---------------------------------------------
         # ScottNote: this isn't needed for all models, 
-        #   and so should be moved to the specific component that uses it
-        self.initialize_soil_texture_from_GSD()
+        #   so I have commented it out here
+        #self.initialize_soil_texture_from_GSD()
 
         self.initialize_time_vars()
 
@@ -503,8 +503,9 @@ class permafrost_component( BMI_base.BMI_component ):
     #-------------------------------------------------------------------
     def close_output_files(self):
 
+        # Note: these are component specific, and so are commented out here
         #if (self.SAVE_MR_GRIDS): model_output.close_gs_file( self, 'mr')
-        if (self.SAVE_HS_GRIDS): model_output.close_gs_file( self, 'hs')
+        #if (self.SAVE_HS_GRIDS): model_output.close_gs_file( self, 'hs')
         #if (self.SAVE_SW_GRIDS): model_output.close_gs_file( self, 'sw')
         #if (self.SAVE_CC_GRIDS): model_output.close_gs_file( self, 'cc')
         #-----------------------------------------------------------------
@@ -512,6 +513,9 @@ class permafrost_component( BMI_base.BMI_component ):
         #if (self.SAVE_HS_PIXELS): model_output.close_ts_file( self, 'hs')
         #if (self.SAVE_SW_PIXELS): model_output.close_ts_file( self, 'sw')
         #if (self.SAVE_CC_PIXELS): model_output.close_ts_file( self, 'cc')
+
+        # Since there are no commands, we need a 'pass' statement here
+        pass
     #-------------------------------------------------------------------
     def close_input_files(self):
 

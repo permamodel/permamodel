@@ -520,9 +520,40 @@ class frostnumber_method( perma_base.permafrost_component ):
 
     def close_input_files(self):
 
-        if (self.T_air_min_type     != 'Scalar'): self.T_air_unit.close()
-        if (self.T_air_max_type     != 'Scalar'): self.A_air_unit.close()
+        if (self.T_air_min_type     != 'Scalar'): self.T_air_min_unit.close()
+        if (self.T_air_max_type     != 'Scalar'): self.T_air_max_unit.close()
 
     #   close_input_files()
     #-------------------------------------------------------------------
+
+    def finalize(self, SILENT=True):
+        # Finish with the run
+        self.status = 'finalizing'  # (OpenMI)
+
+        # Close the input files
+        self.close_input_files()   # Close any input files
+
+        # Write output last output
+        self.write_output_to_file(SILENT=True)
+
+        # Close the output files
+        self.close_output_files()
+
+        # Done finalizing  
+        self.status = 'finalized'  # (OpenMI)
+
+        # Print final report, as desired
+        if not SILENT:
+            self.print_final_report(\
+                    comp_name='Permamodel FrostNumber component')
+
+    def write_output_to_file(self, SILENT=True):
+        # Write the output to the screen unless we're silent
+        if not SILENT:
+            self.print_frost_numbers(self.year)
+
+        # Write the output to a file
+        with open(self.fn_out_filename, 'w') as f_out:
+            for year in sorted(self.output.keys()):
+                f_out.write("Year: %d  output=%s\n" % (year,self.output[year]))
 
