@@ -6,5 +6,5 @@ if not(SILENT):
     print '   permamodel.components'
     print ' '
 
-import permamodel.utils
+#import permamodel.utils
 import permamodel.components

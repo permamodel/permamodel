@@ -171,8 +171,7 @@ class permafrost_component( BMI_base.BMI_component ):
         #   Those should be moved to that component instead of perma_base
         pass
 
-    def initialize(self, cfg_file=None, mode="nondriver",
-                   SILENT=False):
+    def initialize(self):
 
         #---------------------------------------------------------
         # Notes:  Need to make sure than h_swe matches h_snow ?
@@ -183,6 +182,13 @@ class permafrost_component( BMI_base.BMI_component ):
         # there is no snowmelt method because the snow depth
         # affects the ET rate.  Otherwise, return to caller.
         #---------------------------------------------------------
+
+        # SILENT and mode were original optional arguments
+        #   they should be removed, but are simply defined here for brevity
+
+        SILENT = True
+        mode = "nondriver"
+
         if not(SILENT):
             print ' '
             print 'Permafrost component: Initializing...'

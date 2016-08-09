@@ -557,3 +557,6 @@ class frostnumber_method( perma_base.permafrost_component ):
             for year in sorted(self.output.keys()):
                 f_out.write("Year: %d  output=%s\n" % (year,self.output[year]))
 
+
+    def get_end_time(self):
+        return self.end_year
