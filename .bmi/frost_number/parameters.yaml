@@ -1,13 +1,11 @@
 Input:
 - key: permafrost_dir
-  name: permafrost root directory 
   description: Directory containing permamodel files
   value:
     type: string
     default: .
     units: '-'
 - key: comp_status
-  name: Component status
   description: Component status
   value:
     type: choice
@@ -17,35 +15,30 @@ Input:
     - Disabled
     units: '-'
 - key: in_directory
-  name: Input directory
   description: Input directory
   value:
     type: string
     default: .
     units: '-'
 - key: out_directory
-  name: Output directory
   description: Output directory
   value:
     type: string
     default: .
     units: '-'
 - key: site_prefix
-  name: Site prefix
   description: File prefix for the study site
   value:
     type: string
     default: Test
     units: '-'
 - key: case_prefix
-  name: Case prefix
   description: File prefix for the model scenario
   value:
     type: string
     default: Case_test
     units: '-'
 - key: T_air_min_type
-  name: T_air_min type
   description: data type of T_air_min
   value:
     type: choice
@@ -55,7 +48,6 @@ Input:
     - Time_Series
     units: '-'
 - key: T_air_min
-  name: T_air_min
   description:  Average temp of coldest month in the modeled year
   value:
     type: float
@@ -65,7 +57,6 @@ Input:
       max: 100
     units: degC
 - key: T_air_max_type
-  name: T_air_max type
   description: date type of T_air_max
   value:
     type: choice
@@ -75,7 +66,6 @@ Input:
     - Time_Series
     units: '-'
 - key: T_air_max
-  name: T_air_max
   description:  Average temp of warmest month in the modeled year
   value:
     type: float
@@ -85,7 +75,6 @@ Input:
       max: 100
     units: degC
 - key: start_year
-  name: start year
   description: begining of the simulation time 
   value:
     type: float
@@ -95,7 +84,6 @@ Input:
       max: 2200
     units: year
 - key: end_year
-  name: end year
   description: end of the simulation time 
   value:
     type: float
@@ -105,7 +93,6 @@ Input:
       max: 2200
     units: year
 - key: dt
-  name: Time step
   description: Timestep for permamodel
   value:
     type: float
@@ -116,31 +103,26 @@ Input:
     units: year
 Output:
 - key: frostnumber_air
-  name: frostnumber_air
   description: Current value of the air frost number
   value:
     type: float
     units: '-'
 - key: frostnumber_surface
-  name: frostnumber_surface
   description: Current value of the surface frost number
   value:
     type: float
     units: '-'
 - key: frostnumber_stefan
-  name: frostnumber_stefan
   description: Current value of the Stefan frost number
   value:
     type: float
     units: '-'
 - key: output_dictionary
-  name: output_dictionary
   description: Data structure--a dictionary--with the results of the model run
   value:
     type: dictionary
     units: '-'
 - key: fn_out_filename
-  name: fn_out_filename
   description: Filename to which model output is saved at the end of the run
   value:
     type: string
