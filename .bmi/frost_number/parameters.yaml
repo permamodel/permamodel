@@ -76,20 +76,20 @@ T_air_max:
 start_year:
   description: begining of the simulation time 
   value:
-    type: float
-    default: 2000.0
+    type: long
+    default: 2000
     range:
-      min: 1000.0
-      max: 2200.0
+      min: 1000
+      max: 2200
     units: year
 end_year:
   description: end of the simulation time 
   value:
-    type: float
-    default: 2000.0
+    type: long
+    default: 2000
     range:
-      min: 1000.0
-      max: 2200.0
+      min: 1000
+      max: 2200
     units: year
 dt:
   description: Timestep for permamodel
