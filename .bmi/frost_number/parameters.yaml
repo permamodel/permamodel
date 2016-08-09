@@ -50,10 +50,10 @@ T_air_min:
   description:  Average temp of coldest month in the modeled year
   value:
     type: float
-    default: '-9.0'
+    default: -9.0
     range:
-      min: '-100.0'
-      max: 100
+      min: -100.0
+      max: 100.0
     units: degC
 T_air_max_type:
   description: date type of T_air_max
@@ -68,28 +68,28 @@ T_air_max:
   description:  Average temp of warmest month in the modeled year
   value:
     type: float
-    default: '15.4'
+    default: 15.4
     range:
-      min: '-100.0'
-      max: 100
+      min: -100.0
+      max: 100.0
     units: degC
 start_year:
   description: begining of the simulation time 
   value:
     type: float
-    default: '2000'
+    default: 2000.0
     range:
-      min: 1000
-      max: 2200
+      min: 1000.0
+      max: 2200.0
     units: year
 end_year:
   description: end of the simulation time 
   value:
     type: float
-    default: '2000'
+    default: 2000.0
     range:
-      min: 1000
-      max: 2200
+      min: 1000.0
+      max: 2200.0
     units: year
 dt:
   description: Timestep for permamodel
@@ -97,6 +97,6 @@ dt:
     type: float
     default: 1.0
     range:
-      min: '0.001'
+      min: 0.001
       max: 1e3
     units: year
