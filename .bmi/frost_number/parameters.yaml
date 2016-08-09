@@ -145,25 +145,3 @@ Output:
   value:
     type: string
     units: '-'
-About:
-- key: PermaModel FrostNumber
-  name: PermaModel FrostNumber
-  description: Computes the frost number for a location 
-  value:
-    type: String
-    default: frost_model
-    units: '-'
-- key: ModelAuthor
-  name: Author name
-  description: Elchin Jafarov and J. Scott Stewart
-  value:
-    type: String
-    default: 'Elchin Jafarov and J. Scott Stewart'
-    units: '-'
-- key: HTML_HELP_FILE
-  name: HTML help file
-  description: Url for html help file
-  value:
-    type: String
-    default: http://csdms.colorado.edu/wiki/
-    units: '-'
