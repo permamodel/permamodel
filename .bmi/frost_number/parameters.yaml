@@ -100,28 +100,3 @@ dt:
       min: '0.001'
       max: 1e3
     units: year
-frostnumber_air:
-  description: Current value of the air frost number
-  value:
-    type: float
-    units: '-'
-frostnumber_surface:
-  description: Current value of the surface frost number
-  value:
-    type: float
-    units: '-'
-frostnumber_stefan:
-  description: Current value of the Stefan frost number
-  value:
-    type: float
-    units: '-'
-output_dictionary:
-  description: Data structure--a dictionary--with the results of the model run
-  value:
-    type: dictionary
-    units: '-'
-fn_out_filename:
-  description: Filename to which model output is saved at the end of the run
-  value:
-    type: string
-    units: '-'
