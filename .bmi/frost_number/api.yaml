@@ -3,6 +3,3 @@ language: python
 
 package: permamodel
 class: frostnumber_method
-
-build:
-  - python setup.py install
