@@ -46,14 +46,14 @@ def test_can_initialize_frostnumber_method_from_file():
     cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
                                 '/examples/'),
                  'Fairbanks_frostnumber_method.cfg')
-    fn.initialize(cfg_file=cfg_file, SILENT=True)
+    fn.initialize(cfg_file=cfg_file)
 
 def test_frostnumber_method_has_date_and_location():
     fn = frost_number.frostnumber_method()
     cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
                                 '/examples/'),
                  'Fairbanks_frostnumber_method.cfg')
-    fn.initialize(cfg_file=cfg_file, SILENT=True)
+    fn.initialize(cfg_file=cfg_file)
     assert(fn.year >= 0)
     assert(fn.year == fn.start_year)
 
