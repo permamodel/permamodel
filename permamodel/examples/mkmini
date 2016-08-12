@@ -1,0 +1,19 @@
+
+
+mkdir mini && cd mini
+
+curl http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -o miniconda.sh
+
+bash ./miniconda.sh -f -b -p $(pwd)/conda
+
+PATH=$(pwd)/conda/bin:$PATH
+conda install ipython  # miniconda doesn't come with ipython
+
+conda install nose
+conda install numpy
+conda install gdal
+conda install pyproj
+
+git clone https://github.com/permamodel/permamodel.git
+cd permamodel
+python setup.py develop
