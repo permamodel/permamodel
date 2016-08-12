@@ -11,4 +11,5 @@ setup(name='permamodel',
       description='Permamodel',
       long_description=open('README.md').read(),
       packages=find_packages(),
+      install_requires=('numpy', 'nose', 'gdal', 'pyproj'),
 )
