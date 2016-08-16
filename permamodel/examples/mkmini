@@ -7,12 +7,12 @@ curl http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -o mini
 bash ./miniconda.sh -f -b -p $(pwd)/conda
 
 PATH=$(pwd)/conda/bin:$PATH
-conda install ipython  # miniconda doesn't come with ipython
+conda install -y ipython  # miniconda doesn't come with ipython
 
-conda install nose
-conda install numpy
-conda install gdal
-conda install pyproj
+conda install -y nose
+conda install -y numpy
+conda install -y gdal
+conda install -y pyproj
 
 git clone https://github.com/permamodel/permamodel.git
 cd permamodel
