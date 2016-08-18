@@ -7,12 +7,17 @@ from permamodel.components import frost_number
 from permamodel.components import perma_base
 import os
 import numpy as np
+from ..tests import examples_directory
 
 # Set the file names for the example cfg files
 onesite_oneyear_filename = \
-        './permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg'
+        os.path.join(examples_directory,
+                     'Frostnumber_example_singlesite_singleyear.cfg')
+        #'./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg'
 onesite_multiyear_filename = \
-        './permamodel/examples/Frostnumber_example_singlesite_multiyear.cfg'
+        os.path.join(examples_directory,
+                     'Frostnumber_example_singlesite_multiyear.cfg')
+        #'./permamodel/examples/Frostnumber_example_singlesite_multiyear.cfg'
 
 # ---------------------------------------------------
 # Tests that ensure we have bmi functionality

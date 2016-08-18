@@ -746,6 +746,10 @@ class permafrost_component( BMI_base.BMI_component ):
     """
 
     def get_permafrost_data_directory(self):
+        ''' Note: this can now be:
+
+            from ..tests import permamodel_directory
+        '''
         datadir = os.environ.get('PERMAMODEL_DATADIR')
         if datadir is None:
             print("Please set the environment variable PERMAMODEL_DATADIR")

@@ -5,6 +5,7 @@
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
+from permamodel.tests import examples_directory
 import os
 #import gdal
 #from gdalconst import *  # Import standard constants, such as GA_ReadOnly
@@ -133,10 +134,14 @@ class frostnumber_method( perma_base.permafrost_component ):
     #-------------------------------------------------------------------
     def open_input_files(self):
         # this function will work only if filename is not empty
-        self.T_air_min_file   = './permamodel/examples/fn_t_air_min.dat'
+        #self.T_air_min_file   = './permamodel/examples/fn_t_air_min.dat'
+        self.T_air_min_file   = os.path.join(examples_directory,
+                                             'fn_t_air_min.dat')
         self.T_air_min_unit = open(self.T_air_min_file, "r")
 
-        self.T_air_max_file   = './permamodel/examples/fn_t_air_max.dat'
+        #self.T_air_max_file   = './permamodel/examples/fn_t_air_max.dat'
+        self.T_air_max_file   = os.path.join(examples_directory,
+                                             'fn_t_air_max.dat')
         self.T_air_max_unit = open(self.T_air_max_file, "r")
 
         # lat and lon not implemented yet
