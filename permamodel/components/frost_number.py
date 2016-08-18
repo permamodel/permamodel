@@ -6,10 +6,10 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 import os
-import gdal
-from gdalconst import *  # Import standard constants, such as GA_ReadOnly
+#import gdal
+#from gdalconst import *  # Import standard constants, such as GA_ReadOnly
 import osr
-from pyproj import Proj, transform
+#from pyproj import Proj, transform
 
 class frostnumber_method( perma_base.permafrost_component ):
 

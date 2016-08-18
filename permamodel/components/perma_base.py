@@ -45,10 +45,10 @@
 
 import numpy as np
 import os
-import gdal
-from gdalconst import *  # Import GDAL constants, eg GA_ReadOnly
+#import gdal
+#from gdalconst import *  # Import GDAL constants, eg GA_ReadOnly
 import osr
-from pyproj import Proj, transform
+#from pyproj import Proj, transform
 
 from permamodel.utils import BMI_base
 from permamodel.utils import model_input
@@ -536,6 +536,10 @@ class permafrost_component( BMI_base.BMI_component ):
     # CRU geotiff file interpretation routines
     # ----------------------------------------
 
+    """
+
+    WARNING: These don't work "automagically" because GDAL is busted in Python
+
     def get_cru_indexes_from_lon_lat(self, lon, lat, month, year):
         # Inspired by:
         #   http://gis.stackexchange.com/questions/122335/using-gdals-getprojection-information-to-make-a-coordinate-conversion-in-pyproj
@@ -738,6 +742,8 @@ class permafrost_component( BMI_base.BMI_component ):
         (i, j) = self.get_cru_indexes_from_lon_lat(lon, lat, month, year)
         temperature = self.get_precipitation_from_cru_indexes(i, j, month, year)
         return temperature
+
+    """
 
     def get_permafrost_data_directory(self):
         datadir = os.environ.get('PERMAMODEL_DATADIR')
