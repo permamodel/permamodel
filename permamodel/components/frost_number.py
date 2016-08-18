@@ -9,7 +9,7 @@ from permamodel.tests import examples_directory
 import os
 #import gdal
 #from gdalconst import *  # Import standard constants, such as GA_ReadOnly
-import osr
+#import osr
 #from pyproj import Proj, transform
 
 class frostnumber_method( perma_base.permafrost_component ):

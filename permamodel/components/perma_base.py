@@ -47,7 +47,7 @@ import numpy as np
 import os
 #import gdal
 #from gdalconst import *  # Import GDAL constants, eg GA_ReadOnly
-import osr
+#import osr
 #from pyproj import Proj, transform
 
 from permamodel.utils import BMI_base
