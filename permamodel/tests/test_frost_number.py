@@ -67,5 +67,3 @@ def test_frostnumber_method_has_date_and_location():
     assert(fn.year == fn.start_year)
 
 
-def test_mark_is_god():
-    print(permamodel_directory + '****************************')

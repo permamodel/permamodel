@@ -49,7 +49,7 @@ def test_frost_number_update_increments_year():
     fn = frost_number.frostnumber_method()
     fn.initialize(cfg_file=onesite_multiyear_filename)
 
-    fn.update(dt=fn.dt)
+    fn.update()
     assert(fn.year == fn.start_year + fn.dt)
     assert(fn.year != fn.start_year)
 
@@ -58,7 +58,7 @@ def test_frost_number_update_changes_air_frost_number():
     fn.initialize(cfg_file=onesite_multiyear_filename)
 
     afn0 = fn.air_frost_number
-    fn.update(dt=fn.dt)
+    fn.update()
     afn1 = fn.air_frost_number
     assert(afn0 != afn1)
 
@@ -67,7 +67,7 @@ def test_frost_number_runs_several_years():
     fn.initialize(cfg_file=onesite_multiyear_filename)
 
     while fn.year < fn.end_year:
-        fn.update(dt=fn.dt)
+        fn.update()
 
     assert(fn.output is not None)
 
@@ -95,6 +95,17 @@ def test_frost_number_implements_finalize():
     fn.update_until(fn.end_year)
     fn.finalize()
 
+def test_frost_number_get_current_time_returns_scalar_float():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file=onesite_multiyear_filename)
+    current_time = fn.get_current_time()
+    assert(isinstance(current_time, float))
+
+def  test_frost_number_get_end_time_returns_scalar_float():
+    fn = frost_number.frostnumber_method()
+    fn.initialize(cfg_file=onesite_multiyear_filename)
+    end_time = fn.get_end_time()
+    assert(isinstance(end_time, float))
 
 
 

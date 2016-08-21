@@ -9,7 +9,7 @@ from permamodel.tests import examples_directory
 import os
 #import gdal
 #from gdalconst import *  # Import standard constants, such as GA_ReadOnly
-import osr
+#import osr
 #from pyproj import Proj, transform
 
 class frostnumber_method( perma_base.permafrost_component ):
@@ -182,6 +182,10 @@ class frostnumber_method( perma_base.permafrost_component ):
     #   read_input_files()
     #-------------------------------------------------------------------
 
+    def get_current_time(self):
+        # For the frostnumber component, the time is simply the year
+        return self.year
+
     def initialize_permafrost_component(self):
         # Here, initialize the variables which are unique to the
         #   frost_number component 
@@ -245,12 +249,13 @@ class frostnumber_method( perma_base.permafrost_component ):
     def calculate_stefan_frost_number(self):
         self.stefan_frost_number = -1.0
 
-    def update(self, dt=-1.0):
+    #def update(self, dt=-1.0):  Remove the optional dt
+    def update(self):
         # Ensure that we've already initialized the run
         assert(self.status == 'initialized')
 
         # Update the time
-        self.year += dt
+        self.year += self.dt
 
         # Get new input values
         self.read_input_files()
@@ -273,7 +278,7 @@ class frostnumber_method( perma_base.permafrost_component ):
         # Implement the loop to update until stop_year
         year = self.year
         while year < stop_year:
-            self.update(dt=self.dt)
+            self.update()
             year = self.year
 
     def compute_degree_days(self):
