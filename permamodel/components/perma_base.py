@@ -57,7 +57,7 @@ from permamodel.utils import model_input
 
 
 #-----------------------------------------------------------------------
-class permafrost_component( BMI_base.BMI_component ):
+class PermafrostComponent( BMI_base.BMI_component ):
 
 
     #------------------------------------------------------------

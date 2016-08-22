@@ -20,11 +20,11 @@ def test_testing():
 # Tests that the frost_number module is importing
 # ---------------------------------------------------
 def test_can_initialize_frost_number_module():
-    fn = frost_number.frostnumber_method
+    fn = frost_number.FrostnumberMethod
     assert(True)
 
 def test_have_output_var_names():
-    fn = frost_number.frostnumber_method
+    fn = frost_number.FrostnumberMethod
     assert(fn._output_var_names != None)
 
 # ---------------------------------------------------
@@ -43,23 +43,13 @@ def test_environment_variables_set():
 # Tests that input data is being read correctly
 # ---------------------------------------------------
 def test_can_initialize_frostnumber_method_from_file():
-    fn = frost_number.frostnumber_method()
-    """
-    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
-                                '/examples/'),
-                 'Fairbanks_frostnumber_method.cfg')
-    """
+    fn = frost_number.FrostnumberMethod()
     cfg_file = os.path.join(examples_directory, 
                             'Fairbanks_frostnumber_method.cfg')
     fn.initialize(cfg_file=cfg_file)
 
 def test_frostnumber_method_has_date_and_location():
-    fn = frost_number.frostnumber_method()
-    '''
-    cfg_file = os.path.join(os.environ.get('PERMAMODEL_EXAMPLEDIR',\
-                                '/examples/'),
-                 'Fairbanks_frostnumber_method.cfg')
-    '''
+    fn = frost_number.FrostnumberMethod()
     cfg_file = os.path.join(examples_directory, 
                             'Fairbanks_frostnumber_method.cfg')
     fn.initialize(cfg_file=cfg_file)

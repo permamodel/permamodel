@@ -12,7 +12,7 @@ import os
 #import osr
 #from pyproj import Proj, transform
 
-class frostnumber_method( perma_base.permafrost_component ):
+class FrostnumberMethod( perma_base.PermafrostComponent ):
 
     #-------------------------------------------------------------------
     _att_map = {
