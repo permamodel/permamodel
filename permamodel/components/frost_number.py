@@ -159,10 +159,6 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
 
     def read_input_files(self):
-        #print("in read_input_files for year %d" % self.year)
-
-        #rti = self.rti # has a problem with loading rti: do not know where its been initialized
-
         #-------------------------------------------------------
         # All grids are assumed to have a data type of Float32.
         #-------------------------------------------------------
@@ -175,12 +171,6 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
                                                    self.T_air_max_type)
         if (T_air_max != None): 
             self.T_air_max = T_air_max
-
-        # <If we were getting Temperature values from a file, we'd do that here
-        pass
-
-    #   read_input_files()
-    #-------------------------------------------------------------------
 
     def get_current_time(self):
         # For the frostnumber component, the time is simply the year
@@ -570,3 +560,12 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
 
     def get_end_time(self):
         return self.end_year
+
+    # ----------------------------------
+    # Functions added to pass bmi-tester
+    # ----------------------------------
+    def get_grid_type(arg1, arg2):
+        print("arg1: %s" % arg1)
+        print("arg2: %s" % arg2)
+        return 'scalar'
+

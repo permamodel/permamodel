@@ -188,6 +188,7 @@ class PermafrostComponent( BMI_base.BMI_component ):
         #   they should be removed, but are simply defined here for brevity
 
         SILENT = True
+        SILENT = False
         mode = "nondriver"
 
         if not(SILENT):
@@ -196,7 +197,19 @@ class PermafrostComponent( BMI_base.BMI_component ):
 
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
         self.mode       = mode
-        self.cfg_file   = cfg_file
+
+        # Set the cfg file if it exists, otherwise, a default
+        print("cfg_file: %s" % cfg_file)
+        if os.path.isfile(cfg_file):
+            self.cfg_file = cfg_file
+        else:
+            cfg_file = \
+            "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg"
+            print("No valid configuration file specified, trying: ")
+            print("   %s" %
+                  cfg_file)
+            self.cfg_file = cfg_file
+
         #print mode, cfg_file
 
         #-----------------------------------------------
@@ -237,6 +250,7 @@ class PermafrostComponent( BMI_base.BMI_component ):
             self.Hvgt   = self.initialize_scalar(0, dtype='float64')
             self.Dvf    = self.initialize_scalar(0, dtype='float64')
             self.Dvt    = self.initialize_scalar(0, dtype='float64')
+            self.start_year    = self.initialize_scalar(0, dtype='float64')
             self.DONE   = True
             self.status = 'initialized'
             return

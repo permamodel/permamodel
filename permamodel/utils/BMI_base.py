@@ -1558,7 +1558,9 @@ class BMI_component:
         # the initialize() method before now.
         #---------------------------------------
         # print '#### CALLING read_config_file()...'
+
         self.read_config_file()
+
         # print '#### AFTER read_config_file():'
         # print '#### in_directory  =', self.in_directory
         # print '#### out_directory =', self.out_directory
