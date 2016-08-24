@@ -30,14 +30,16 @@ def test_have_output_var_names():
 # ---------------------------------------------------
 # Test that environment variables have been set
 # ---------------------------------------------------
-def test_environment_variables_set():
-    env_var_to_test = "PERMAMODEL_EXAMPLEDIR"
-    if not os.environ.get(env_var_to_test):
-        raise ValueError('Environment variable %s not set', env_var_to_test)
-
-    env_var_to_test = "PERMAMODEL_DATADIR"
-    if not os.environ.get(env_var_to_test):
-        raise ValueError('Environment variable %s not set', env_var_to_test)
+# This is obsolete because we now get the permamodel directory
+# using calls to os.path....
+#def test_environment_variables_set():
+#    env_var_to_test = "PERMAMODEL_EXAMPLEDIR"
+#    if not os.environ.get(env_var_to_test):
+#        raise ValueError('Environment variable %s not set', env_var_to_test)
+#
+#    env_var_to_test = "PERMAMODEL_DATADIR"
+#    if not os.environ.get(env_var_to_test):
+#        raise ValueError('Environment variable %s not set', env_var_to_test)
 
 # ---------------------------------------------------
 # Tests that input data is being read correctly
