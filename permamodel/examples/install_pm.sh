@@ -42,10 +42,12 @@ fi
 
 # Install the latest miniconda repository
 echo "Installing miniconda in $dirname..."
-bash ./miniconda.sh -b -p $(pwd)/conda
+#bash ./miniconda.sh -b -p $(pwd)/conda
+bash ./miniconda.sh -b -p $PWD/conda
 
 # Set up python environment
-PATH=$(pwd)/conda/bin:$PATH
+#PATH=$(pwd)/conda/bin:$PATH
+PATH=$PWD/conda/bin:$PATH
 
 # Install necessary and desired conda repository
 # Required, although these would be accomplished via pip from setup.py install
