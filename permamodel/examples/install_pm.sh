@@ -39,7 +39,6 @@ else
 	echo "Operating system not recognized as mac or linux: $this_os"
 	exit
 fi
-exit
 
 # Install the latest miniconda repository
 echo "Installing miniconda in $dirname..."
