@@ -27,8 +27,17 @@ mkdir $dirname && cd $dirname
 echo "$dirname successfully created"
 
 # Get the latest miniconda repository
+# First need to know whether on a Max or a PC
 echo "Downloading latest miniconda repository..."
-curl http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -o miniconda.sh
+this_os=`uname`
+if [ $this_os -eq 'Linux' ]; then
+  curl http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -o miniconda.sh
+elif [ $this_os -eq 'Darwin' ]; then
+  curl http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -o miniconda.sh
+else
+	echo "Operating system not recognized as mac or linux: $this_os"
+	exit
+fi
 
 # Install the latest miniconda repository
 echo "Installing miniconda in $dirname..."
