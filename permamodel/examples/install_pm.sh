@@ -30,14 +30,16 @@ echo "$dirname successfully created"
 # First need to know whether on a Max or a PC
 echo "Downloading latest miniconda repository..."
 this_os=`uname`
-if [ $this_os -eq 'Linux' ]; then
+echo "this_os: ...$this_os..."
+if [ $this_os = 'Linux' ]; then
   curl http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -o miniconda.sh
-elif [ $this_os -eq 'Darwin' ]; then
+elif [ $this_os = 'Darwin' ]; then
   curl http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -o miniconda.sh
 else
 	echo "Operating system not recognized as mac or linux: $this_os"
 	exit
 fi
+exit
 
 # Install the latest miniconda repository
 echo "Installing miniconda in $dirname..."
