@@ -4,6 +4,7 @@ test_frost_number.py
 """
 
 from permamodel.components import frost_number
+from permamodel.components import bmi_frost_number
 import os
 import numpy as np
 import pprint
@@ -24,7 +25,7 @@ def test_can_initialize_frost_number_module():
     assert(True)
 
 def test_have_output_var_names():
-    fn = frost_number.FrostnumberMethod
+    fn = bmi_frost_number.BmiFrostnumberMethod
     assert(fn._output_var_names != None)
 
 # ---------------------------------------------------

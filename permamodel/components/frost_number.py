@@ -5,7 +5,7 @@
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
-from permamodel.components import bmi_frost_number
+#from permamodel.components import bmi_frost_number
 from permamodel.tests import examples_directory
 import os
 #import gdal
@@ -42,8 +42,7 @@ class FrostnumberMethod( object ):
         if (T_air_max != None):
             self.T_air_max = T_air_max
 
-    ''' Overwritten.  Now in bmi_frost_number.py
-    def initialize_permafrost_component(self):
+    def initialize_frostnumber_component(self):
         # Note: Initialized from initialize() in perma_base.py
         print("Initializing for FrostnumberMethod")
         self._model = 'FrostNumber'
@@ -91,7 +90,6 @@ class FrostnumberMethod( object ):
 
         # Here, we should calculate the initial values of all the frost numbers
         self.calculate_frost_numbers()
-    '''
 
     def calculate_frost_numbers(self):
         # Calculate all the frost numbers using the current data

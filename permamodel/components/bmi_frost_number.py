@@ -5,12 +5,9 @@
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
+from permamodel.components import frost_number
 from permamodel.tests import examples_directory
 import os
-#import gdal
-#from gdalconst import *  # Import standard constants, such as GA_ReadOnly
-#import osr
-#from pyproj import Proj, transform
 
 """
 class FrostnumberMethod( frost_number.BmiFrostnumberMethod ):
@@ -104,6 +101,13 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         'frostnumber__stefan':                                '' }
 
     #-------------------------------------------------------------------
+    def __init__(self):
+        self._model = None
+        self._values = {}
+        self._var_units = {}
+        self._grids = {}
+        self._grid_type = {}
+
     def initialize(self, cfg_file=None):
 
         #---------------------------------------------------------
@@ -114,141 +118,12 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         # SILENT and mode were original optional arguments
         #   they should be removed, but are simply defined here for brevity
 
-        SILENT = False
+        self._model = FrostnumberMethod()
+        print("self._model: %s" % self._model)
+        exit()
 
-        if not(SILENT):
-            print 'Permafrost component: Initializing...'
-
-        self.status     = 'initializing'  # (OpenMI 2.0 convention)
-
-        # Set the cfg file if it exists, otherwise, a default
-        if os.path.isfile(cfg_file):
-            print("passed cfg_file: %s" % cfg_file)
-            self.cfg_file = cfg_file
-        else:
-            cfg_file = \
-            "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg"
-            print("No valid configuration file specified, trying: ")
-            print("   %s" % cfg_file)
-            self.cfg_file = cfg_file
-
-            if os.path.isfile(cfg_file):
-                print("Default config file exists: %s" % cfg_file)
-            else:
-                print("Default config file does not exist: ")
-                print("  %s" % cfg_file)
-                raise(ValueError(
-                    "Default frostnumber config file %s does not exist" %\
-                    cfg_file))
-
-        #print mode, cfg_file
-
-        #-----------------------------------------------
-        # Load component parameters from a config file
-        #-----------------------------------------------
-        self.set_constants()           # in this file, unless overridden
-        self.initialize_config_vars()  # in BMI_base.py, unless overridden
-        # self.initialize_config_vars() reads the configuration file
-        # using read_config_file() in BMI_base.py
-
-        #---------------------------------------------
-        # Extract soil texture from Grid Soil Database (Netcdf files)
-        # according to locations
-        #---------------------------------------------
-        # ScottNote: this isn't needed for all models, 
-        #   so I have commented it out here
-        #self.initialize_soil_texture_from_GSD()
-
-        self.initialize_time_vars()  # These time values refer to clock time
-
-        if (self.comp_status == 'Disabled'):
-            #########################################
-            #  DOUBLE CHECK THIS; SEE NOTES ABOVE
-            #########################################
-               ####### and (ep.method != 2):  ??????
-            if not(SILENT):
-                print 'Permafrost component: Disabled.'
-            self.lat    = self.initialize_scalar(0, dtype='float64')
-            self.lon    = self.initialize_scalar(0, dtype='float64')
-            self.T_air  = self.initialize_scalar(0, dtype='float64')
-            self.h_snow = self.initialize_scalar(0, dtype='float64')
-            self.vwc_H2O= self.initialize_scalar(0, dtype='float64')
-            self.Hvgf   = self.initialize_scalar(0, dtype='float64')
-            self.Hvgt   = self.initialize_scalar(0, dtype='float64')
-            self.Dvf    = self.initialize_scalar(0, dtype='float64')
-            self.Dvt    = self.initialize_scalar(0, dtype='float64')
-            self.start_year    = self.initialize_scalar(0, dtype='float64')
-            self.DONE   = True
-            self.status = 'initialized'
-            return
-
-        #---------------------------------------------
-        # Open input files needed to initialize vars
-        #---------------------------------------------
-        self.open_input_files()
-        self.read_input_files()
-
-        #---------------------------
-        # Initialize computed vars
-        #---------------------------
-        self.check_input_types()  # (maybe not used yet)
-
-        #-----------------------------------------------
-        # Load component-specific parameters
-        #-----------------------------------------------
-        print("Starting specific component initialization...")
-        #self.initialize_permafrost_component()
-        # Note: this is just copied here....
-    def initialize_permafrost_component(self):
-        # Note: Initialized from initialize() in perma_base.py
-        print("Initializing for FrostnumberMethod")
-        self._model = 'FrostNumber'
-
-        # Here, initialize the variables which are unique to the
-        # frost_number component 
-
-        # Set the initial values, units, grids and grid_types of 
-        # input and output variables
-        # Note: these names should match the list of _input_var_names 
-        # and _output_var_names defined at the top of this class definition
-
-
-
-        """
-        _input_var_names = ('land_surface_air__temperature',
-                        'land_surface__latitude',
-                        'land_surface__longitude',
-        _output_var_names = ('frost_number_air',
-                         'frost_number_surface',
-                         'frost_number_stefan',
-        """
-
-        # Initialize the year to the start year
-        #  or to zero if it doesn't exist
-        try:
-            self.year = self.start_year
-        except AttributeError:
-            self.year = 0
-            self.start_year = 0
-            self.end_year = 0
-
-        # Ensure that the end_year is not before the start_year
-        # If no end_year is given, 
-        #   it is assumed that this will run for one year 
-        #   so the end_year is the same as the start_year
-        try:
-            assert(self.end_year >= self.start_year)
-        except AttributeError:
-            self.end_year = self.start_year
-
-        # Create a dictionary to hold the output values
-        # (this is unique to frost_number()
-        self.output = {}
-
-        # Here, we should calculate the initial values of all the frost numbers
-        self.calculate_frost_numbers()
-
-
+        self.initialize_from_config_file(cfg_file=cfg_file)
+        self.initialize_frostnumber_component()
 
         self.status = 'initialized'
 

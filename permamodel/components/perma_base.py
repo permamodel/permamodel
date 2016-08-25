@@ -171,7 +171,7 @@ class PermafrostComponent( BMI_base.BMI_component ):
         #   Those should be moved to that component instead of perma_base
         print("  no specific component initialization performed")
 
-    def initialize(self, cfg_file=None):
+    def initialize_from_config_file(self, cfg_file=None):
 
         #---------------------------------------------------------
         # Notes:  Need to make sure than h_swe matches h_snow ?
