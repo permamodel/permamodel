@@ -169,60 +169,54 @@ class PermafrostComponent( BMI_base.BMI_component ):
     def initialize_permafrost_component(self):
         # Each PermaModel component may have its own initialization needs
         #   Those should be moved to that component instead of perma_base
-        pass
+        print("  no specific component initialization performed")
 
-    #def initialize(self):
     def initialize(self, cfg_file=None):
 
         #---------------------------------------------------------
         # Notes:  Need to make sure than h_swe matches h_snow ?
         #         User may have entered incompatible values.
         #---------------------------------------------------------
-        # (3/14/07) If the Energy Balance method is used for ET,
-        # then we must initialize and track snow depth even if
-        # there is no snowmelt method because the snow depth
-        # affects the ET rate.  Otherwise, return to caller.
-        #---------------------------------------------------------
 
         # SILENT and mode were original optional arguments
         #   they should be removed, but are simply defined here for brevity
 
-        SILENT = True
         SILENT = False
-        mode = "nondriver"
 
         if not(SILENT):
-            print ' '
             print 'Permafrost component: Initializing...'
 
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
-        self.mode       = mode
 
         # Set the cfg file if it exists, otherwise, a default
-        print("cfg_file: %s" % cfg_file)
         if os.path.isfile(cfg_file):
+            print("passed cfg_file: %s" % cfg_file)
             self.cfg_file = cfg_file
         else:
             cfg_file = \
             "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg"
             print("No valid configuration file specified, trying: ")
-            print("   %s" %
-                  cfg_file)
+            print("   %s" % cfg_file)
             self.cfg_file = cfg_file
+
+            if os.path.isfile(cfg_file):
+                print("Default config file exists: %s" % cfg_file)
+            else:
+                print("Default config file does not exist: ")
+                print("  %s" % cfg_file)
+                raise(ValueError(
+                    "Default frostnumber config file %s does not exist" %\
+                    cfg_file))
 
         #print mode, cfg_file
 
         #-----------------------------------------------
         # Load component parameters from a config file
         #-----------------------------------------------
-        self.set_constants()
-        self.initialize_config_vars()
-
-        # At this stage we are going to ignore read_grid_info b/c
-        # we do not have rti file associated with our model
-        # we also skipping the basin_vars which calls the outlets
-        #self.read_grid_info()
-        #self.initialize_basin_vars()
+        self.set_constants()           # in this file, unless overridden
+        self.initialize_config_vars()  # in BMI_base.py, unless overridden
+        # self.initialize_config_vars() reads the configuration file
+        # using read_config_file() in BMI_base.py
 
         #---------------------------------------------
         # Extract soil texture from Grid Soil Database (Netcdf files)
@@ -232,7 +226,7 @@ class PermafrostComponent( BMI_base.BMI_component ):
         #   so I have commented it out here
         #self.initialize_soil_texture_from_GSD()
 
-        self.initialize_time_vars()
+        self.initialize_time_vars()  # These time values refer to clock time
 
         if (self.comp_status == 'Disabled'):
             #########################################
@@ -269,6 +263,7 @@ class PermafrostComponent( BMI_base.BMI_component ):
         #-----------------------------------------------
         # Load component-specific parameters
         #-----------------------------------------------
+        print("Starting specific component initialization...")
         self.initialize_permafrost_component()
 
         self.status = 'initialized'
@@ -447,7 +442,7 @@ class PermafrostComponent( BMI_base.BMI_component ):
         #-----------------------------------------
         if (time_seconds is None):
             time_seconds = self.time_sec
-        model_time = int(time_seconds)
+        eodel_time = int(time_seconds)
 
         #----------------------------------------
         # Save computed values at sampled times

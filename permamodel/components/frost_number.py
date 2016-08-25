@@ -14,12 +14,43 @@ import os
 
 class FrostnumberMethod( perma_base.PermafrostComponent ):
 
+    """ Implement the Nelson-Outcalt Frost numbers """
+
+    # Set up the name of this permafrost module
+    _name = 'Frost number module'
+
+    # Indicate the CSDMS standard names of input and output variables
+    _input_var_names = ('land_surface_air__temperature',
+                        'land_surface__latitude',
+                        'land_surface__longitude',
+                       )
+                       # other standard names that might apply?
+                       # land_surface__temperature
+                       # model__initial_time_step
+                       # model__max_allowed_time_step
+                       # model__min_allowed_time_step
+                       # model__run_time
+                       # model__spinup_time
+                       # model__start_time
+                       # model__stop_time
+                       # model__time
+                       # model__time_step
+                       # model__time_step_count
+    _output_var_names = ('frost_number_air',
+                         'frost_number_surface',
+                         'frost_number_stefan',
+                        )
+                        # other standard names that might apply?
+                        # soil_permafrost__thickness
+                        # soil_permafrost_top__depth
+                        # soil_permafrost_bottom__depth
+
     #-------------------------------------------------------------------
     _att_map = {
     # NOTE: this will change in the future
         'model_name':         'PermaModel_frostnumber_method',
         'version':            '0.1',
-        'author_name':        'Scott Stewart and Elchin Jafarov',
+        'author_name':        'J. Scott Stewart and Elchin Jafarov',
         'grid_type':          'none',
         'time_step_type':     'fixed',
         'step_method':        'explicit',
@@ -62,12 +93,13 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         'atmosphere_bottom_air__temperature_min':             'deg_C',
         'atmosphere_bottom_air__temperature_max':             'deg_C',
         'datetime__start':                                    'year',
-        'datetime__end':                                      'end',
+        'datetime__end':                                      'year',
         'frostnumber__air':                                   '',
         'frostnumber__surface':                               '',
         'frostnumber__stefan':                                '' }
 
     #-------------------------------------------------------------------
+
     def get_attribute(self, att_name):
 
         try:
@@ -133,30 +165,16 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
     #   check_input_types()
     #-------------------------------------------------------------------
     def open_input_files(self):
-        # this function will work only if filename is not empty
-        #self.T_air_min_file   = './permamodel/examples/fn_t_air_min.dat'
         self.T_air_min_file   = os.path.join(examples_directory,
                                              'fn_t_air_min.dat')
         self.T_air_min_unit = open(self.T_air_min_file, "r")
 
-        #self.T_air_max_file   = './permamodel/examples/fn_t_air_max.dat'
         self.T_air_max_file   = os.path.join(examples_directory,
                                              'fn_t_air_max.dat')
         self.T_air_max_unit = open(self.T_air_max_file, "r")
 
         # lat and lon not implemented yet
 
-        #self.lat_file   = './permamodel/examples/fn_lat.dat'
-        #self.lat_unit = open(self.lat_file, "r")
-
-        #self.lon_file   = './permamodel/examples/fn_lon.dat'
-        #self.lon_unit = open(self.lon_file, "r")
-
-        # This isn't exactly "opening an input file", but it is an init
-        #self.year = self.start_year
-
-    #   open_input_files()
-    #-------------------------------------------------------------------
 
     def read_input_files(self):
         #-------------------------------------------------------
@@ -164,12 +182,12 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         #-------------------------------------------------------
         T_air_min = model_input.read_next_modified(self.T_air_min_unit,
                                                    self.T_air_min_type)
-        if (T_air_min != None): 
+        if (T_air_min != None):
             self.T_air_min = T_air_min
 
         T_air_max = model_input.read_next_modified(self.T_air_max_unit,
                                                    self.T_air_max_type)
-        if (T_air_max != None): 
+        if (T_air_max != None):
             self.T_air_max = T_air_max
 
     def get_current_time(self):
@@ -177,8 +195,28 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         return self.year
 
     def initialize_permafrost_component(self):
+        # Note: Initialized from initialize() in perma_base.py
+        print("Initializing for FrostnumberMethod")
+        self._model = 'FrostNumber'
+
         # Here, initialize the variables which are unique to the
-        #   frost_number component 
+        # frost_number component 
+
+        # Set the initial values, units, grids and grid_types of 
+        # input and output variables
+        # Note: these names should match the list of _input_var_names 
+        # and _output_var_names defined at the top of this class definition
+
+
+
+        """
+        _input_var_names = ('land_surface_air__temperature',
+                        'land_surface__latitude',
+                        'land_surface__longitude',
+        _output_var_names = ('frost_number_air',
+                         'frost_number_surface',
+                         'frost_number_stefan',
+        """
 
         # Initialize the year to the start year
         #  or to zero if it doesn't exist
@@ -199,6 +237,7 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
             self.end_year = self.start_year
 
         # Create a dictionary to hold the output values
+        # (this is unique to frost_number()
         self.output = {}
 
         # Here, we should calculate the initial values of all the frost numbers

@@ -164,32 +164,27 @@ class BMI_component:
 
     def __init__(self):
 
-        ######################################################
-        # These should be obsolete now.
-        # self.CCA              = tf_utils.TF_Use_CCA()
-        # self.USE_GUI_SETTINGS = False
-        ######################################################
-
-        ## self.DEBUG    = True
         self.DEBUG       = False
         self.SKIP_ERRORS = False
-        self.SILENT      = True   # (new default: 11/16/11)
+        self.SILENT      = True
         self.REPORT      = False
         self.DONE        = False
-        self.status      = 'created'   # (OpenMI 2.0 conventions)
+        self.status      = 'created'
 
         self.in_directory     = None
         self.out_directory    = None
         self.site_prefix      = None
         self.case_prefix      = None
-        self.cfg_prefix       = None       ###### (9/18/14)
+        self.cfg_prefix       = None
         self.comp_status      = 'Enabled'
 
-        # NB! This probably won't work here, because a driver
-        #     may be instantiated later that then changes the
-        #     current working directory.
-##        self.cfg_directory  = os.getcwd()
-##        self.cfg_prefix     = 'Case5'
+        # These were added following the example in bmi_heat.py
+        self._model = None
+        self._values = {}
+        self._var_units = {}
+        self._grids = {}
+        self._grid_type = {}
+
 
     #   __init__()
     #-------------------------------------------------------------------
@@ -860,7 +855,6 @@ class BMI_component:
         ## self.set_constants()
         self.initialize_config_vars()  # calls check_directories().
         self.read_grid_info()
-        self.initialize_basin_vars()
         self.initialize_time_vars()
 
         #---------------------------------------------
@@ -1675,13 +1669,6 @@ class BMI_component:
 
     #   set_computed_input_vars()
     #-------------------------------------------------------------------
-    def initialize_basin_vars( self ):
-
-        #------------------------------------------------------------
-        # This saves outlet_file, outlet_IDs, outlet_ID, n_outlets,
-        # basin_area and basin_relief into self.  (9/19/14)
-        #------------------------------------------------------------
-        outlets.read_outlet_file( self )
 
     #   initialize_basin_vars()
     def initialize_soil_texture(self):
@@ -1705,66 +1692,6 @@ class BMI_component:
 
 
 
-    #-------------------------------------------------------------------
-    def initialize_basin_vars0( self ):
-
-        #------------------------------------------------------------
-        # Notes: Most of the TopoFlow and Erode components have the
-        #        ability to save values at monitored pixels.  This
-        #        method supports this by embedding an instance of
-        #        "basins_component" within each component.
-        #------------------------------------------------------------
-        # Notes: The routine BMI_base.read_grid_info() looks first
-        #        in "in_directory" and then in "out_directory" for
-        #        the RTI file, which supports TopoFlow and Erode.
-        #------------------------------------------------------------
-        ## from topoflow.utils import basins
-        ## import basins
-
-        self.bp = basins.basins_component()
-
-##        print 'self.cfg_prefix  =', self.cfg_prefix
-##        print 'self.site_prefix =', self.site_prefix    ##########
-##        print 'self.case_prefix =', self.case_prefix
-
-        #-----------------------------------------------------
-        # Copy all of this from the "host" component, since
-        # "basin components" don't have CFG files.\
-        #-----------------------------------------------------
-        # Added "out_directory" and "case_prefix" for Erode
-        # on (11/5/13) to fix a bug.
-        #-----------------------------------------------------
-        self.bp.site_prefix   = self.site_prefix
-        self.bp.case_prefix   = self.case_prefix
-        self.bp.in_directory  = self.in_directory
-        self.bp.out_directory = self.out_directory
-
-        ## This isn't actually used by basins.initialize.
-        cfg_file = (self.in_directory + self.site_prefix + '.rti')
-
-        self.bp.initialize( cfg_file=cfg_file,
-                            SILENT=not(self.DEBUG) )
-
-        #-------------------------------
-        # Store the outlet IDs in self
-        #-------------------------------
-        outlet_IDs = self.bp.outlet_IDs
-        outlet_ID  = outlet_IDs[0]
-        self.outlet_IDs = (outlet_IDs / self.nx, outlet_IDs % self.nx)
-        self.outlet_ID  = (outlet_ID  / self.nx, outlet_ID  % self.nx)
-
-##        self.outlet_IDs = outlet_IDs   # (long-int calendar indices)
-##        self.outlet_ID  = outlet_ID
-
-        #--------------------------------------------------
-        # Before 5/14/10, get outlet_IDs from the
-        # basins port of a Basins component.  Also,
-        # every initialize() called "store_outlet_IDs()".
-        #--------------------------------------------------
-        # outlet_IDs = self.bp.get_vector_long('outlet_IDs')
-
-    #   initialize_basin_vars0()
-    #-------------------------------------------------------------------
     #-------------------------------------------------------------------
     def prepend_directory(self, file_list, INPUT=True):
 
