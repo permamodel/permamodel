@@ -40,5 +40,5 @@ GIPL
 
 GIPL is a detailed numerical model that solves for the temperature profile
 of a soil column given its material properties and the temperature and
-precipitation conditions it experiences.
+precipitation conditions it experiences. For more information please see <https://github.com/Elchin/GIPL> 
 
