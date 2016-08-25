@@ -13,7 +13,8 @@ import os
 #import osr
 #from pyproj import Proj, transform
 
-class FrostnumberMethod( bmi_frost_number.BmiFrostnumberMethod ):
+#class FrostnumberMethod( bmi_frost_number.BmiFrostnumberMethod ):
+class FrostnumberMethod( object ):
 
     def open_input_files(self):
         self.T_air_min_file   = os.path.join(examples_directory,
@@ -41,6 +42,7 @@ class FrostnumberMethod( bmi_frost_number.BmiFrostnumberMethod ):
         if (T_air_max != None):
             self.T_air_max = T_air_max
 
+    ''' Overwritten.  Now in bmi_frost_number.py
     def initialize_permafrost_component(self):
         # Note: Initialized from initialize() in perma_base.py
         print("Initializing for FrostnumberMethod")
@@ -89,6 +91,7 @@ class FrostnumberMethod( bmi_frost_number.BmiFrostnumberMethod ):
 
         # Here, we should calculate the initial values of all the frost numbers
         self.calculate_frost_numbers()
+    '''
 
     def calculate_frost_numbers(self):
         # Calculate all the frost numbers using the current data
@@ -390,12 +393,4 @@ class FrostnumberMethod( bmi_frost_number.BmiFrostnumberMethod ):
             for year in sorted(self.output.keys()):
                 f_out.write("Year: %d  output=%s\n" % (year,self.output[year]))
 
-
-    # ----------------------------------
-    # Functions added to pass bmi-tester
-    # ----------------------------------
-    def get_grid_type(arg1, arg2):
-        print("arg1: %s" % arg1)
-        print("arg2: %s" % arg2)
-        return 'scalar'
 
