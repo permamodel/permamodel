@@ -6,6 +6,7 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 from permamodel.components import frost_number
+from permamodel.components.perma_base import *
 from permamodel.tests import examples_directory
 import os
 
@@ -118,13 +119,11 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         # SILENT and mode were original optional arguments
         #   they should be removed, but are simply defined here for brevity
 
-        self._model = FrostnumberMethod()
-        print("self._model: %s" % self._model)
-        exit()
+        self._model = frost_number.FrostnumberMethod()
 
-        self.initialize_from_config_file(cfg_file=cfg_file)
-        self.initialize_frostnumber_component()
-
+        print("Attempting...")
+        self._model.initialize_from_config_file(cfg_file=cfg_file)
+        self._model.initialize_frostnumber_component()
         self.status = 'initialized'
 
 
@@ -169,89 +168,64 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
 
     #   get_var_units()
     #-------------------------------------------------------------------
-    def check_input_types(self):
-        """
-        this functionality is not used for frostnumber_method
-        """
-        return
-
-        #--------------------------------------------------
-        # Notes: rho_H2O, Cp_snow, rho_air and Cp_air are
-        #        currently always scalars.
-        #--------------------------------------------------
-        """
-        are_scalars = np.array([
-                          self.is_scalar('lat'),
-                          self.is_scalar('lon'),
-                          self.is_scalar('T_air_min'),
-                          self.is_scalar('T_air_max'),
-                          self.is_scalar('start_year'),
-                          self.is_scalar('end_year') ])
-
-        self.ALL_SCALARS = np.all(are_scalars)
-        """
-
-    #   check_input_types()
-    #-------------------------------------------------------------------
-
     def get_current_time(self):
         # For the frostnumber component, the time is simply the year
         return self.year
 
     def update(self):
         # Ensure that we've already initialized the run
-        assert(self.status == 'initialized')
+        assert(self._model.status == 'initialized')
 
         # Update the time
-        self.year += self.dt
+        self._model.year += self._model.dt
 
         # Get new input values
-        self.read_input_files()
+        self._model.read_input_files()
 
         # Calculate the new frost number values
-        self.calculate_frost_numbers()
+        self._model.calculate_frost_numbers()
 
     def update_until(self, stop_year):
         # Ensure that stop_year is at least the current year
-        if stop_year < self.year:
+        if stop_year < self._model.year:
             print("Warning: update_until year is less than current year")
             print("  no update run")
             return
 
-        if stop_year > self.end_year:
+        if stop_year > self._model.end_year:
             print("Warning: update_until year was greater than end_year")
             print("  setting stop_year to end_year")
             stop_year = self.end_year
 
         # Implement the loop to update until stop_year
-        year = self.year
+        year = self._model.year
         while year < stop_year:
             self.update()
-            year = self.year
+            year = self._model.year
 
     def finalize(self, SILENT=True):
         # Finish with the run
-        self.status = 'finalizing'  # (OpenMI)
+        self._model.status = 'finalizing'  # (OpenMI)
 
         # Close the input files
-        self.close_input_files()   # Close any input files
+        self._model.close_input_files()   # Close any input files
 
         # Write output last output
-        self.write_output_to_file(SILENT=True)
+        self._model.write_output_to_file(SILENT=True)
 
         # Close the output files
-        self.close_output_files()
+        self._model.close_output_files()
 
         # Done finalizing  
-        self.status = 'finalized'  # (OpenMI)
+        self._model.status = 'finalized'  # (OpenMI)
 
         # Print final report, as desired
         if not SILENT:
-            self.print_final_report(\
+            self._model.print_final_report(\
                     comp_name='Permamodel FrostNumber component')
 
     def get_end_time(self):
-        return self.end_year
+        return self._model.end_year
 
     # ----------------------------------
     # Functions added to pass bmi-tester

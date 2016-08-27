@@ -5,6 +5,7 @@
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
+#from permamodel.components.perma_base import *
 #from permamodel.components import bmi_frost_number
 from permamodel.tests import examples_directory
 import os
@@ -14,7 +15,7 @@ import os
 #from pyproj import Proj, transform
 
 #class FrostnumberMethod( bmi_frost_number.BmiFrostnumberMethod ):
-class FrostnumberMethod( object ):
+class FrostnumberMethod( perma_base.PermafrostComponent ):
 
     def open_input_files(self):
         self.T_air_min_file   = os.path.join(examples_directory,
@@ -380,6 +381,32 @@ class FrostnumberMethod( object ):
 
     #   close_input_files()
     #-------------------------------------------------------------------
+
+    def check_input_types(self):
+        """
+        this functionality is not used for frostnumber_method
+        """
+        return
+        
+        #--------------------------------------------------
+        # Notes: rho_H2O, Cp_snow, rho_air and Cp_air are
+        #        currently always scalars.
+        #--------------------------------------------------
+        """
+        are_scalars = np.array([
+                          self.is_scalar('lat'),
+                          self.is_scalar('lon'),
+                          self.is_scalar('T_air_min'),
+                          self.is_scalar('T_air_max'), 
+                          self.is_scalar('start_year'),
+                          self.is_scalar('end_year') ])
+
+        self.ALL_SCALARS = np.all(are_scalars)
+        """
+
+    #   check_input_types()
+    #-------------------------------------------------------------------
+
 
     def write_output_to_file(self, SILENT=True):
         # Write the output to the screen unless we're silent
