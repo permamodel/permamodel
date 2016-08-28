@@ -22,6 +22,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
     # Set up the name of this permafrost module
     _name = 'Frost number module'
 
+    """ Note: all of these are defined below instead!
     # Indicate the CSDMS standard names of input and output variables
     _input_var_names = ('land_surface_air__temperature',
                         'land_surface__latitude',
@@ -47,6 +48,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
                         # soil_permafrost__thickness
                         # soil_permafrost_top__depth
                         # soil_permafrost_bottom__depth
+    """
 
     #-------------------------------------------------------------------
     _att_map = {
@@ -65,23 +67,25 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         'gui_yaml_file':      '/input/frostnumber_model.yaml',
         'time_units':         'years' }
 
-    _input_var_names = [
-        'latitude',
-        'longitude',
+    # This used to be [...] instead of (...)
+    _input_var_names = (
+        #'latitude',
+        #'longitude',
         'atmosphere_bottom_air__temperature_min',
         'atmosphere_bottom_air__temperature_max',
         'datetime__start',
-        'datetime__end']
+        'datetime__end')
 
-    _output_var_names = [
+    _output_var_names = (
         'frostnumber__air',            # Air Frost number
         'frostnumber__surface',        # Surface Frost number
-        'frostnumber__stefan' ]        # Stefan Frost number
+        'frostnumber__stefan' )        # Stefan Frost number
 
     _var_name_map = {
-    # NOTE: we need to look up for the corresponding standard names
-        'latitude':                                  'lat',
-        'longitude':                                 'lon',
+        # These are the corresponding CSDMS standard names
+        # NOTE: we need to look up for the corresponding standard names
+        #'latitude':                                  'lat',
+        #'longitude':                                 'lon',
         'atmosphere_bottom_air__temperature_min':    'T_air_min',
         'atmosphere_bottom_air__temperature_max':    'T_air_max',
         'datetime__start':                           'start_year',
@@ -90,16 +94,18 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         'frostnumber__surface':                      'frostnumber_surface',
         'frostnumber__stefan':                       'frostnumber_stefan'}
 
+
     _var_units_map = {
-        'latitude':                                           'deg',
-        'longitude':                                          'deg',
+        # These are the links to the model's variables' units
+        #'latitude':                                           'deg',
+        #'longitude':                                          'deg',
         'atmosphere_bottom_air__temperature_min':             'deg_C',
         'atmosphere_bottom_air__temperature_max':             'deg_C',
         'datetime__start':                                    'year',
         'datetime__end':                                      'year',
-        'frostnumber__air':                                   '',
-        'frostnumber__surface':                               '',
-        'frostnumber__stefan':                                '' }
+        'frostnumber__air':                                   'none',
+        'frostnumber__surface':                               'none',
+        'frostnumber__stefan':                                'none' }
 
     #-------------------------------------------------------------------
     def __init__(self):
@@ -114,6 +120,55 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
 
         self._model.initialize_from_config_file(cfg_file=cfg_file)
         self._model.initialize_frostnumber_component()
+
+        # Set the name of this component
+        self._name = "Permamodel Frostnumber Component"
+
+        # Verify that all input and output variable names are in the
+        # variable name and the units map
+        for varname in self._input_var_names:
+            assert(varname in self._var_name_map)
+            assert(varname in self._var_units_map)
+            #print("Input var %s is in the name map and the units map"\
+            #      % varname)
+        for varname in self._output_var_names:
+            assert(varname in self._var_name_map)
+            assert(varname in self._var_units_map)
+            #print("Output var %s is in the name map and the units map"\
+            #      % varname)
+
+        # Set the Frost Number grids, based on input and output variables
+        #print("Number of input variables: %d" % len(self._input_var_names))
+        #print("Number of output variables: %d" % len(self._output_var_names))
+
+        # Set the names and types of the grids
+        gridnumber = 0
+        for varname in self._input_var_names:
+            self._grids[gridnumber] = varname
+            self._grid_type[gridnumber] = 'scalar'
+            gridnumber += 1
+        for varname in self._output_var_names:
+            self._grids[gridnumber] = varname
+            self._grid_type[gridnumber] = 'scalar'
+            gridnumber += 1
+
+        # Set the internal (frost number) variables that correspond
+        # to the input and output variable names
+        # Note: since we used Topoflow's _var_name_map for this, it is that
+        self._values = _values = {
+        # These are the links to the model's variables and
+        # should be consistent with _var_name_map
+            #'latitude':                                  self._model.lat,
+            #'longitude':                                 self._model.lon,
+            'atmosphere_bottom_air__temperature_min':    self._model.T_air_min,
+            'atmosphere_bottom_air__temperature_max':    self._model.T_air_max,
+            'datetime__start':          self._model.start_year,
+            'datetime__end':            self._model.end_year,
+            'frostnumber__air':         self._model.frostnumber_air,
+            'frostnumber__surface':     self._model.frostnumber_surface,
+            'frostnumber__stefan':      self._model.frostnumber_stefan}
+
+        # initialize() tasks complete.  Update status.
         self.status = 'initialized'
 
     def get_attribute(self, att_name):
@@ -218,8 +273,101 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
     # ----------------------------------
     # Functions added to pass bmi-tester
     # ----------------------------------
-    def get_grid_type(arg1, arg2):
-        print("arg1: %s" % arg1)
-        print("arg2: %s" % arg2)
-        return 'scalar'
+    def get_grid_type(self, grid_number):
+        return self._grid_type[grid_number]
+
+    def get_time_step(self):
+        return self._model.dt
+
+    # Note: get_value_ref() copied from bmi_heat.py
+    def get_value_ref(self, var_name):
+        """Reference to values.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of variable as CSDMS Standard Name.
+
+        Returns
+        -------
+        array_like
+            Value array.
+        """
+        return self._values[var_name]
+
+    # Note: get_value() copied from bmi_heat.py
+    def get_value(self, var_name):
+        """Copy of values.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of variable as CSDMS Standard Name.
+
+        Returns
+        -------
+        array_like
+            Copy of values.
+        """
+        # Original version
+        #return self.get_value_ref(var_name).copy()
+
+        # Version to convert to numpy array for bmi-tester compliance
+        # Note: converting to np arrays on the fly here
+        # Note: float values don't have a copy() function
+        try:
+            return np.array(self.get_value_ref(var_name).copy())
+        except AttributeError:
+            return np.array(self.get_value_ref(var_name))
+
+    def get_component_name(self):
+        return self._name
+
+    # Copied from bmi_heat.py
+    def get_var_grid(self, var_name):
+        """Grid id for a variable.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of variable as CSDMS Standard Name.
+
+        Returns
+        -------
+        int
+            Grid id.
+        """
+        for grid_id, var_name_list in self._grids.items():
+            if var_name in var_name_list:
+                return grid_id
+
+    # Copied from bmi_heat.py, with 'var' substituting for 'grid'
+    def get_grid_shape(self, grid_id):
+        """Number of rows and columns of uniform rectilinear grid."""
+        #var_name = self._grids[grid_id][0]
+        var_name = self._grids[grid_id]
+        value = np.array(self.get_value_ref(var_name)).shape
+        #return len(np.array(self.get_value_ref(var_name)).shape)
+        return value
+
+    # Copied from bmi_heat.py, with 'var' substituting for 'grid'
+    def get_var_rank(self, var_id):
+        """Rank of grid.
+
+        Parameters
+        ----------
+        grid_id : int
+            Identifier of a grid.
+
+        Returns
+        -------
+        int
+            Rank of grid.
+        """
+        return len(self.get_grid_shape(self.get_var_grid(var_id)))
+
+
+
+
+
 

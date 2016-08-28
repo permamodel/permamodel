@@ -166,11 +166,6 @@ class PermafrostComponent( BMI_base.BMI_component ):
             exit(-1)
         return filename
 
-    def initialize_permafrost_component(self):
-        # Each PermaModel component may have its own initialization needs
-        #   Those should be moved to that component instead of perma_base
-        print("  no specific component initialization performed")
-
     def initialize_from_config_file(self, cfg_file=None):
 
         #---------------------------------------------------------
@@ -259,12 +254,6 @@ class PermafrostComponent( BMI_base.BMI_component ):
         # Initialize computed vars
         #---------------------------
         self.check_input_types()  # (maybe not used yet)
-
-        #-----------------------------------------------
-        # Load component-specific parameters
-        #-----------------------------------------------
-        print("Starting specific component initialization...")
-        self.initialize_permafrost_component()
 
         self.status = 'initialized'
 

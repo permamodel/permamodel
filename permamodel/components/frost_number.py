@@ -56,8 +56,6 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         # Note: these names should match the list of _input_var_names 
         # and _output_var_names defined at the top of this class definition
 
-
-
         """
         _input_var_names = ('land_surface_air__temperature',
                         'land_surface__latitude',
@@ -66,6 +64,11 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
                          'frost_number_surface',
                          'frost_number_stefan',
         """
+
+        # Initialize the output variables (internal names)
+        self.frostnumber_air = -1.0
+        self.frostnumber_surface = -1.0
+        self.frostnumber_stefan = -1.0
 
         # Initialize the year to the start year
         #  or to zero if it doesn't exist

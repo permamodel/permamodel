@@ -255,6 +255,7 @@ class BMI_component:
         #       returned values in this method and the next 2.
         #       Ordering hasn't been established for BMI yet?
         #-------------------------------------------------------
+        print("in BMI_base's get_grid_shape()")
         if not(hasattr( self, 'grid_info' )):
             self.read_grid_info()
 
