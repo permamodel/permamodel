@@ -20,8 +20,8 @@ def test_testing():
 # ---------------------------------------------------
 # Tests that the frost_number module is importing
 # ---------------------------------------------------
-def test_can_initialize_frost_number_module():
-    fn = frost_number.FrostnumberMethod
+def test_can_initialize_bmi_frost_number_module():
+    fn = bmi_frost_number.BmiFrostnumberMethod
     assert(True)
 
 def test_have_output_var_names():
@@ -46,17 +46,17 @@ def test_have_output_var_names():
 # Tests that input data is being read correctly
 # ---------------------------------------------------
 def test_can_initialize_frostnumber_method_from_file():
-    fn = frost_number.FrostnumberMethod()
+    fn = bmi_frost_number.BmiFrostnumberMethod()
     cfg_file = os.path.join(examples_directory, 
                             'Fairbanks_frostnumber_method.cfg')
     fn.initialize(cfg_file=cfg_file)
 
 def test_frostnumber_method_has_date_and_location():
-    fn = frost_number.FrostnumberMethod()
+    fn = bmi_frost_number.BmiFrostnumberMethod()
     cfg_file = os.path.join(examples_directory, 
                             'Fairbanks_frostnumber_method.cfg')
     fn.initialize(cfg_file=cfg_file)
-    assert(fn.year >= 0)
-    assert(fn.year == fn.start_year)
+    assert(fn._model.year >= 0)
+    assert(fn._model.year == fn._model.start_year)
 
 

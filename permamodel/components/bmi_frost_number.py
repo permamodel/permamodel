@@ -110,23 +110,11 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         self._grid_type = {}
 
     def initialize(self, cfg_file=None):
-
-        #---------------------------------------------------------
-        # Notes:  Need to make sure than h_swe matches h_snow ?
-        #         User may have entered incompatible values.
-        #---------------------------------------------------------
-
-        # SILENT and mode were original optional arguments
-        #   they should be removed, but are simply defined here for brevity
-
         self._model = frost_number.FrostnumberMethod()
 
-        print("Attempting...")
         self._model.initialize_from_config_file(cfg_file=cfg_file)
         self._model.initialize_frostnumber_component()
         self.status = 'initialized'
-
-
 
     def get_attribute(self, att_name):
 
@@ -170,7 +158,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
     def get_current_time(self):
         # For the frostnumber component, the time is simply the year
-        return self.year
+        return self._model.year
 
     def update(self):
         # Ensure that we've already initialized the run
