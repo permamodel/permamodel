@@ -320,6 +320,21 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         except AttributeError:
             return np.array(self.get_value_ref(var_name))
 
+    def get_var_type(self, var_name):
+        """Data type of variable.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of variable as CSDMS Standard Name.
+
+        Returns
+        -------
+        str
+            Data type.
+        """
+        return str(self.get_value_ref(var_name).dtype)
+
     def get_component_name(self):
         return self._name
 
