@@ -309,16 +309,16 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         array_like
             Copy of values.
         """
-        # Original version
-        #return self.get_value_ref(var_name).copy()
+        # Original version: from bmi_heat.py
+        return self.get_value_ref(var_name).copy()
 
         # Version to convert to numpy array for bmi-tester compliance
         # Note: converting to np arrays on the fly here
         # Note: float values don't have a copy() function
-        try:
-            return np.array(self.get_value_ref(var_name).copy())
-        except AttributeError:
-            return np.array(self.get_value_ref(var_name))
+        #try:
+        #    return np.array(self.get_value_ref(var_name).copy())
+        #except AttributeError:
+        #    return np.array(self.get_value_ref(var_name))
 
     def get_var_type(self, var_name):
         """Data type of variable.
