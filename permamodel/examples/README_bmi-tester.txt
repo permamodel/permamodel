@@ -13,5 +13,9 @@ Then:
 
 To use, go to the permamodel root directory (which gets installed when
 the permamodel repository is cloned to your machine):
-  bmi-tester --infile=./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg permamodel.components.frost_number.FrostnumberMethod
+
+  bmi-tester --infile=./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg permamodel.components.bmi_frost_number.BmiFrostnumberMethod
+
+
+  [OLD] bmi-tester --infile=./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg permamodel.components.frost_number.FrostnumberMethod
 

@@ -16,7 +16,6 @@ import os
 
 #class FrostnumberMethod( bmi_frost_number.BmiFrostnumberMethod ):
 class FrostnumberMethod( perma_base.PermafrostComponent ):
-
     def open_input_files(self):
         self.T_air_min_file   = os.path.join(examples_directory,
                                              'fn_t_air_min.dat')
@@ -49,11 +48,11 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         self._model = 'FrostNumber'
 
         # Here, initialize the variables which are unique to the
-        # frost_number component 
+        # frost_number component
 
-        # Set the initial values, units, grids and grid_types of 
+        # Set the initial values, units, grids and grid_types of
         # input and output variables
-        # Note: these names should match the list of _input_var_names 
+        # Note: these names should match the list of _input_var_names
         # and _output_var_names defined at the top of this class definition
 
         """
@@ -80,8 +79,8 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
             self.end_year = 0
 
         # Ensure that the end_year is not before the start_year
-        # If no end_year is given, 
-        #   it is assumed that this will run for one year 
+        # If no end_year is given,
+        #   it is assumed that this will run for one year
         #   so the end_year is the same as the start_year
         try:
             assert(self.end_year >= self.start_year)
@@ -173,7 +172,7 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
             T_average=(Th + Tc) / 2.0
             T_amplitude=(Th - Tc) / 2.0
 
-            """ this section shows how to read a series of temperatures 
+            """ this section shows how to read a series of temperatures
         elif (self.T_air_type != 'Scalar'):
             #wk = np.loadtxt('examples/temp_copy.txt', skiprows=1,unpack=False)
             temperature_filename = self.permafrost_dir +\
@@ -312,7 +311,7 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         Zs=np.mean(self.h_snow)
         # i am not sure what they mean by length of the annual temprature cycle
         # Something worthwhile discussing
-        P=2*np.pi/365; 
+        P=2*np.pi/365;
 
         c_s=7.79*self.Tw+2115                 #(eqn. 7)
         alpha_s=lambda_s/(c_s*rho_s)          #(eqn. 8)
@@ -390,7 +389,7 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         this functionality is not used for frostnumber_method
         """
         return
-        
+
         #--------------------------------------------------
         # Notes: rho_H2O, Cp_snow, rho_air and Cp_air are
         #        currently always scalars.
@@ -400,7 +399,7 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
                           self.is_scalar('lat'),
                           self.is_scalar('lon'),
                           self.is_scalar('T_air_min'),
-                          self.is_scalar('T_air_max'), 
+                          self.is_scalar('T_air_max'),
                           self.is_scalar('start_year'),
                           self.is_scalar('end_year') ])
 
