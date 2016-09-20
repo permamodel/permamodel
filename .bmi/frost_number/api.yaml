@@ -1,4 +1,4 @@
-name: frost_number_model
+name: FrostNumberModel
 language: python
 
 package: permamodel
