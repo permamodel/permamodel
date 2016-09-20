@@ -1,5 +1,5 @@
 name: FrostNumberModel
 language: python
 
-package: permamodel
-class: frostnumber_method
+package: permamodel.components.bmi_frost_number
+class: BmiFrostnumberMethod
