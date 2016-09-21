@@ -3,4 +3,4 @@ bmi_paths:
   - .bmi/ku
 
 build:
-  - python setup.py develop
+  - python setup.py install
