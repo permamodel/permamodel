@@ -37,17 +37,28 @@ case_prefix:
     type: string
     default: Case_test
     units: '-'
-T_air_min_type:
-  description: data type of T_air_min
+T_air_min_ptype:
+  description: Average temperature of coldest month in the modeled year
   value:
     type: choice
     default: Scalar
     choices:
-    - Scalar
-    - Time_Series
+      - Scalar
+      - Time_Series
+    units: degC
+T_air_min_dtype:
+  description: T_air_min data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - int
+      - long
+      - string
     units: '-'
 T_air_min:
-  description:  Average temp of coldest month in the modeled year
+  description: Scalar value
   value:
     type: float
     default: -9.0
@@ -55,24 +66,49 @@ T_air_min:
       min: -100.0
       max: 100.0
     units: degC
-T_air_max_type:
-  description: date type of T_air_max
+T_air_min_file:
+  description: Time series file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+T_air_max_ptype:
+  description: Average temperature of warmest month in the modeled year
   value:
     type: choice
     default: Scalar
     choices:
-    - Scalar
-    - Time_Series
+      - Scalar
+      - Time_Series
+    units: degC
+T_air_max_dtype:
+  description: T_air_max data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - int
+      - long
+      - string
     units: '-'
 T_air_max:
-  description:  Average temp of warmest month in the modeled year
+  description: Scalar value
   value:
     type: float
-    default: 15.4
+    default: -9.0
     range:
       min: -100.0
       max: 100.0
     units: degC
+T_air_max_file:
+  description: Time series file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
 start_year:
   description: begining of the simulation time 
   value:
