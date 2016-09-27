@@ -97,7 +97,7 @@ T_air_max:
   description: Scalar value
   value:
     type: float
-    default: -9.0
+    default: 15.4
     range:
       min: -100.0
       max: 100.0
