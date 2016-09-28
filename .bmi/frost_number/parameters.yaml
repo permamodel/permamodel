@@ -110,29 +110,29 @@ T_air_max_file:
     files:
       - 'off'
 start_year:
-  description: begining of the simulation time 
+  description: Simulation start time
   value:
     type: long
     default: 2000
     range:
       min: 1000
       max: 2200
-    units: year
+    units: yr
 end_year:
-  description: end of the simulation time 
+  description: Simulation end time
   value:
     type: long
-    default: 2000
+    default: 2001
     range:
       min: 1000
       max: 2200
-    units: year
+    units: yr
 dt:
-  description: Timestep for permamodel
+  description: Simulation timestep
   value:
     type: float
     default: 1.0
     range:
       min: 0.001
       max: 1e3
-    units: year
+    units: yr
