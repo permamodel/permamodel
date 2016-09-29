@@ -122,7 +122,7 @@ end_year:
   description: Simulation end time
   value:
     type: long
-    default: 2001
+    default: 2000
     range:
       min: 1000
       max: 2200
