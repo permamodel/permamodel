@@ -90,9 +90,9 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         'atmosphere_bottom_air__temperature_max':    'T_air_max',
         'datetime__start':                           'start_year',
         'datetime__end':                             'end_year',
-        'frostnumber__air':                          'frostnumber_air',
-        'frostnumber__surface':                      'frostnumber_surface',
-        'frostnumber__stefan':                       'frostnumber_stefan'}
+        'frostnumber__air':                          'air_frost_number',
+        'frostnumber__surface':                      'surface_frost_number',
+        'frostnumber__stefan':                       'stefan_frost_number'}
 
 
     _var_units_map = {
@@ -164,9 +164,9 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             'atmosphere_bottom_air__temperature_max':    self._model.T_air_max,
             'datetime__start':          self._model.start_year,
             'datetime__end':            self._model.end_year,
-            'frostnumber__air':         self._model.frostnumber_air,
-            'frostnumber__surface':     self._model.frostnumber_surface,
-            'frostnumber__stefan':      self._model.frostnumber_stefan}
+            'frostnumber__air':         self._model.air_frost_number,
+            'frostnumber__surface':     self._model.surface_frost_number,
+            'frostnumber__stefan':      self._model.stefan_frost_number}
 
         # initialize() tasks complete.  Update status.
         self.status = 'initialized'

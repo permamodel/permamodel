@@ -65,9 +65,9 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         """
 
         # Initialize the output variables (internal names)
-        self.frostnumber_air = np.float32(-1.0)
-        self.frostnumber_surface = np.float32(-1.0)
-        self.frostnumber_stefan = np.float32(-1.0)
+        self.air_frost_number = np.float32(-1.0)
+        self.surface_frost_number = np.float32(-1.0)
+        self.stefan_frost_number = np.float32(-1.0)
 
         # Initialize the year to the start year
         #  or to zero if it doesn't exist
@@ -124,10 +124,10 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
 
     def calculate_surface_frost_number(self):
         # For now, a dummy value
-        self.surface_frost_number = -1.0
+        self.surface_frost_number = np.float32(-1.0)
 
     def calculate_stefan_frost_number(self):
-        self.stefan_frost_number = -1.0
+        self.stefan_frost_number = np.float32(-1.0)
 
     def compute_degree_days(self):
 
