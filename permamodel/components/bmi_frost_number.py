@@ -103,9 +103,9 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         'atmosphere_bottom_air__temperature_max':             'deg_C',
         'datetime__start':                                    'year',
         'datetime__end':                                      'year',
-        'frostnumber__air':                                   'none',
-        'frostnumber__surface':                               'none',
-        'frostnumber__stefan':                                'none' }
+        'frostnumber__air':                                   '1',
+        'frostnumber__surface':                               '1',
+        'frostnumber__stefan':                                '1' }
 
     #-------------------------------------------------------------------
     def __init__(self):
