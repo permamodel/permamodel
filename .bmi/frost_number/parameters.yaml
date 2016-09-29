@@ -38,7 +38,7 @@ case_prefix:
     default: Case_test
     units: '-'
 T_air_min_ptype:
-  description: Average temperature of coldest month in the modeled year
+  description: Mean temperature of coldest month per modeled year
   value:
     type: choice
     default: Scalar
@@ -74,7 +74,7 @@ T_air_min_file:
     files:
       - 'off'
 T_air_max_ptype:
-  description: Average temperature of warmest month in the modeled year
+  description: Mean temperature of warmest month per modeled year
   value:
     type: choice
     default: Scalar
@@ -128,7 +128,7 @@ end_year:
       max: 2200
     units: yr
 dt:
-  description: Simulation timestep
+  description: Simulation time step
   value:
     type: float
     default: 1.0
