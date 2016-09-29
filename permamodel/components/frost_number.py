@@ -65,9 +65,9 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         """
 
         # Initialize the output variables (internal names)
-        self.frostnumber_air = -1.0
-        self.frostnumber_surface = -1.0
-        self.frostnumber_stefan = -1.0
+        self.frostnumber_air = np.float32(-1.0)
+        self.frostnumber_surface = np.float32(-1.0)
+        self.frostnumber_stefan = np.float32(-1.0)
 
         # Initialize the year to the start year
         #  or to zero if it doesn't exist
