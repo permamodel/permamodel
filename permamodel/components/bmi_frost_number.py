@@ -371,6 +371,22 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         #return len(np.array(self.get_value_ref(var_name)).shape)
         return value
 
+    def get_grid_size(self, grid_id):
+        """Size of grid.
+
+        Parameters
+        ----------
+        grid_id : int
+            Identifier of a grid.
+
+        Returns
+        -------
+        int
+            Size of grid.
+
+        """
+        return int(np.prod(self.get_grid_shape(grid_id)))
+
     # Copied from bmi_heat.py, with 'var' substituting for 'grid'
     def get_var_rank(self, var_id):
         """Rank of grid.
