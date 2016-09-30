@@ -227,6 +227,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
 
         # Calculate the new frost number values
         self._model.calculate_frost_numbers()
+        self._values['frostnumber__air'] = self._model.air_frost_number
 
     def update_until(self, stop_year):
         # Ensure that stop_year is at least the current year
@@ -402,9 +403,3 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             Rank of grid.
         """
         return len(self.get_grid_shape(self.get_var_grid(var_id)))
-
-
-
-
-
-
