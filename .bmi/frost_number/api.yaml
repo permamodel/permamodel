@@ -3,3 +3,4 @@ language: python
 
 package: permamodel.components.bmi_frost_number
 class: BmiFrostnumberMethod
+initialize_args: "frostnumber_model.cfg"

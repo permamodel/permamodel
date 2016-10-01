@@ -90,9 +90,9 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         'atmosphere_bottom_air__temperature_max':    'T_air_max',
         'datetime__start':                           'start_year',
         'datetime__end':                             'end_year',
-        'frostnumber__air':                          'frostnumber_air',
-        'frostnumber__surface':                      'frostnumber_surface',
-        'frostnumber__stefan':                       'frostnumber_stefan'}
+        'frostnumber__air':                          'air_frost_number',
+        'frostnumber__surface':                      'surface_frost_number',
+        'frostnumber__stefan':                       'stefan_frost_number'}
 
 
     _var_units_map = {
@@ -103,9 +103,9 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         'atmosphere_bottom_air__temperature_max':             'deg_C',
         'datetime__start':                                    'year',
         'datetime__end':                                      'year',
-        'frostnumber__air':                                   'none',
-        'frostnumber__surface':                               'none',
-        'frostnumber__stefan':                                'none' }
+        'frostnumber__air':                                   '1',
+        'frostnumber__surface':                               '1',
+        'frostnumber__stefan':                                '1' }
 
     #-------------------------------------------------------------------
     def __init__(self):
@@ -164,9 +164,9 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             'atmosphere_bottom_air__temperature_max':    self._model.T_air_max,
             'datetime__start':          self._model.start_year,
             'datetime__end':            self._model.end_year,
-            'frostnumber__air':         self._model.frostnumber_air,
-            'frostnumber__surface':     self._model.frostnumber_surface,
-            'frostnumber__stefan':      self._model.frostnumber_stefan}
+            'frostnumber__air':         self._model.air_frost_number,
+            'frostnumber__surface':     self._model.surface_frost_number,
+            'frostnumber__stefan':      self._model.stefan_frost_number}
 
         # initialize() tasks complete.  Update status.
         self.status = 'initialized'
@@ -227,6 +227,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
 
         # Calculate the new frost number values
         self._model.calculate_frost_numbers()
+        self._values['frostnumber__air'] = self._model.air_frost_number
 
     def update_until(self, stop_year):
         # Ensure that stop_year is at least the current year
@@ -371,6 +372,22 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         #return len(np.array(self.get_value_ref(var_name)).shape)
         return value
 
+    def get_grid_size(self, grid_id):
+        """Size of grid.
+
+        Parameters
+        ----------
+        grid_id : int
+            Identifier of a grid.
+
+        Returns
+        -------
+        int
+            Size of grid.
+
+        """
+        return int(np.prod(self.get_grid_shape(grid_id)))
+
     # Copied from bmi_heat.py, with 'var' substituting for 'grid'
     def get_var_rank(self, var_id):
         """Rank of grid.
@@ -386,9 +403,3 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             Rank of grid.
         """
         return len(self.get_grid_shape(self.get_var_grid(var_id)))
-
-
-
-
-
-
