@@ -26,8 +26,6 @@
 from numpy import *
 import numpy
 
-from tf_utils import TF_Print
-
 #-------------------------------------------------------------------
 def unit_test():
 
@@ -187,15 +185,15 @@ def get_da(rti, METERS=False, REPORT=False, VERBOSE=False):
         da = (dx[0] * dy[0])
 
         if (VERBOSE):
-            TF_Print('dx = ' + str(dx[0]) + '  [m]')
-            TF_Print('dy = ' + str(dy[0]) + '  [m]')
-            TF_Print('da = ' + str(da) + '  [m^2]')
+            print('dx = ' + str(dx[0]) + '  [m]')
+            print('dy = ' + str(dy[0]) + '  [m]')
+            print('da = ' + str(da) + '  [m^2]')
     else:
         #---------------------------------
         # Convert da from 1D to 2D array
         # Then subscript with the wk's.
         #---------------------------------
-        TF_Print('Computing pixel area grid...')
+        print('Computing pixel area grid...')
         nx = rti.ncols
         ny = rti.nrows
 
@@ -216,17 +214,17 @@ def get_da(rti, METERS=False, REPORT=False, VERBOSE=False):
         if (VERBOSE):
             da_min = da.min()
             da_max = da.max()
-            TF_Print('    min(da) = ' + str(da_min) + '  [m^2]')
-            TF_Print('    max(da) = ' + str(da_max) + '  [m^2]')
+            print('    min(da) = ' + str(da_min) + '  [m^2]')
+            print('    max(da) = ' + str(da_max) + '  [m^2]')
             dx_min = dx.min()
             dx_max = dx.max()
-            TF_Print('    min(dx) = ' + str(dx_min) + '  [m]')
-            TF_Print('    max(dx) = ' + str(dx_max) + '  [m]')
+            print('    min(dx) = ' + str(dx_min) + '  [m]')
+            print('    max(dx) = ' + str(dx_max) + '  [m]')
             dy_min = dy.min()
             dy_max = dy.max()
-            TF_Print('    min(dy) = ' + str(dy_min) + '  [m]')
-            TF_Print('    max(dy) = ' + str(dy_max) + '  [m]')
-            TF_Print(' ')
+            print('    min(dy) = ' + str(dy_min) + '  [m]')
+            print('    max(dy) = ' + str(dy_max) + '  [m]')
+            print(' ')
 
     return da
 
