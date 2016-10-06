@@ -106,7 +106,7 @@ echo "  cd $dirname"
 echo "  . ./use_this_env"
 echo "  cd permamodel"
 echo "    nosetests -x"
-echo "    bmi-tester permamodel.components.frost_number.FrostnumberMethod"
+echo "    bmi-tester permamodel.components.bmi_frost_number.BmiFrostnumberMethod"
 exit
 
 # Other things to add?
