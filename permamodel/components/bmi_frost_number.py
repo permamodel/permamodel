@@ -216,15 +216,15 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         # Ensure that we've already initialized the run
         assert(self._model.status == 'initialized')
 
+        # Calculate the new frost number values
+        self._model.calculate_frost_numbers()
+        self._values['frostnumber__air'] = self._model.air_frost_number
+
         # Update the time
         self._model.year += self._model.dt
 
         # Get new input values
         self._model.read_input_files()
-
-        # Calculate the new frost number values
-        self._model.calculate_frost_numbers()
-        self._values['frostnumber__air'] = self._model.air_frost_number
 
     def update_until(self, stop_year):
         # Ensure that stop_year is at least the current year
