@@ -142,13 +142,17 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         #print("Number of output variables: %d" % len(self._output_var_names))
 
         # Set the names and types of the grids
+        # Note: A single value is a uniform rectilinear grid of shape (1)
+        #       and size 1
         gridnumber = 0
         for varname in self._input_var_names:
             self._grids[gridnumber] = varname
+            #self._grid_type[gridnumber] = 'uniform_rectilinear'
             self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
         for varname in self._output_var_names:
             self._grids[gridnumber] = varname
+            #self._grid_type[gridnumber] = 'uniform_rectilinear'
             self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
 
@@ -226,6 +230,29 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         # Get new input values
         self._model.read_input_files()
 
+    def update_frac(self, time_fraction):
+        # Only increment the time by a partial time step
+        # Ensure that we've already initialized the run
+        assert(self._model.status == 'initialized')
+
+        # Determine which year the model is currently in
+        current_model_year = int(self._model.year)
+
+        # Update the time with a partial time step
+        self._model.year += time_fraction * self._model.dt
+
+        # Determine if the model year is now different
+        new_model_year = int(self._model.year)
+
+        # If the year has changed, change the values
+        if new_model_year > current_model_year:
+            # Get new input values
+            self._model.read_input_files()
+
+            # Calculate the new frost number values
+            self._model.calculate_frost_numbers()
+            self._values['frostnumber__air'] = self._model.air_frost_number
+
     def update_until(self, stop_year):
         # Ensure that stop_year is at least the current year
         if stop_year < self._model.year:
@@ -299,7 +326,15 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         """
         return self._values[var_name]
 
-    # Note: get_value() copied from bmi_heat.py
+    def set_value(self, var_name, new_var_values):
+        self._values[var_name] = new_var_values
+
+    def get_var_itemsize(self, var_name):
+        return np.asarray(self.get_value_ref(var_name)).flatten()[0].nbytes
+
+    def get_var_nbytes(self, var_name):
+        return np.asarray(self.get_value_ref(var_name)).nbytes
+
     def get_value(self, var_name):
         """Copy of values.
 
@@ -366,13 +401,10 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             if var_name in var_name_list:
                 return grid_id
 
-    # Copied from bmi_heat.py, with 'var' substituting for 'grid'
     def get_grid_shape(self, grid_id):
         """Number of rows and columns of uniform rectilinear grid."""
-        #var_name = self._grids[grid_id][0]
         var_name = self._grids[grid_id]
         value = np.array(self.get_value_ref(var_name)).shape
-        #return len(np.array(self.get_value_ref(var_name)).shape)
         return value
 
     def get_grid_size(self, grid_id):
@@ -389,10 +421,13 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             Size of grid.
 
         """
-        return int(np.prod(self.get_grid_shape(grid_id)))
+        grid_size = self.get_grid_shape(grid_id)
+        if grid_size == ():
+            return 1
+        else:
+            return int(np.prod(grid_size))
 
-    # Copied from bmi_heat.py, with 'var' substituting for 'grid'
-    def get_var_rank(self, var_id):
+    def get_grid_rank(self, var_id):
         """Rank of grid.
 
         Parameters
