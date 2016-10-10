@@ -326,8 +326,14 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
     def set_value(self, var_name, new_var_values):
         self._values[var_name] = new_var_values
 
+    def set_value_at_indices(self, var_name, new_var_values, indices):
+        self.get_value_ref(var_name).flat[indices] = new_var_values
+
     def get_var_itemsize(self, var_name):
         return np.asarray(self.get_value_ref(var_name)).flatten()[0].nbytes
+
+    def get_value_at_indices(self, var_name, indices):
+        return self.get_value_ref(var_name).take(indices)
 
     def get_var_nbytes(self, var_name):
         return np.asarray(self.get_value_ref(var_name)).nbytes
