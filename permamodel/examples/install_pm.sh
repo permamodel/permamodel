@@ -107,6 +107,10 @@ echo "  . ./use_this_env"
 echo "  cd permamodel"
 echo "    nosetests -x"
 echo "    bmi-tester permamodel.components.bmi_frost_number.BmiFrostnumberMethod"
+echo "If you want to add a non-standard conda package--e.g. rednose for nosetests:"
+echo "  conda install -y anaconda-client"
+echo "  conda install -y --channel https://conda.anaconda.org/blaze rednose"
+
 exit
 
 # Other things to add?

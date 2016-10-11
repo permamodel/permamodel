@@ -176,16 +176,17 @@ class PermafrostComponent( BMI_base.BMI_component ):
         # SILENT and mode were original optional arguments
         #   they should be removed, but are simply defined here for brevity
 
-        SILENT = False
+        SILENT = True
 
-        if not(SILENT):
+        if not SILENT:
             print 'Permafrost component: Initializing...'
 
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
 
         # Set the cfg file if it exists, otherwise, a default
         if os.path.isfile(cfg_file):
-            print("passed cfg_file: %s" % cfg_file)
+            if not SILENT:
+                print("passed cfg_file: %s" % cfg_file)
             self.cfg_file = cfg_file
         else:
             cfg_file = \
