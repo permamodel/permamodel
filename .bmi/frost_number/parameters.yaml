@@ -136,3 +136,9 @@ dt:
       min: 0.001
       max: 1e3
     units: yr
+fn_out_filename:
+  description: Name of output file
+  value:
+    type: string
+    default: frostnumber_output.dat
+    units: '-'
