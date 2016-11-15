@@ -32,9 +32,9 @@ echo "Downloading latest miniconda repository..."
 this_os=`uname`
 echo "this_os: ...$this_os..."
 if [ $this_os = 'Linux' ]; then
-  curl http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -o miniconda.sh
+  curl https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -o miniconda.sh
 elif [ $this_os = 'Darwin' ]; then
-  curl http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -o miniconda.sh
+  curl https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -o miniconda.sh
 else
 	echo "Operating system not recognized as mac or linux: $this_os"
 	exit
