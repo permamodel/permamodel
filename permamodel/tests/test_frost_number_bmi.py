@@ -58,6 +58,7 @@ def test_frost_number_update_changes_air_frost_number():
     fn = bmi_frost_number.BmiFrostnumberMethod()
     fn.initialize(cfg_file=onesite_multiyear_filename)
 
+    fn.update()
     afn0 = fn._model.air_frost_number
     fn.update()
     afn1 = fn._model.air_frost_number

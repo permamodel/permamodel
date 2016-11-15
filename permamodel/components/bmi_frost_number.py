@@ -215,23 +215,20 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
 
     #   get_var_units()
     #-------------------------------------------------------------------
-    def get_current_time(self):
-        # For the frostnumber component, the time is simply the year
-        return self._model.year
 
     def update(self):
         # Ensure that we've already initialized the run
         assert(self._model.status == 'initialized')
+
+        # Calculate the new frost number values
+        self._model.calculate_frost_numbers()
+        self._values['frostnumber__air'] = self._model.air_frost_number
 
         # Update the time
         self._model.year += self._model.dt
 
         # Get new input values
         self._model.read_input_files()
-
-        # Calculate the new frost number values
-        self._model.calculate_frost_numbers()
-        self._values['frostnumber__air'] = self._model.air_frost_number
 
     def update_frac(self, time_fraction):
         # Only increment the time by a partial time step
@@ -297,8 +294,14 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             self._model.print_final_report(\
                     comp_name='Permamodel FrostNumber component')
 
+    def get_start_time(self):
+        return 0.0
+
+    def get_current_time(self):
+        return self._model.year - self._model.start_year
+
     def get_end_time(self):
-        return self._model.end_year
+        return self._model.end_year - self._model.start_year + 1.0
 
     # ----------------------------------
     # Functions added to pass bmi-tester
