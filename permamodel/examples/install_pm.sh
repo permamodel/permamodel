@@ -32,9 +32,9 @@ echo "Downloading latest miniconda repository..."
 this_os=`uname`
 echo "this_os: ...$this_os..."
 if [ $this_os = 'Linux' ]; then
-  curl http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -o miniconda.sh
+  curl https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -o miniconda.sh
 elif [ $this_os = 'Darwin' ]; then
-  curl http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -o miniconda.sh
+  curl https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -o miniconda.sh
 else
 	echo "Operating system not recognized as mac or linux: $this_os"
 	exit
@@ -107,6 +107,10 @@ echo "  . ./use_this_env"
 echo "  cd permamodel"
 echo "    nosetests -x"
 echo "    bmi-tester permamodel.components.bmi_frost_number.BmiFrostnumberMethod"
+echo "If you want to add a non-standard conda package--e.g. rednose for nosetests:"
+echo "  conda install -y anaconda-client"
+echo "  conda install -y --channel https://conda.anaconda.org/blaze rednose"
+
 exit
 
 # Other things to add?

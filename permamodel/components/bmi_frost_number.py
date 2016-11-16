@@ -271,7 +271,9 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             self.update()
             year = self._model.year
 
-    def finalize(self, SILENT=True):
+    def finalize(self):
+        SILENT = True
+
         # Finish with the run
         self._model.status = 'finalizing'  # (OpenMI)
 

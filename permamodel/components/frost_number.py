@@ -43,8 +43,12 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
             self.T_air_max = T_air_max
 
     def initialize_frostnumber_component(self):
+        SILENT = True
+
         # Note: Initialized from initialize() in perma_base.py
-        print("Initializing for FrostnumberMethod")
+        if not SILENT:
+            print("Initializing for FrostnumberMethod")
+
         self._model = 'FrostNumber'
 
         # Here, initialize the variables which are unique to the
