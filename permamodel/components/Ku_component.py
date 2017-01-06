@@ -53,6 +53,9 @@ from permamodel.utils import model_input
 from permamodel.components import perma_base
 
 class Ku_method( perma_base.permafrost_component ):
+    
+    # Set up the name of this permafrost module
+    _name = 'Kudryavtsev module'
 
     #-------------------------------------------------------------------
     _att_map = {
