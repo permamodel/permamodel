@@ -52,7 +52,7 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 
-class Ku_method( perma_base.permafrost_component ):
+class Ku_method( perma_base.PermafrostComponent ):
     
     # Set up the name of this permafrost module
     _name = 'Kudryavtsev module'
@@ -907,7 +907,7 @@ class Ku_method( perma_base.permafrost_component ):
         
     def initialize(self, cfg_file=None, mode="nondriver",
                    SILENT=False):
-
+        
         #---------------------------------------------------------
         # Notes:  Need to make sure than h_swe matches h_snow ?
         #         User may have entered incompatible values.
@@ -923,7 +923,27 @@ class Ku_method( perma_base.permafrost_component ):
 
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
         self.mode       = mode
-        self.cfg_file   = cfg_file
+#        self.cfg_file   = cfg_file
+        
+                # Set the cfg file if it exists, otherwise, a default
+#        if cfg_file==None:
+        cfg_file = "../permamodel/examples/Ku_method.cfg"
+        print cfg_file
+        
+        self.cfg_file = cfg_file
+        
+        print self.cfg_file
+
+#            if os.path.isfile(cfg_file):
+#                print("Default config file exists: %s" % cfg_file)
+#            else:
+#                print("Default config file does not exist: ")
+#                print("  %s" % cfg_file)
+#                raise(ValueError(
+#                    "Default frostnumber config file %s does not exist" %\
+#                    cfg_file))
+
+        
         #print mode, cfg_file
 
         #-----------------------------------------------
@@ -1130,8 +1150,8 @@ class Ku_method( perma_base.permafrost_component ):
         #----------------------------------------------
         # Components use own self.time_sec by default.
         #-----------------------------------------------
-        #        if (self.SAVE_ALT_GRIDS):       
-        #            self.save_grids()
+        if (self.SAVE_ALT_GRIDS):       
+        	self.save_grids()
 
         #-----------------------------
         # Update internal clock
@@ -1142,31 +1162,31 @@ class Ku_method( perma_base.permafrost_component ):
 
     #   update()
     
-    def finalize(self):
-        SILENT = True
-
-        # Finish with the run
-        self._model.status = 'finalizing'  # (OpenMI)
-
-        # Close the input files
-        self._model.close_input_files()   # Close any input files
-
-        # Write output last output
-        # self._model.write_output_to_file(SILENT=True)
-
-        if (self.SAVE_ALT_GRIDS):       
-            self.save_grids()
-
-        # Close the output files
-        self._model.close_output_files()
-
-        # Done finalizing  
-        self._model.status = 'finalized'  # (OpenMI)
-
-        # Print final report, as desired
-        if not SILENT:
-            self._model.print_final_report(\
-                    comp_name='Permamodel FrostNumber component')
+#     def finalize(self):
+#         SILENT = True
+# 
+#         # Finish with the run
+#         self._model.status = 'finalizing'  # (OpenMI)
+# 
+#         # Close the input files
+#         self._model.close_input_files()   # Close any input files
+# 
+#         # Write output last output
+#         # self._model.write_output_to_file(SILENT=True)
+# 
+#         if (self.SAVE_ALT_GRIDS):       
+#             self.save_grids()
+# 
+#         # Close the output files
+#         self._model.close_output_files()
+# 
+#         # Done finalizing  
+#         self._model.status = 'finalized'  # (OpenMI)
+# 
+#         # Print final report, as desired
+#         if not SILENT:
+#             self._model.print_final_report(\
+#                     comp_name='Permamodel Ku component')
     # finalize()
 
    
