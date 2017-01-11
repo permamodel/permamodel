@@ -927,7 +927,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         
                 # Set the cfg file if it exists, otherwise, a default
 #        if cfg_file==None:
-        cfg_file = "../permamodel/examples/Ku_method.cfg"
+        cfg_file = "permamodel/examples/Ku_method.cfg"
         print cfg_file
         
         self.cfg_file = cfg_file
@@ -1233,7 +1233,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         ALT[idx] = -999.99;
         
         # Open a file to save the final result
-        w_nc_fid = Dataset(output_file, 'w', format='NETCDF4');
+        w_nc_fid = Dataset(output_file+'.nc', 'w', format='NETCDF4');
         
         # ==== Latitude ====
 
@@ -1263,3 +1263,12 @@ class Ku_method( perma_base.PermafrostComponent ):
         temp[:] = ALT;
 #        
         w_nc_fid.close()  # close the new file
+        
+    def write_out_txtfile(self, output_file, varname):
+
+        import numpy as np
+        
+        ALT = self.Zal+0.;
+        
+        # Open a file to save the final result
+        np.savetxt(output_file+'.txt',self.lat);
