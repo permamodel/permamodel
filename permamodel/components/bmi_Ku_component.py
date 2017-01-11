@@ -1,0 +1,355 @@
+# -*- coding: utf-8 -*-
+"""  Frost Number by Nelson and Outcalt 1983. DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363
+"""
+
+import numpy as np
+from permamodel.utils import model_input
+from permamodel.components import perma_base
+from permamodel.components import Ku_component
+#from permamodel.components.perma_base import *
+#from permamodel.tests import examples_directory
+import os
+
+"""
+class FrostnumberMethod( frost_number.BmiFrostnumberMethod ):
+    _thisname = 'this name'
+"""
+
+class BmiKuMethod( perma_base.PermafrostComponent ):
+
+    """ Implement the Nelson-Outcalt Frost numbers """
+
+    # Set up the name of this permafrost module
+    _name = 'Frost number module'
+
+    """ Note: all of these are defined below instead!
+    # Indicate the CSDMS standard names of input and output variables
+    _input_var_names = ('land_surface_air__temperature',
+                        'land_surface__latitude',
+                        'land_surface__longitude',
+                       )
+                       # other standard names that might apply?
+                       # land_surface__temperature
+                       # model__initial_time_step
+                       # model__max_allowed_time_step
+                       # model__min_allowed_time_step
+                       # model__run_time
+                       # model__spinup_time
+                       # model__start_time
+                       # model__stop_time
+                       # model__time
+                       # model__time_step
+                       # model__time_step_count
+    _output_var_names = ('frost_number_air',
+                         'frost_number_surface',
+                         'frost_number_stefan',
+                        )
+                        # other standard names that might apply?
+                        # soil_permafrost__thickness
+                        # soil_permafrost_top__depth
+                        # soil_permafrost_bottom__depth
+    """
+
+    #-------------------------------------------------------------------
+    _att_map = {
+    # NOTE: this will change in the future
+        'model_name':         'PermaModel_Kudryavtsev_method',
+        'version':            '0.1',
+        'author_name':        'Kang Wang and Elchin Jafarov',
+        'grid_type':          'none',
+        'time_step_type':     'fixed',
+        'step_method':        'explicit',
+        #-------------------------------------------------------------
+        'comp_name':          'Ku_model',
+        'model_family':       'PermaModel',
+        'cfg_extension':      '_ku_model.cfg',
+        'cmt_var_prefix':     '/input/',
+        'gui_yaml_file':      '/input/frostnumber_model.yaml',
+        'time_units':         'years' }
+
+    # This used to be [...] instead of (...)
+    _input_var_names = (
+        'latitude',
+        'longitude',
+        'atmosphere_bottom_air__temperature',
+        'atmosphere_bottom_air__temperature_amplitude',
+        'snowpack__depth',
+        'snowpack__density',
+        'water-liquid__volumetric-water-content-soil',
+        'vegetation__Hvgf',
+        'vegetation__Hvgt',
+        'vegetation__Dvf',
+        'vegetation__Dvt' )
+
+    _output_var_names = (
+        'soil__temperature',                                  # Tps
+        'soil__active_layer_thickness' )                      # Zal
+
+    _var_name_map = {
+        'latitude':                                           'lat',
+        'longitude':                                          'lon',
+        'atmosphere_bottom_air__temperature':                 'T_air',
+        'atmosphere_bottom_air__temperature_amplitude':       'A_air',
+        'snowpack__depth':                                    'h_snow',
+        'snowpack__density':                                  'rho_snow',
+        'water-liquid__volumetric-water-content-soil':        'vwc_H2O',
+        'vegetation__Hvgf':                                   'Hvgf',
+        'vegetation__Hvgt':                                   'Hvgt',
+        'vegetation__Dvf':                                    'Dvf',
+        'vegetation__Dvt':                                    'Dvt' }
+
+
+    _var_units_map = {
+        # These are the links to the model's variables' units
+        'latitude':                                           'lat',
+        'longitude':                                          'lon',
+        'atmosphere_bottom_air__temperature':                 'deg_C',
+        'atmosphere_bottom_air__temperature_amplitude':       'deg_C',
+        'snowpack__depth':                                    'm',
+        'snowpack__density':                                  'kg m-3',
+        'water-liquid__volumetric-water-content-soil':        'm3 m-3',
+        'vegetation__Hvgf':                                   'm',
+        'vegetation__Hvgt':                                   'm',
+        'vegetation__Dvf':                                    'm2 s',
+        'vegetation__Dvt':                                    'm2 s' }
+
+    #-------------------------------------------------------------------
+    def __init__(self):
+        self._model = None
+        self._values = {}
+        self._var_units = {}
+        self._grids = {}
+        self._grid_type = {}
+
+    def initialize(self, cfg_file=None):
+        
+        self._model = Ku_component.Ku_method()
+    
+        # Set the cfg file if it exists, otherwise, a default
+#        if cfg_file==None:  
+#        
+#        print self.cfg_file
+        
+        self._model.initialize()   
+
+    def get_attribute(self, att_name):
+
+        try:
+            return self._att_map[ att_name.lower() ]
+        except:
+            print '###################################################'
+            print ' ERROR: Could not find attribute: ' + att_name
+            print '###################################################'
+            print ' '
+
+    #   get_attribute()
+    #-------------------------------------------------------------------
+    def get_input_var_names(self):
+
+        #--------------------------------------------------------
+        # Note: These are currently variables needed from other
+        #       components vs. those read from files or GUI.
+        #--------------------------------------------------------
+        return self._input_var_names
+
+    #   get_input_var_names()
+    #-------------------------------------------------------------------
+    def get_output_var_names(self):
+
+        return self._output_var_names
+
+    #   get_output_var_names()
+    #-------------------------------------------------------------------
+    def get_var_name(self, long_var_name):
+
+        return self._var_name_map[ long_var_name ]
+
+    #   get_var_name()
+    #-------------------------------------------------------------------
+    def get_var_units(self, long_var_name):
+
+        return self._var_units_map[ long_var_name ]
+
+    #   get_var_units()
+    #-------------------------------------------------------------------
+
+    def update(self):
+        # Ensure that we've already initialized the run
+        assert(self._model.status == 'initialized')
+
+        # Calculate the new frost number values
+        self._model.update()
+        
+        self._values['ALT'] = self._model.Zal
+
+    def finalize(self):
+        SILENT = True
+
+        # Finish with the run
+        self._model.status = 'finalizing'  # (OpenMI)
+
+        # Close the input files
+        self._model.finalize()   # Close any input files
+
+        # Write output last output
+        
+
+        # Done finalizing  
+        self._model.status = 'finalized'  # (OpenMI)
+
+
+    def get_start_time(self):
+        return 0.0
+
+    def get_current_time(self):
+        return self._model.year - self._model.start_year
+
+    def get_end_time(self):
+        return self._model.end_year - self._model.start_year + 1.0
+
+    # ----------------------------------
+    # Functions added to pass bmi-tester
+    # ----------------------------------
+    def get_grid_type(self, grid_number):
+        return self._grid_type[grid_number]
+
+    def get_time_step(self):
+        return self._model.dt
+
+    # Note: get_value_ref() copied from bmi_heat.py
+    def get_value_ref(self, var_name):
+        """Reference to values.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of variable as CSDMS Standard Name.
+
+        Returns
+        -------
+        array_like
+            Value array.
+        """
+        return self._values[var_name]
+
+    def set_value(self, var_name, new_var_values):
+        self._values[var_name] = new_var_values
+
+    def set_value_at_indices(self, var_name, new_var_values, indices):
+        self.get_value_ref(var_name).flat[indices] = new_var_values
+
+    def get_var_itemsize(self, var_name):
+        return np.asarray(self.get_value_ref(var_name)).flatten()[0].nbytes
+
+    def get_value_at_indices(self, var_name, indices):
+        return self.get_value_ref(var_name).take(indices)
+
+    def get_var_nbytes(self, var_name):
+        return np.asarray(self.get_value_ref(var_name)).nbytes
+
+    def get_value(self, var_name):
+        """Copy of values.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of variable as CSDMS Standard Name.
+
+        Returns
+        -------
+        array_like
+            Copy of values.
+        """
+        # Original version: from bmi_heat.py
+        #return self.get_value_ref(var_name).copy()
+
+        # Version to convert to numpy array for bmi-tester compliance
+        # Note: converting to np arrays on the fly here
+        # Note: float values don't have a copy() function
+        #try:
+        #    return np.array(self.get_value_ref(var_name).copy())
+        #except AttributeError:
+        #    return np.array(self.get_value_ref(var_name))
+
+        # This version is simpler than above, but it may break when
+        #   using scalars because the resulting variable doesn't
+        #   have a shape
+        return np.asarray(self.get_value_ref(var_name))
+
+
+    def get_var_type(self, var_name):
+        """Data type of variable.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of variable as CSDMS Standard Name.
+
+        Returns
+        -------
+        str
+            Data type.
+        """
+        return str(self.get_value_ref(var_name).dtype)
+
+    def get_component_name(self):
+        return self._name
+
+    # Copied from bmi_heat.py
+    def get_var_grid(self, var_name):
+        """Grid id for a variable.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of variable as CSDMS Standard Name.
+
+        Returns
+        -------
+        int
+            Grid id.
+        """
+        for grid_id, var_name_list in self._grids.items():
+            if var_name in var_name_list:
+                return grid_id
+
+    def get_grid_shape(self, grid_id):
+        """Number of rows and columns of uniform rectilinear grid."""
+        var_name = self._grids[grid_id]
+        value = np.array(self.get_value_ref(var_name)).shape
+        return value
+
+    def get_grid_size(self, grid_id):
+        """Size of grid.
+
+        Parameters
+        ----------
+        grid_id : int
+            Identifier of a grid.
+
+        Returns
+        -------
+        int
+            Size of grid.
+
+        """
+        grid_size = self.get_grid_shape(grid_id)
+        if grid_size == ():
+            return 1
+        else:
+            return int(np.prod(grid_size))
+
+    def get_grid_rank(self, var_id):
+        """Rank of grid.
+
+        Parameters
+        ----------
+        grid_id : int
+            Identifier of a grid.
+
+        Returns
+        -------
+        int
+            Rank of grid.
+        """
+        return len(self.get_grid_shape(self.get_var_grid(var_id)))
