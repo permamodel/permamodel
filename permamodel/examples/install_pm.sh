@@ -51,7 +51,7 @@ PATH=$PWD/conda/bin:$PATH
 
 # Install necessary and desired conda repository
 # Required, although these would be accomplished via pip from setup.py install
-declare -a module_list=("nose" "numpy")
+declare -a module_list=("nose" "numpy" "netCDF4" "affine")
 # Potentially helpful packages: ipython
 # Eventually required packages: gdal, pyproj, osr
 for module in "${module_list[@]}"; do
