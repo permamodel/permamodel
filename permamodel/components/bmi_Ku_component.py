@@ -5,7 +5,7 @@
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
-from permamodel.components import Ku_component
+from permamodel.components import Ku_method
 #from permamodel.components.perma_base import *
 #from permamodel.tests import examples_directory
 import os
@@ -71,6 +71,8 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     _input_var_names = (
         'latitude',
         'longitude',
+        'datetime__start',
+        'datetime__end',
         'atmosphere_bottom_air__temperature',
         'atmosphere_bottom_air__temperature_amplitude',
         'snowpack__depth',
@@ -88,6 +90,8 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     _var_name_map = {
         'latitude':                                           'lat',
         'longitude':                                          'lon',
+        'datetime__start':                                    'start_year',
+        'datetime__end':                                      'end_year',
         'atmosphere_bottom_air__temperature':                 'T_air',
         'atmosphere_bottom_air__temperature_amplitude':       'A_air',
         'snowpack__depth':                                    'h_snow',
@@ -96,13 +100,17 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         'vegetation__Hvgf':                                   'Hvgf',
         'vegetation__Hvgt':                                   'Hvgt',
         'vegetation__Dvf':                                    'Dvf',
-        'vegetation__Dvt':                                    'Dvt' }
+        'vegetation__Dvt':                                    'Dvt' ,
+        'soil__temperature':                                  'Tps',
+        'soil__active_layer_thickness':                       'Zal'}
 
 
     _var_units_map = {
         # These are the links to the model's variables' units
-        'latitude':                                           'lat',
-        'longitude':                                          'lon',
+        'latitude':                                           'degree_north',
+        'longitude':                                          'degree_east',
+        'datetime__start':                                    'year',
+        'datetime__end':                                      'year',
         'atmosphere_bottom_air__temperature':                 'deg_C',
         'atmosphere_bottom_air__temperature_amplitude':       'deg_C',
         'snowpack__depth':                                    'm',
@@ -111,7 +119,9 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         'vegetation__Hvgf':                                   'm',
         'vegetation__Hvgt':                                   'm',
         'vegetation__Dvf':                                    'm2 s',
-        'vegetation__Dvt':                                    'm2 s' }
+        'vegetation__Dvt':                                    'm2 s'  ,
+        'soil__temperature':                                  'deg_C',
+        'soil__active_layer_thickness':                       'm'}
 
     #-------------------------------------------------------------------
     def __init__(self):
@@ -123,15 +133,59 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
 
     def initialize(self, cfg_file=None):
         
-        self._model = Ku_component.Ku_method()
-    
+        self._model = Ku_method.Ku_method()
+        
+        self._name = "Permamodel Ku Component"
+        self._model.initialize() 
+        
+
+        # Verify that all input and output variable names are in the
+        # variable name and the units map
+        for varname in self._input_var_names:
+            assert(varname in self._var_name_map)
+            assert(varname in self._var_units_map)
+            #print("Input var %s is in the name map and the units map"\
+            #      % varname)
+        for varname in self._output_var_names:
+            assert(varname in self._var_name_map)
+            assert(varname in self._var_units_map)
+
+        gridnumber = 0
+        for varname in self._input_var_names:
+            self._grids[gridnumber] = varname
+            #self._grid_type[gridnumber] = 'uniform_rectilinear'
+            self._grid_type[gridnumber] = 'scalar'
+            gridnumber += 1
+        for varname in self._output_var_names:
+            self._grids[gridnumber] = varname
+            #self._grid_type[gridnumber] = 'uniform_rectilinear'
+            self._grid_type[gridnumber] = 'scalar'
+            gridnumber += 1
+
+        self._values = _values = {
+        # These are the links to the model's variables and
+        # should be consistent with _var_name_map 
+            'latitude':                                 self._model.lat,
+            'longitude':                                self._model.lon,
+            'datetime__start':                          self._model.start_year,
+            'datetime__end':                                self._model.end_year,
+            'atmosphere_bottom_air__temperature':       self._model.T_air,
+            'atmosphere_bottom_air__temperature_amplitude': self._model.A_air,
+            'snowpack__depth':                          self._model.h_snow,
+            'snowpack__density':                        self._model.rho_snow,
+            'water-liquid__volumetric-water-content-soil':    self._model.vwc_H2O,
+            'vegetation__Hvgf': self._model.Hvgf,
+            'vegetation__Hvgt': self._model.Hvgt,
+            'vegetation__Dvf':  self._model.Dvf,
+            'vegetation__Dvt':  self._model.Dvt,
+            'soil__temperature': self._model.Tps,
+            'soil__active_layer_thickness': self._model.Zal}
+            
         # Set the cfg file if it exists, otherwise, a default
 #        if cfg_file==None:  
 #        
 #        print self.cfg_file
         
-        self._model.initialize()   
-
     def get_attribute(self, att_name):
 
         try:
@@ -182,6 +236,15 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         
         self._values['ALT'] = self._model.Zal
 
+    def update_frac(self, time_fraction):
+
+        return
+    
+    def update_until(self, stop_year):
+
+        return
+
+
     def finalize(self):
         SILENT = True
 
@@ -202,7 +265,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         return 0.0
 
     def get_current_time(self):
-        return self._model.year - self._model.start_year
+        return self._model.year
 
     def get_end_time(self):
         return self._model.end_year - self._model.start_year + 1.0
