@@ -6,13 +6,16 @@ Created on Tue Jan 10 10:56:16 2017
 @author: kangwang
 """
 
+import os
 import sys
-
-
 from permamodel.components import bmi_Ku_component
-x=bmi_Ku_component.BmiKuMethod()
+from permamodel.tests import examples_directory
 
-x.initialize()
+
+cfg_file = os.path.join(examples_directory, 'Ku_method.cfg')
+x = bmi_Ku_component.BmiKuMethod()
+
+x.initialize(cfg_file)
 x.update()
 x.finalize()
 
