@@ -7,16 +7,13 @@ Created on Tue Jan 10 10:56:16 2017
 """
 
 import sys
-sys.path.append('permamodel/')
+
 
 from permamodel.components import bmi_Ku_component
 x=bmi_Ku_component.BmiKuMethod()
 
 x.initialize()
-
-#
 x.update()
-#
 x.finalize()
-#
+
 print x._values["ALT"][:]
