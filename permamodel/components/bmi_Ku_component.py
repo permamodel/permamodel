@@ -136,8 +136,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         self._model = Ku_method.Ku_method()
         
         self._name = "Permamodel Ku Component"
-        self._model.initialize() 
-        
+        self._model.initialize(cfg_file=cfg_file)
 
         # Verify that all input and output variable names are in the
         # variable name and the units map
