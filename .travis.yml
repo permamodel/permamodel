@@ -5,9 +5,8 @@ sudo: false
 before_install:
   - pip install nose
   - pip install numpy
-  - pip install hdf5
-  - pip install netCDF4
   - pip install scipy
+  - pip install netCDF4
   - pip install affine
 install:
   - python setup.py install
