@@ -19,4 +19,5 @@ x.initialize(cfg_file)
 x.update()
 x.finalize()
 
-print x._values["ALT"][:]
+# print x._values["ALT"][:]
+print x.get_value('soil__active_layer_thickness')
