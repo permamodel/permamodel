@@ -1,10 +1,11 @@
 language: python
 python:
-  - "2.7_with_system_site_packages"
+  - "2.7"
 before_install:
-  - sudo apt-get install -qq python-numpy python-scipy
   - pip install nose
-  - pip install netCDF4
+  - pip install --only-binary=numpy numpy
+  - pip install --only-binary=scipy scipy
+  - pip install --only-binary=netcdf4 netcdf4
   - pip install affine
 install:
   - python setup.py install
