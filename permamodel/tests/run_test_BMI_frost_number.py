@@ -6,17 +6,18 @@ Created on Tue Jan 10 10:56:16 2017
 @author: kangwang
 """
 
+import os
 import sys
-sys.path.append('permamodel/')
-
 from permamodel.components import bmi_frost_number
-x=bmi_frost_number.BmiFrostnumberMethod()
+from permamodel.tests import examples_directory
 
-x.initialize('permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg')
-print x.initialize.im_self.status
 
+cfg_file = os.path.join(examples_directory,
+                        'Frostnumber_example_singlesite_singleyear.cfg')
+x = bmi_frost_number.BmiFrostnumberMethod()
+
+x.initialize(cfg_file)
 x.update()
-
 x.finalize()
 
-print x.status
+print x.get_value('frostnumber__air')
