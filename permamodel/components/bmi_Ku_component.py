@@ -5,9 +5,9 @@
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
-from permamodel.components import frost_number
-from permamodel.components.perma_base import *
-from permamodel.tests import examples_directory
+from permamodel.components import Ku_method
+#from permamodel.components.perma_base import *
+#from permamodel.tests import examples_directory
 import os
 
 """
@@ -15,7 +15,7 @@ class FrostnumberMethod( frost_number.BmiFrostnumberMethod ):
     _thisname = 'this name'
 """
 
-class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
+class BmiKuMethod( perma_base.PermafrostComponent ):
 
     """ Implement the Nelson-Outcalt Frost numbers """
 
@@ -53,59 +53,75 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
     _att_map = {
     # NOTE: this will change in the future
-        'model_name':         'PermaModel_frostnumber_method',
+        'model_name':         'PermaModel_Kudryavtsev_method',
         'version':            '0.1',
-        'author_name':        'J. Scott Stewart and Elchin Jafarov',
+        'author_name':        'Kang Wang and Elchin Jafarov',
         'grid_type':          'none',
         'time_step_type':     'fixed',
         'step_method':        'explicit',
         #-------------------------------------------------------------
-        'comp_name':          'frostnumber',
+        'comp_name':          'Ku_model',
         'model_family':       'PermaModel',
-        'cfg_extension':      '_frostnumber_model.cfg',
+        'cfg_extension':      '_ku_model.cfg',
         'cmt_var_prefix':     '/input/',
         'gui_yaml_file':      '/input/frostnumber_model.yaml',
         'time_units':         'years' }
 
     # This used to be [...] instead of (...)
     _input_var_names = (
-        #'latitude',
-        #'longitude',
-        'atmosphere_bottom_air__temperature_min',
-        'atmosphere_bottom_air__temperature_max',
+        'latitude',
+        'longitude',
         'datetime__start',
-        'datetime__end')
+        'datetime__end',
+        'atmosphere_bottom_air__temperature',
+        'atmosphere_bottom_air__temperature_amplitude',
+        'snowpack__depth',
+        'snowpack__density',
+        'water-liquid__volumetric-water-content-soil',
+        'vegetation__Hvgf',
+        'vegetation__Hvgt',
+        'vegetation__Dvf',
+        'vegetation__Dvt' )
 
     _output_var_names = (
-        'frostnumber__air',            # Air Frost number
-        'frostnumber__surface',        # Surface Frost number
-        'frostnumber__stefan' )        # Stefan Frost number
+        'soil__temperature',                                  # Tps
+        'soil__active_layer_thickness' )                      # Zal
 
     _var_name_map = {
-        # These are the corresponding CSDMS standard names
-        # NOTE: we need to look up for the corresponding standard names
-        #'latitude':                                  'lat',
-        #'longitude':                                 'lon',
-        'atmosphere_bottom_air__temperature_min':    'T_air_min',
-        'atmosphere_bottom_air__temperature_max':    'T_air_max',
-        'datetime__start':                           'start_year',
-        'datetime__end':                             'end_year',
-        'frostnumber__air':                          'air_frost_number',
-        'frostnumber__surface':                      'surface_frost_number',
-        'frostnumber__stefan':                       'stefan_frost_number'}
+        'latitude':                                           'lat',
+        'longitude':                                          'lon',
+        'datetime__start':                                    'start_year',
+        'datetime__end':                                      'end_year',
+        'atmosphere_bottom_air__temperature':                 'T_air',
+        'atmosphere_bottom_air__temperature_amplitude':       'A_air',
+        'snowpack__depth':                                    'h_snow',
+        'snowpack__density':                                  'rho_snow',
+        'water-liquid__volumetric-water-content-soil':        'vwc_H2O',
+        'vegetation__Hvgf':                                   'Hvgf',
+        'vegetation__Hvgt':                                   'Hvgt',
+        'vegetation__Dvf':                                    'Dvf',
+        'vegetation__Dvt':                                    'Dvt' ,
+        'soil__temperature':                                  'Tps',
+        'soil__active_layer_thickness':                       'Zal'}
 
 
     _var_units_map = {
         # These are the links to the model's variables' units
-        #'latitude':                                           'deg',
-        #'longitude':                                          'deg',
-        'atmosphere_bottom_air__temperature_min':             'deg_C',
-        'atmosphere_bottom_air__temperature_max':             'deg_C',
+        'latitude':                                           'degree_north',
+        'longitude':                                          'degree_east',
         'datetime__start':                                    'year',
         'datetime__end':                                      'year',
-        'frostnumber__air':                                   '1',
-        'frostnumber__surface':                               '1',
-        'frostnumber__stefan':                                '1' }
+        'atmosphere_bottom_air__temperature':                 'deg_C',
+        'atmosphere_bottom_air__temperature_amplitude':       'deg_C',
+        'snowpack__depth':                                    'm',
+        'snowpack__density':                                  'kg m-3',
+        'water-liquid__volumetric-water-content-soil':        'm3 m-3',
+        'vegetation__Hvgf':                                   'm',
+        'vegetation__Hvgt':                                   'm',
+        'vegetation__Dvf':                                    'm2 s',
+        'vegetation__Dvt':                                    'm2 s'  ,
+        'soil__temperature':                                  'deg_C',
+        'soil__active_layer_thickness':                       'm'}
 
     #-------------------------------------------------------------------
     def __init__(self):
@@ -116,13 +132,11 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         self._grid_type = {}
 
     def initialize(self, cfg_file=None):
-        self._model = frost_number.FrostnumberMethod()
-
-        self._model.initialize_from_config_file(cfg_file=cfg_file)
-        self._model.initialize_frostnumber_component()
-
-        # Set the name of this component
-        self._name = "Permamodel Frostnumber Component"
+        
+        self._model = Ku_method.Ku_method()
+        
+        self._name = "Permamodel Ku Component"
+        self._model.initialize(cfg_file=cfg_file)
 
         # Verify that all input and output variable names are in the
         # variable name and the units map
@@ -134,16 +148,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         for varname in self._output_var_names:
             assert(varname in self._var_name_map)
             assert(varname in self._var_units_map)
-            #print("Output var %s is in the name map and the units map"\
-            #      % varname)
 
-        # Set the Frost Number grids, based on input and output variables
-        #print("Number of input variables: %d" % len(self._input_var_names))
-        #print("Number of output variables: %d" % len(self._output_var_names))
-
-        # Set the names and types of the grids
-        # Note: A single value is a uniform rectilinear grid of shape (1)
-        #       and size 1
         gridnumber = 0
         for varname in self._input_var_names:
             self._grids[gridnumber] = varname
@@ -156,25 +161,30 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
 
-        # Set the internal (frost number) variables that correspond
-        # to the input and output variable names
-        # Note: since we used Topoflow's _var_name_map for this, it is that
         self._values = _values = {
         # These are the links to the model's variables and
-        # should be consistent with _var_name_map
-            #'latitude':                                  self._model.lat,
-            #'longitude':                                 self._model.lon,
-            'atmosphere_bottom_air__temperature_min':    self._model.T_air_min,
-            'atmosphere_bottom_air__temperature_max':    self._model.T_air_max,
-            'datetime__start':          self._model.start_year,
-            'datetime__end':            self._model.end_year,
-            'frostnumber__air':         self._model.air_frost_number,
-            'frostnumber__surface':     self._model.surface_frost_number,
-            'frostnumber__stefan':      self._model.stefan_frost_number}
-
-        # initialize() tasks complete.  Update status.
-        self.status = 'initialized'
-
+        # should be consistent with _var_name_map 
+            'latitude':                                 self._model.lat,
+            'longitude':                                self._model.lon,
+            'datetime__start':                          self._model.start_year,
+            'datetime__end':                                self._model.end_year,
+            'atmosphere_bottom_air__temperature':       self._model.T_air,
+            'atmosphere_bottom_air__temperature_amplitude': self._model.A_air,
+            'snowpack__depth':                          self._model.h_snow,
+            'snowpack__density':                        self._model.rho_snow,
+            'water-liquid__volumetric-water-content-soil':    self._model.vwc_H2O,
+            'vegetation__Hvgf': self._model.Hvgf,
+            'vegetation__Hvgt': self._model.Hvgt,
+            'vegetation__Dvf':  self._model.Dvf,
+            'vegetation__Dvt':  self._model.Dvt,
+            'soil__temperature': self._model.Tps,
+            'soil__active_layer_thickness': self._model.Zal}
+            
+        # Set the cfg file if it exists, otherwise, a default
+#        if cfg_file==None:  
+#        
+#        print self.cfg_file
+        
     def get_attribute(self, att_name):
 
         try:
@@ -221,55 +231,18 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         assert(self._model.status == 'initialized')
 
         # Calculate the new frost number values
-        self._model.calculate_frost_numbers()
-        self._values['frostnumber__air'] = self._model.air_frost_number
-
-        # Update the time
-        self._model.year += self._model.dt
-
-        # Get new input values
-        self._model.read_input_files()
+        self._model.update()
+        
+        self._values['ALT'] = self._model.Zal
 
     def update_frac(self, time_fraction):
-        # Only increment the time by a partial time step
-        # Ensure that we've already initialized the run
-        assert(self._model.status == 'initialized')
 
-        # Determine which year the model is currently in
-        current_model_year = int(self._model.year)
-
-        # Update the time with a partial time step
-        self._model.year += time_fraction * self._model.dt
-
-        # Determine if the model year is now different
-        new_model_year = int(self._model.year)
-
-        # If the year has changed, change the values
-        if new_model_year > current_model_year:
-            # Get new input values
-            self._model.read_input_files()
-
-            # Calculate the new frost number values
-            self._model.calculate_frost_numbers()
-            self._values['frostnumber__air'] = self._model.air_frost_number
-
+        return
+    
     def update_until(self, stop_year):
-        # Ensure that stop_year is at least the current year
-        if stop_year < self._model.year:
-            print("Warning: update_until year is less than current year")
-            print("  no update run")
-            return
 
-        if stop_year > self._model.end_year:
-            print("Warning: update_until year was greater than end_year")
-            print("  setting stop_year to end_year")
-            stop_year = self.end_year
+        return
 
-        # Implement the loop to update until stop_year
-        year = self._model.year
-        while year < stop_year:
-            self.update()
-            year = self._model.year
 
     def finalize(self):
         SILENT = True
@@ -278,27 +251,20 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         self._model.status = 'finalizing'  # (OpenMI)
 
         # Close the input files
-        self._model.close_input_files()   # Close any input files
+        self._model.finalize()   # Close any input files
 
         # Write output last output
-        self._model.write_output_to_file(SILENT=True)
-
-        # Close the output files
-        self._model.close_output_files()
+        
 
         # Done finalizing  
         self._model.status = 'finalized'  # (OpenMI)
 
-        # Print final report, as desired
-        if not SILENT:
-            self._model.print_final_report(\
-                    comp_name='Permamodel FrostNumber component')
 
     def get_start_time(self):
         return 0.0
 
     def get_current_time(self):
-        return self._model.year - self._model.start_year
+        return self._model.year
 
     def get_end_time(self):
         return self._model.end_year - self._model.start_year + 1.0

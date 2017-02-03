@@ -53,110 +53,6 @@ from permamodel.utils import model_input
 from permamodel.components import perma_base
 
 class Ku_method( perma_base.PermafrostComponent ):
-    
-    # Set up the name of this permafrost module
-    _name = 'Kudryavtsev module'
-
-    #-------------------------------------------------------------------
-    _att_map = {
-    # NOTE: this will change in the future
-        'model_name':         'PermaModel_Kudryavtsev_method',
-        'version':            '0.1',
-        'author_name':        'Kang Wang and Elchin Jafarov',
-        'grid_type':          'none',
-        'time_step_type':     'fixed',
-        'step_method':        'explicit',
-        #-------------------------------------------------------------
-        'comp_name':          'Ku_model',
-        'model_family':       'PermaModel',
-        'cfg_extension':      '_ku_model.cfg',
-        'cmt_var_prefix':     '/input/',
-        'gui_yaml_file':      '/input/ku_model.yaml',
-        'time_units':         'years' }
-
-    _input_var_names = [
-        'latitude',
-        'longitude',
-        'atmosphere_bottom_air__temperature',
-        'atmosphere_bottom_air__temperature_amplitude',
-        'snowpack__depth',
-        'snowpack__density',
-        'water-liquid__volumetric-water-content-soil',
-        'vegetation__Hvgf',
-        'vegetation__Hvgt',
-        'vegetation__Dvf',
-        'vegetation__Dvt' ]
-
-    _output_var_names = [
-        'soil__temperature',                                  # Tps
-        'soil__active_layer_thickness' ]                      # Zal
-
-    _var_name_map = {
-    # NOTE: we need to look up for the corresponding standard names
-        'latitude':                                           'lat',
-        'longitude':                                          'lon',
-        'atmosphere_bottom_air__temperature':                 'T_air',
-        'atmosphere_bottom_air__temperature_amplitude':       'A_air',
-        'snowpack__depth':                                    'h_snow',
-        'snowpack__density':                                  'rho_snow',
-        'water-liquid__volumetric-water-content-soil':        'vwc_H2O',
-        'vegetation__Hvgf':                                   'Hvgf',
-        'vegetation__Hvgt':                                   'Hvgt',
-        'vegetation__Dvf':                                    'Dvf',
-        'vegetation__Dvt':                                    'Dvt' }
-
-    _var_units_map = {
-    # NOTE: Kang please complete the vegetation info both on var names and units
-        'latitude':                                           'lat',
-        'longitude':                                          'lon',
-        'atmosphere_bottom_air__temperature':                 'deg_C',
-        'atmosphere_bottom_air__temperature_amplitude':       'deg_C',
-        'snowpack__depth':                                    'm',
-        'snowpack__density':                                  'kg m-3',
-        'water-liquid__volumetric-water-content-soil':        'm3 m-3',
-        'vegetation__Hvgf':                                   'm',
-        'vegetation__Hvgt':                                   'm',
-        'vegetation__Dvf':                                    'm2 s',
-        'vegetation__Dvt':                                    'm2 s' }
-
-    #-------------------------------------------------------------------
-    def get_attribute(self, att_name):
-
-        try:
-            return self._att_map[ att_name.lower() ]
-        except:
-            print '###################################################'
-            print ' ERROR: Could not find attribute: ' + att_name
-            print '###################################################'
-            print ' '
-
-    #   get_attribute()
-    #-------------------------------------------------------------------
-    def get_input_var_names(self):
-
-        #--------------------------------------------------------
-        # Note: These are currently variables needed from other
-        #       components vs. those read from files or GUI.
-        #--------------------------------------------------------
-        return self._input_var_names
-
-    #   get_input_var_names()
-    #-------------------------------------------------------------------
-    def get_output_var_names(self):
-
-        return self._output_var_names
-
-    #   get_output_var_names()
-    #-------------------------------------------------------------------
-    def get_var_name(self, long_var_name):
-
-        return self._var_name_map[ long_var_name ]
-
-    #   get_var_name()
-    #-------------------------------------------------------------------
-    def get_var_units(self, long_var_name):
-
-        return self._var_units_map[ long_var_name ]
 
     #   get_var_units()
     #-------------------------------------------------------------------
@@ -923,16 +819,11 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
         self.mode       = mode
-#        self.cfg_file   = cfg_file
-        
-                # Set the cfg file if it exists, otherwise, a default
-#        if cfg_file==None:
-        cfg_file = "../permamodel/examples/Ku_method.cfg"
-        print cfg_file
-        
+
+        # Set the cfg file if it exists, otherwise, provide a default.
+        if cfg_file is None:
+            cfg_file = "permamodel/examples/Ku_method.cfg"
         self.cfg_file = cfg_file
-        
-        print self.cfg_file
 
 #            if os.path.isfile(cfg_file):
 #                print("Default config file exists: %s" % cfg_file)
@@ -942,6 +833,27 @@ class Ku_method( perma_base.PermafrostComponent ):
 #                raise(ValueError(
 #                    "Default frostnumber config file %s does not exist" %\
 #                    cfg_file))
+        # Initialize the output variables (internal names)
+        self.Tps = np.float32(-999.99)
+        self.Zal = np.float32(-999.99)
+        
+                # Initialize the year to the start year
+        #  or to zero if it doesn't exist
+        try:
+            self.year = self.start_year
+        except AttributeError:
+            self.year = 0
+            self.start_year = 0
+            self.end_year = 0
+
+        # Ensure that the end_year is not before the start_year
+        # If no end_year is given,
+        #   it is assumed that this will run for one year
+        #   so the end_year is the same as the start_year
+        try:
+            assert(self.end_year >= self.start_year)
+        except AttributeError:
+            self.end_year = self.start_year
 
         
         #print mode, cfg_file
@@ -968,6 +880,8 @@ class Ku_method( perma_base.PermafrostComponent ):
                 print 'Permafrost component: Disabled.'
             self.lat    = self.initialize_scalar(0, dtype='float64')
             self.lon    = self.initialize_scalar(0, dtype='float64')
+            self.start_year    = self.initialize_scalar(0, dtype='float64')
+            self.end_year    = self.initialize_scalar(0, dtype='float64')
             self.T_air  = self.initialize_scalar(0, dtype='float64')
             self.h_snow = self.initialize_scalar(0, dtype='float64')
             self.vwc_H2O= self.initialize_scalar(0, dtype='float64')
@@ -1233,7 +1147,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         ALT[idx] = -999.99;
         
         # Open a file to save the final result
-        w_nc_fid = Dataset(output_file, 'w', format='NETCDF4');
+        w_nc_fid = Dataset(output_file+'.nc', 'w', format='NETCDF4');
         
         # ==== Latitude ====
 
@@ -1263,3 +1177,12 @@ class Ku_method( perma_base.PermafrostComponent ):
         temp[:] = ALT;
 #        
         w_nc_fid.close()  # close the new file
+        
+    def write_out_txtfile(self, output_file, varname):
+
+        import numpy as np
+        
+        ALT = self.Zal+0.;
+        
+        # Open a file to save the final result
+        np.savetxt(output_file+'.txt',self.lat);
