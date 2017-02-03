@@ -819,16 +819,11 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
         self.mode       = mode
-#        self.cfg_file   = cfg_file
-        
-                # Set the cfg file if it exists, otherwise, a default
-#        if cfg_file==None:
-        cfg_file = "permamodel/examples/Ku_method.cfg"
-        print cfg_file
-        
+
+        # Set the cfg file if it exists, otherwise, provide a default.
+        if cfg_file is None:
+            cfg_file = "permamodel/examples/Ku_method.cfg"
         self.cfg_file = cfg_file
-        
-        print self.cfg_file
 
 #            if os.path.isfile(cfg_file):
 #                print("Default config file exists: %s" % cfg_file)
