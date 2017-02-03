@@ -1,1 +1,2 @@
+#!/usr/bin/env bash
 bmi-tester permamodel.components.bmi_frost_number.BmiFrostnumberMethod 
