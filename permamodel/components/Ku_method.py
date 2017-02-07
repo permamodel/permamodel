@@ -209,7 +209,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         # I do not like this input file here need fix later
         #input_file = 'Parameters/Typical_Thermal_Parameters.csv'
 
-        input_file = os.path.join(data_directory, 'Typical_Thermal_Parameters.csv'
+        input_file = os.path.join(data_directory, 'Typical_Thermal_Parameters.csv')
         s_data = np.genfromtxt(input_file, names = True, delimiter=',', dtype=None)
 
         Bulk_Density_Texture = s_data['Bulk_Density']
@@ -260,7 +260,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         #
         #--------------------------------------------------
         #input_file = 'Parameters/Typical_Thermal_Parameters.csv'
-        input_file = os.path.join(data_directory, 'Typical_Thermal_Parameters.csv'
+        input_file = os.path.join(data_directory, 'Typical_Thermal_Parameters.csv')
         s_data = np.genfromtxt(input_file, names = True, delimiter=',', dtype=None)
 
         vwc=self.vwc_H2O
