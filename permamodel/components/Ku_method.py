@@ -750,15 +750,11 @@ class Ku_method( perma_base.PermafrostComponent ):
         
     def read_whole_soil_texture_from_GSD(self):
         
-        Clay_file = self.get_param_nc4_filename("T_CLAY",
-                                                self.permafrost_dir)
-        Sand_file = self.get_param_nc4_filename("T_SAND",
-                                                self.permafrost_dir)
-        Silt_file = self.get_param_nc4_filename("T_SILT",
-                                                self.permafrost_dir)
-        Peat_file = self.get_param_nc4_filename("T_OC",
-                                                self.permafrost_dir)
-                                                
+        Clay_file = self.get_param_nc4_filename("T_CLAY")
+        Sand_file = self.get_param_nc4_filename("T_SAND")
+        Silt_file = self.get_param_nc4_filename("T_SILT")
+        Peat_file = self.get_param_nc4_filename("T_OC")
+
         lonname    = 'lon';
         latname    = 'lat';
         
