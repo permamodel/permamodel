@@ -84,7 +84,10 @@ class Ku_method( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
     def open_input_files(self):
         # this function will work only if filename is not empty
-    
+
+        self.thermal_parameters_file = os.path.join(data_directory,
+                                                    'Typical_Thermal_Parameters.csv')
+
         self.T_air_file       = self.in_directory + self.T_air_file
         self.A_air_file       = self.in_directory + self.A_air_file
         self.h_snow_file      = self.in_directory + self.h_snow_file
@@ -114,6 +117,11 @@ class Ku_method( perma_base.PermafrostComponent ):
     def read_input_files(self):
 
         #rti = self.rti # has a problem with loading rti: do not know where its been initialized
+
+        self.thermal_data = np.genfromtxt(self.thermal_parameters_file,
+                                          names = True,
+                                          delimiter=',',
+                                          dtype=None)
 
         #-------------------------------------------------------
         # All grids are assumed to have a data type of Float32.
@@ -209,11 +217,8 @@ class Ku_method( perma_base.PermafrostComponent ):
         # I do not like this input file here need fix later
         #input_file = 'Parameters/Typical_Thermal_Parameters.csv'
 
-        input_file = os.path.join(data_directory, 'Typical_Thermal_Parameters.csv')
-        s_data = np.genfromtxt(input_file, names = True, delimiter=',', dtype=None)
-
-        Bulk_Density_Texture = s_data['Bulk_Density']
-        Heat_Capacity_Texture = s_data['Heat_Capacity']
+        Bulk_Density_Texture = self.thermal_data['Bulk_Density']
+        Heat_Capacity_Texture = self.thermal_data['Heat_Capacity']
 
         # Adjusting percent of sand, silt, clay and peat ==
         tot_percent = self.p_sand+self.p_clay+self.p_silt+self.p_peat
@@ -260,15 +265,13 @@ class Ku_method( perma_base.PermafrostComponent ):
         #
         #--------------------------------------------------
         #input_file = 'Parameters/Typical_Thermal_Parameters.csv'
-        input_file = os.path.join(data_directory, 'Typical_Thermal_Parameters.csv')
-        s_data = np.genfromtxt(input_file, names = True, delimiter=',', dtype=None)
 
         vwc=self.vwc_H2O
                 
-        KT_DRY = s_data['KT_DRY'] # DRY soil thermal conductivity in THAWED states
-        KT_WET = s_data['KT_WET'] # WET soil thermal conductivity in THAWED states
-        KF_DRY = s_data['KF_DRY'] # DRY soil thermal conductivity in FROZEN states 
-        KF_WET = s_data['KF_WET'] # WET soil thermal conductivity in FROZEN states
+        KT_DRY = self.thermal_data['KT_DRY'] # DRY soil thermal conductivity in THAWED states
+        KT_WET = self.thermal_data['KT_WET'] # WET soil thermal conductivity in THAWED states
+        KF_DRY = self.thermal_data['KF_DRY'] # DRY soil thermal conductivity in FROZEN states 
+        KF_WET = self.thermal_data['KF_WET'] # WET soil thermal conductivity in FROZEN states
         
         KT_DRY = KT_DRY * 1;
         KT_WET = KT_WET * 1;
