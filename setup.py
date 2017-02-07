@@ -15,5 +15,5 @@ setup(name='permamodel',
       install_requires=('affine', 'netCDF4', 'scipy', 'numpy', 'nose',),
       package_data={'': ['examples/*.cfg',
                          'examples/*.dat',
-                         'components/Parameters/*']}
+                         'data/*']}
 )
