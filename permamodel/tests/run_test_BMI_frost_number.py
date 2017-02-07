@@ -1,8 +1,11 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan 10 10:56:16 2017
+A simple BMI FrostNumberModel example. Run with:
 
+  $ python -m permamodel.tests.run_test_BMI_frost_number
+
+Created on Tue Jan 10 10:56:16 2017
 @author: kangwang
 """
 
