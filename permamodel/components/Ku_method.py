@@ -1108,7 +1108,7 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         #if (self.SAVE_MR_GRIDS):
         #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
-        self.ALT_file  = self.in_directory + self.ALT_file
+        self.ALT_file  = self.out_directory + self.ALT_file
         
         if (self.SAVE_ALT_GRIDS):
             self.write_out_ncfile(self.ALT_file,self.Zal)
