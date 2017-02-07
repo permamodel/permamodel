@@ -1,7 +1,4 @@
-"""
-test_perma_base.py
-  tests of the perma_base component of permamodel
-"""
+"""Tests directories set in the permamodel package definition file."""
 
 import os
 from nose.tools import assert_true
