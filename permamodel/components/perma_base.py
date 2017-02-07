@@ -54,6 +54,7 @@ from permamodel.utils import BMI_base
 from permamodel.utils import model_input
 #from permamodel.utils import model_output
 
+from .. import data_directory
 
 
 #-----------------------------------------------------------------------
@@ -158,9 +159,8 @@ class PermafrostComponent( BMI_base.BMI_component ):
     #   extract_grid_value_from_GSD()
     #-------------------------------------------------------------------
 
-    def get_param_nc4_filename(self, filename_root, permamodel_dir="."):
-        filename = "%s/permamodel/components/Parameters/%s.nc4" % \
-                (permamodel_dir, filename_root)
+    def get_param_nc4_filename(self, filename_root):
+        filename = os.path.join(data_directory, '%s.nc4' % filename_root)
         if not os.path.isfile(filename):
             print("Error: File %s does not exist" % filename)
             exit(-1)
