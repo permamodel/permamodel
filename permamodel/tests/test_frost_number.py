@@ -8,7 +8,7 @@ from permamodel.components import bmi_frost_number
 import os
 import numpy as np
 import pprint
-from ..tests import permamodel_directory, examples_directory
+from .. import permamodel_directory, examples_directory
 
 # ---------------------------------------------------
 # Tests that ensure we are reaching this testing file

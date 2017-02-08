@@ -7,7 +7,7 @@ from permamodel.utils import model_input
 from permamodel.components import perma_base
 from permamodel.components import frost_number
 from permamodel.components.perma_base import *
-from permamodel.tests import examples_directory
+from .. import examples_directory
 import os
 
 """
