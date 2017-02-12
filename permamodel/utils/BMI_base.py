@@ -144,6 +144,8 @@ import outlets          ## (9/19/14)
 #import pixels
 import rti_files
 
+from .. import data_directory
+
 #---------------------------------------------
 # Experiment.  9/19/14
 #---------------------------------------------
@@ -1674,10 +1676,10 @@ class BMI_component:
     #   initialize_basin_vars()
     def initialize_soil_texture(self):
         print self.lat
-        Clay_file = 'Parameters/T_CLAY.nc4'
-        Sand_file = 'Parameters/T_SAND.nc4'
-        Silt_file = 'Parameters/T_SILT.nc4'
-        Peat_file = 'Parameters/T_OC.nc4'
+        Clay_file = os.path.join(data_directory, 'T_CLAY.nc4')
+        Sand_file = os.path.join(data_directory, 'T_SAND.nc4')
+        Silt_file = os.path.join(data_directory, 'T_SILT.nc4')
+        Peat_file = os.path.join(data_directory, 'T_OC.nc4')
 
         lonname     = 'lon'; lon_grid_scale = 0.05;
         latname     = 'lat'; lat_grid_scale = 0.05;

@@ -8,7 +8,7 @@ from permamodel.components import bmi_frost_number
 from permamodel.components import perma_base
 import os
 import numpy as np
-from ..tests import examples_directory
+from .. import examples_directory
 
 # Set the file names for the example cfg files
 onesite_oneyear_filename = \
