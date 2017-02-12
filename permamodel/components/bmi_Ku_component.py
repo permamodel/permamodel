@@ -118,8 +118,8 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         'water-liquid__volumetric-water-content-soil':        'm3 m-3',
         'vegetation__Hvgf':                                   'm',
         'vegetation__Hvgt':                                   'm',
-        'vegetation__Dvf':                                    'm2 s',
-        'vegetation__Dvt':                                    'm2 s'  ,
+        'vegetation__Dvf':                                    'm2 s-1',
+        'vegetation__Dvt':                                    'm2 s-1'  ,
         'soil__temperature':                                  'deg_C',
         'soil__active_layer_thickness':                       'm'}
 
