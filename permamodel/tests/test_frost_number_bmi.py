@@ -110,6 +110,7 @@ def test_frost_number_implements_finalize():
     fn.initialize(cfg_file=onesite_multiyear_filename)
     fn.update_until(fn._model.end_year)
     fn.finalize()
+    files_to_remove.append(fn._model.fn_out_filename)
 
 def test_frost_number_get_current_time_returns_scalar_float():
     fn = bmi_frost_number.BmiFrostnumberMethod()
