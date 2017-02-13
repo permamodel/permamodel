@@ -42,3 +42,20 @@ GIPL is a detailed numerical model that solves for the temperature profile
 of a soil column given its material properties and the temperature and
 precipitation conditions it experiences. For more information please see <https://github.com/Elchin/GIPL> 
 
+Installation
+------------
+
+The suite of permamodel routines as well as some useful ancillary packages 
+can be installed using the bash script:
+
+   permamodel/permamodel/examples/install\_pm.sh
+
+If this file is downloaded to your system, you can change it to executable
+and run it with:
+
+   chmod +x ./install\_pm.sh
+	 ./install\_pm.sh
+
+By default, this will install a Python 2.7 environment and the permamodel
+suite to the subdirectory ./pm\_env (or a different subdirectory, if specified
+as a command line argument to install\_pm.sh).

@@ -20,6 +20,20 @@ onesite_multiyear_filename = \
                      'Frostnumber_example_singlesite_multiyear.cfg')
         #'./permamodel/examples/Frostnumber_example_singlesite_multiyear.cfg'
 
+# List of files to be removed after testing is complete
+# use files_to_remove.append(<filename>) to add to it
+files_to_remove = []
+
+def setup_module():
+    """ Standard fixture called before any tests in this file are performed """
+    pass
+
+def teardown_module():
+    """ Standard fixture called after all tests in this file are performed """
+    for f in files_to_remove:
+        if os.path.exists(f):
+            os.remove(f)
+
 # ---------------------------------------------------
 # Tests that ensure we have bmi functionality
 # ---------------------------------------------------
@@ -96,6 +110,7 @@ def test_frost_number_implements_finalize():
     fn.initialize(cfg_file=onesite_multiyear_filename)
     fn.update_until(fn._model.end_year)
     fn.finalize()
+    files_to_remove.append(fn._model.fn_out_filename)
 
 def test_frost_number_get_current_time_returns_scalar_float():
     fn = bmi_frost_number.BmiFrostnumberMethod()
