@@ -7,7 +7,6 @@ from permamodel.components import frost_number
 from permamodel.components import bmi_frost_number
 import os
 import numpy as np
-import pprint
 from .. import permamodel_directory, examples_directory
 
 # List of files to be removed after testing is complete
