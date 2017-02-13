@@ -6,7 +6,7 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 
-class gipl_model( perma_base.permafrost_component ):
+class gipl_model( perma_base.PermafrostComponent ):
 
     #-------------------------------------------------------------------
     _att_map = {
