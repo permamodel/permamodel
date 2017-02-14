@@ -16,10 +16,10 @@ tests_directory = os.path.join(permamodel_directory, 'tests')
 
 SILENT = True
 
-if not(SILENT):
-    print("Importing permamodel.utils...")
-import permamodel.utils
-
-if not(SILENT):
-    print("Importing permamodel.components...")
-import permamodel.components
+#if not(SILENT):
+#    print("Importing permamodel.utils...")
+#import permamodel.utils
+#
+#if not(SILENT):
+#    print("Importing permamodel.components...")
+#import permamodel.components
