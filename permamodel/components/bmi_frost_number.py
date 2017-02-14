@@ -174,6 +174,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
 
         # initialize() tasks complete.  Update status.
         self.status = 'initialized'
+        #print(self._model)
 
     def get_attribute(self, att_name):
 
