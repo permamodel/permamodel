@@ -11,16 +11,16 @@ from permamodel.components import Ku_method
 import os
 
 """
-class FrostnumberMethod( frost_number.BmiFrostnumberMethod ):
+class BmiKuMethod( frost_number.BmiFrostnumberMethod ):
     _thisname = 'this name'
 """
 
 class BmiKuMethod( perma_base.PermafrostComponent ):
 
-    """ Implement the Nelson-Outcalt Frost numbers """
+    """ Implement the Ku model """
 
     # Set up the name of this permafrost module
-    _name = 'Frost number module'
+    _name = 'Ku module'
 
     """ Note: all of these are defined below instead!
     # Indicate the CSDMS standard names of input and output variables
@@ -64,7 +64,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         'model_family':       'PermaModel',
         'cfg_extension':      '_ku_model.cfg',
         'cmt_var_prefix':     '/input/',
-        'gui_yaml_file':      '/input/frostnumber_model.yaml',
+        'gui_yaml_file':      '/input/ku_model.yaml',
         'time_units':         'years' }
 
     # This used to be [...] instead of (...)

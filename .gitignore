@@ -70,3 +70,7 @@ target/
 # Emacs backups
 *~
 
+
+frostnumber_output.dat
+
+permamodel/components/bmi_frost_number.py

@@ -14,28 +14,28 @@ Input:
   description: Input directory
   value:
     type: string
-    default: /Users/kang/Desktop/permamodel/permamodel/examples
+    default: permamodel/examples
     units: '-'
 - key: out_directory
   name: Output directory
   description: Output directory
   value:
     type: string
-    default: ~/CMT_Output/
+    default: .
     units: '-'
 - key: permafrost_dir
   name: permafrost directory
   description: permafrost directory
   value:
     type: string
-    default: /Users/kang/Desktop/permamodel
+    default: .
     units: '-'    
 - key: site_prefix
   name: Site prefix
   description: File prefix for the study site
   value:
     type: string
-    default: Test
+    default: Case_test
     units: '-'
 - key: case_prefix
   name: Case prefix
@@ -59,9 +59,9 @@ Input:
   description: latitude
   value:
     type: float
-    default: '64.8378 '
+    default: 64.8378
     range:
-      min: '-90.0'
+      min: -90.0
       max: 90
     units: '-'    
 - key: lon_type
@@ -79,9 +79,9 @@ Input:
   description: longitude
   value:
     type: float
-    default: '-147.7164'
+    default: -147.7164
     range:
-      min: '-180.0'
+      min: -180.0
       max: 180
     units: '-'
 - key: start_year
@@ -89,9 +89,9 @@ Input:
   description: begining of the simulation time 
   value:
     type: float
-    default: '2010'
+    default: 2009
     range:
-      min: '0'
+      min: 0
       max: 100000000
     units: year
 - key: end_year
@@ -99,20 +99,20 @@ Input:
   description: end of the simulation time 
   value:
     type: float
-    default: '2014'
+    default: 2009
     range:
-      min: '0'
+      min: 0
       max: 100000000
     units: year
 - key: dt
   name: Time step
-  description: Timestep for infiltration process
+  description: Timestep for infiltration process (a year)
   value:
     type: float
-    default: '60.000'
+    default: 31536000.000
     range:
-      min: '0'
-      max: 1e3
+      min: 0
+      max: 1e12
     units: sec
 - key: T_air_type
   name: T_air type
@@ -128,12 +128,12 @@ Input:
     units: '-'
 - key: T_air
   name: T_air
-  description: Near Surface Air Temperature
+  description: Near Surface Air Temperature (annual mean)
   value:
     type: float
-    default: '-9.0'
+    default: -9.0
     range:
-      min: '-100.0'
+      min: -100.0
       max: 100
     units: degC
 - key: A_air_type
@@ -150,12 +150,12 @@ Input:
     units: '-'
 - key: A_air
   name: A_air
-  description: Near Surface Air Temperature Amplitude
+  description: Near Surface Air Temperature Amplitude (annual)
   value:
     type: float
-    default: '15.4'
+    default: 15.4
     range:
-      min: '-100.0'
+      min: -100.0
       max: 100
     units: degC
 - key: h_snow_type
@@ -172,13 +172,13 @@ Input:
     units: '-'
 - key: h0_snow
   name: h0_snow
-  description: Depth of snow
+  description: Depth of snow (average through winter)
   value:
     type: float
-    default: '0.500'
+    default: 0.300
     range:
-      min: '0.0'
-      max: '20.0'
+      min: 0.0
+      max: 5.0
     units: m
 - key: rho_snow_type
   name: rho_snow type
@@ -194,12 +194,12 @@ Input:
     units: '-'
 - key: rho_snow
   name: rho_snow
-  description: Density of snow
+  description: Density of snow (average through winter)
   value:
     type: float
-    default: '240.000'
+    default: 240.000
     range:
-      min: '0.0'
+      min: 0.0
       max: 1e3
     units: kg/m^3
 - key: vwc_H2O_type
@@ -216,13 +216,13 @@ Input:
     units: '-'
 - key: vwc_H2O
   name: vwc_H2O
-  description: Soil volumetric water content
+  description: Soil volumetric water content (thaw season, eg. August)
   value:
     type: float
-    default: '0.40'
+    default: 0.40
     range:
-      min: '0.0'
-      max: '1.0'
+      min: 0.0
+      max: 1.0
     units: '-'
 - key: Hvgf_type 
   name: Hvgf type 
@@ -241,10 +241,10 @@ Input:
   description: Height of vegetation in frozen period
   value:
     type: float
-    default: '0.00'
+    default: 0.00
     range:
-      min: '0.0'
-      max: '1.0'
+      min: 0.0
+      max: 1.0
     units: 'm'
 - key: Hvgt_type 
   name: Hvgt type 
@@ -263,10 +263,10 @@ Input:
   description: Height of vegetation in thawed period
   value:
     type: float
-    default: '0.00'
+    default: 0.00
     range:
-      min: '0.0'
-      max: '1.0'
+      min: 0.0
+      max: 1.0
     units: 'm'
 - key: Dvf_type 
   name: Dvf type 
@@ -285,10 +285,10 @@ Input:
   description: Thermal diffusivity of vegetation in frozen period
   value:
     type: float
-    default: '139.00'
+    default: 1.39E-6
     range:
-      min: '0.0'
-      max: '1.0'
+      min: 0.0
+      max: 5.0E-6
     units: 'm2 s'
 - key: Dvt_type 
   name: Dvt type 
@@ -307,11 +307,28 @@ Input:
   description: Thermal diffusivity of vegetation in frozen period
   value:
     type: float
-    default: '5.560'
+    default: 5.56E-8
     range:
-      min: '0.0'
-      max: '1.0'
+      min: 0.0
+      max: 1.0E-6
     units: 'm2 s'
+- key: SAVE_ALT_GRIDS
+  name: SAVE_ALT_GRIDS
+  description: option to save result or not
+  value:
+    type: choice
+    default: Scalar
+    choices:
+    - Yes
+    - No
+    units: '-'
+- key: ALT_file
+  name: ALT_file
+  description: Name of output file
+  value:
+    type: string
+    default: ALT.nc
+    units: '-'    
 About:
 - key: ModelName
   name: Model name
