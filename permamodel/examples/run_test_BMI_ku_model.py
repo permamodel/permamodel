@@ -10,9 +10,8 @@ Created on Tue Jan 10 10:56:16 2017
 """
 
 import os
-import sys
 from permamodel.components import bmi_Ku_component
-from .. import examples_directory
+from permamodel import examples_directory
 
 
 cfg_file = os.path.join(examples_directory, 'Ku_method.cfg')

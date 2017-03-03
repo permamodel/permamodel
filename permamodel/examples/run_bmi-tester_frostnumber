@@ -1,0 +1,6 @@
+# Run this from the root "permamodel" directory
+#  e.g., the one that contains the ez_setup.py and README.md files
+#
+#  . ./permamodel/examples/run_bmi-tester_frostnumber
+
+bmi-tester permamodel.components.bmi_frost_number.BmiFrostnumberMethod 

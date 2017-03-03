@@ -51,7 +51,7 @@ PATH=$PWD/conda/bin:$PATH
 
 # Install necessary and desired conda repository
 # Required, although these would be accomplished via pip from setup.py install
-declare -a module_list=("nose" "numpy" "netCDF4" "affine")
+declare -a module_list=("nose" "numpy" "scipy" "netCDF4" "affine" "pyyaml")
 # Potentially helpful packages: ipython
 # Eventually required packages: gdal, pyproj, osr
 for module in "${module_list[@]}"; do
@@ -91,9 +91,16 @@ python setup.py develop
 cd ..
 
 # Get and install the bmi-tester repository
-echo "Get and install permamodel..."
+echo "Get and install bmi-tester..."
 git clone https://github.com/csdms/bmi-tester.git
 cd bmi-tester
+python setup.py develop
+cd ..
+
+# Get and install the cruAKtemp repository
+echo "Get and install cruAKtemp..."
+git clone https://github.com/permamodel/cruAKtemp.git
+cd cruAKtemp
 python setup.py develop
 cd ..
 
