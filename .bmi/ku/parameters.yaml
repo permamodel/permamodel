@@ -1,6 +1,4 @@
-Input:
-- key: comp_status
-  name: Component status
+comp_status:
   description: Component status
   value:
     type: choice
@@ -9,43 +7,37 @@ Input:
     - Enabled
     - Disabled
     units: '-'
-- key: in_directory
-  name: Input directory
+in_directory:
   description: Input directory
   value:
     type: string
     default: permamodel/examples
     units: '-'
-- key: out_directory
-  name: Output directory
+out_directory:
   description: Output directory
   value:
     type: string
     default: .
     units: '-'
-- key: permafrost_dir
-  name: permafrost directory
+permafrost_dir:
   description: permafrost directory
   value:
     type: string
     default: .
     units: '-'    
-- key: site_prefix
-  name: Site prefix
+site_prefix:
   description: File prefix for the study site
   value:
     type: string
     default: Case_test
     units: '-'
-- key: case_prefix
-  name: Case prefix
+case_prefix:
   description: File prefix for the model scenario
   value:
     type: string
     default: Case_test
     units: '-'
-- key: lat_type
-  name: lat type
+lat_type:
   description: latitude 
   value:
     type: choice
@@ -54,8 +46,7 @@ Input:
     - Scalar
     - Grid
     units: '-'
-- key: lat
-  name: lat
+lat:
   description: latitude
   value:
     type: float
@@ -64,8 +55,7 @@ Input:
       min: -90.0
       max: 90
     units: '-'    
-- key: lon_type
-  name: lon type
+lon_type:
   description: longitude 
   value:
     type: choice
@@ -74,8 +64,7 @@ Input:
     - Scalar
     - Grid
     units: '-'
-- key: lon
-  name: lon
+lon:
   description: longitude
   value:
     type: float
@@ -84,8 +73,7 @@ Input:
       min: -180.0
       max: 180
     units: '-'
-- key: start_year
-  name: start year
+start_year:
   description: begining of the simulation time 
   value:
     type: float
@@ -94,8 +82,7 @@ Input:
       min: 0
       max: 100000000
     units: year
-- key: end_year
-  name: end year
+end_year:
   description: end of the simulation time 
   value:
     type: float
@@ -104,8 +91,7 @@ Input:
       min: 0
       max: 100000000
     units: year
-- key: dt
-  name: Time step
+dt:
   description: Timestep for infiltration process (a year)
   value:
     type: float
@@ -114,8 +100,7 @@ Input:
       min: 0
       max: 1e12
     units: sec
-- key: T_air_type
-  name: T_air type
+T_air_type:
   description: Near Surface Air Temperature input types
   value:
     type: choice
@@ -126,8 +111,7 @@ Input:
     - Time_Series
     - Grid_Sequence
     units: '-'
-- key: T_air
-  name: T_air
+T_air:
   description: Near Surface Air Temperature (annual mean)
   value:
     type: float
@@ -136,8 +120,7 @@ Input:
       min: -100.0
       max: 100
     units: degC
-- key: A_air_type
-  name: A_air type
+A_air_type:
   description: Near Surface Air Temperature Amplitude input types
   value:
     type: choice
@@ -148,8 +131,7 @@ Input:
     - Time_Series
     - Grid_Sequence
     units: '-'
-- key: A_air
-  name: A_air
+A_air:
   description: Near Surface Air Temperature Amplitude (annual)
   value:
     type: float
@@ -158,8 +140,7 @@ Input:
       min: -100.0
       max: 100
     units: degC
-- key: h_snow_type
-  name: h_snow type
+h_snow_type:
   description: Allowed input types
   value:
     type: choice
@@ -170,8 +151,7 @@ Input:
     - Time_Series
     - Grid_Sequence
     units: '-'
-- key: h0_snow
-  name: h0_snow
+h0_snow:
   description: Depth of snow (average through winter)
   value:
     type: float
@@ -180,8 +160,7 @@ Input:
       min: 0.0
       max: 5.0
     units: m
-- key: rho_snow_type
-  name: rho_snow type
+rho_snow_type:
   description: Allowed input types
   value:
     type: choice
@@ -192,8 +171,7 @@ Input:
     - Time_Series
     - Grid_Sequence
     units: '-'
-- key: rho_snow
-  name: rho_snow
+rho_snow:
   description: Density of snow (average through winter)
   value:
     type: float
@@ -202,8 +180,7 @@ Input:
       min: 0.0
       max: 1e3
     units: kg/m^3
-- key: vwc_H2O_type
-  name: vwc_H2O type
+vwc_H2O_type:
   description: Allowed input types
   value:
     type: choice
@@ -214,8 +191,7 @@ Input:
     - Time_Series
     - Grid_Sequence
     units: '-'
-- key: vwc_H2O
-  name: vwc_H2O
+vwc_H2O:
   description: Soil volumetric water content (thaw season, eg. August)
   value:
     type: float
@@ -224,8 +200,7 @@ Input:
       min: 0.0
       max: 1.0
     units: '-'
-- key: Hvgf_type 
-  name: Hvgf type 
+Hvgf_type:
   description: Allowed input types
   value:
     type: choice
@@ -236,8 +211,7 @@ Input:
     - Time_Series
     - Grid_Sequence
     units: '-'
-- key: Hvgf_type 
-  name: Hvgf_type 
+Hvgf_type:
   description: Height of vegetation in frozen period
   value:
     type: float
@@ -246,8 +220,7 @@ Input:
       min: 0.0
       max: 1.0
     units: 'm'
-- key: Hvgt_type 
-  name: Hvgt type 
+Hvgt_type:
   description: Allowed input types
   value:
     type: choice
@@ -258,8 +231,7 @@ Input:
     - Time_Series
     - Grid_Sequence
     units: '-'
-- key: Hvgt_type 
-  name: Hvgt_type 
+Hvgt_type:
   description: Height of vegetation in thawed period
   value:
     type: float
@@ -268,8 +240,7 @@ Input:
       min: 0.0
       max: 1.0
     units: 'm'
-- key: Dvf_type 
-  name: Dvf type 
+Dvf_type:
   description: Allowed input types
   value:
     type: choice
@@ -280,8 +251,7 @@ Input:
     - Time_Series
     - Grid_Sequence
     units: '-'
-- key: Dvf_type 
-  name: Dvf_type 
+Dvf_type:
   description: Thermal diffusivity of vegetation in frozen period
   value:
     type: float
@@ -290,8 +260,7 @@ Input:
       min: 0.0
       max: 5.0E-6
     units: 'm2 s'
-- key: Dvt_type 
-  name: Dvt type 
+Dvt_type:
   description: Allowed input types
   value:
     type: choice
@@ -302,8 +271,7 @@ Input:
     - Time_Series
     - Grid_Sequence
     units: '-'
-- key: Dvt_type 
-  name: Dvt_type 
+Dvt_type:
   description: Thermal diffusivity of vegetation in frozen period
   value:
     type: float
@@ -312,8 +280,7 @@ Input:
       min: 0.0
       max: 1.0E-6
     units: 'm2 s'
-- key: SAVE_ALT_GRIDS
-  name: SAVE_ALT_GRIDS
+SAVE_ALT_GRIDS:
   description: option to save result or not
   value:
     type: choice
@@ -322,30 +289,25 @@ Input:
     - Yes
     - No
     units: '-'
-- key: ALT_file
-  name: ALT_file
+ALT_file:
   description: Name of output file
   value:
     type: string
     default: ALT.nc
     units: '-'    
-About:
-- key: ModelName
-  name: Model name
+ModelName:
   description: Name of the model
   value:
     type: String
     default: Ku_model
     units: '-'
-- key: ModelAuthor
-  name: Author name
+ModelAuthor:
   description: Name of the model author
   value:
     type: String
-    default: 'Kang Wang'
+    default: 'Kang Wang & Elchin E. Jafarov'
     units: '-'
-- key: HTML_HELP_FILE
-  name: HTML help file
+HTML_HELP_FILE:
   description: Url for html help file
   value:
     type: String
