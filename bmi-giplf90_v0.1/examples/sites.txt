@@ -1,0 +1,8 @@
+Class id 
+ 1
+ id snow_code  veg_code  geo_code gt_zone_code temp_grd
+246   	1			1		1			1		0.00
+
+#NOTE:
+#This files non-important for 1 sites case. 
+#It becomes important when we spatial modeling assigning eco-type or topo-type. 
