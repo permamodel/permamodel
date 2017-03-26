@@ -646,8 +646,13 @@
 			open(2,file=self%aver_res_file,STATUS='unknown')
 			open(3,file=self%restart_file,STATUS='unknown')
 			write(self%FMT1,'(A30,I0,A12)')'(1x,I10,1x,F12.3,2(1x,F16.12),',self%m_grd,'(1x,F16.12))'
+			write(FMT11,'(A34,I0,A12)')'(7x,A4,1x,A10,2(3x,A10),',self%m_grd,'(1x,F16.4))'
+			write(1,FMT11) 'id','day','bnd_temp','snd', (self%zdepth(self%zdepth_id(i)),i=1,self%m_grd)
+			
 			write(self%FMT2,'(A28,I0,A40)')'(1x,I10,1x,F12.3,2(1x,F8.3),',self%m_grd,'(1x,F8.3),(1x,F8.3,1x,F12.3),(1x,F12.3))'
-
+			write(FMT22,'(A34,I0,A20,A12)')'(7x,A4,1x,A10,2(3x,A10),',self%m_grd,'(1x,F8.3),3(A12))'
+			write(2,FMT22) 'id','day','bnd_temp','snd', (self%zdepth(self%zdepth_id(i)),i=1,self%m_grd),&
+							'alt','frz_up_cur','frz_up_tot'
 		end subroutine open_res_files
 
 		subroutine active_layer(self,k)
