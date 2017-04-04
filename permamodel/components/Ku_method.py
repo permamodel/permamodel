@@ -838,8 +838,21 @@ class Ku_method( perma_base.PermafrostComponent ):
         # Initialize the output variables (internal names)
         self.Tps = np.float32(-999.99)
         self.Zal = np.float32(-999.99)
+
+        #-----------------------------------------------
+        # Load component parameters from a config file
+        #-----------------------------------------------
+        self.set_constants()
+        self.initialize_config_vars()
+        # At this stage we are going to ignore read_grid_info b/c
+        # we do not have rti file associated with our model
+        # we also skipping the basin_vars which calls the outlets
+        #self.read_grid_info()
+        #self.initialize_basin_vars()
         
-                # Initialize the year to the start year
+        self.initialize_time_vars()
+
+        # Initialize the year to the start year
         #  or to zero if it doesn't exist
         try:
             self.year = self.start_year
@@ -856,22 +869,6 @@ class Ku_method( perma_base.PermafrostComponent ):
             assert(self.end_year >= self.start_year)
         except AttributeError:
             self.end_year = self.start_year
-
-        
-        #print mode, cfg_file
-
-        #-----------------------------------------------
-        # Load component parameters from a config file
-        #-----------------------------------------------
-        self.set_constants()
-        self.initialize_config_vars()
-        # At this stage we are going to ignore read_grid_info b/c
-        # we do not have rti file associated with our model
-        # we also skipping the basin_vars which calls the outlets
-        #self.read_grid_info()
-        #self.initialize_basin_vars()
-        
-        self.initialize_time_vars()
 
         if (self.comp_status == 'Disabled'):
             #########################################
