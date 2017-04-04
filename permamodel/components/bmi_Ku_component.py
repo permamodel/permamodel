@@ -259,7 +259,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         return 0.0
 
     def get_current_time(self):
-        return self._model.year - self._model.start_year
+        return self._model.time.item()
 
     def get_end_time(self):
         return self._model.end_year - self._model.start_year + 1.0
