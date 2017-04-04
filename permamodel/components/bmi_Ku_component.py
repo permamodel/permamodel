@@ -232,7 +232,6 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
 
         # Calculate the new frost number values
         self._model.update()
-        
         self._values['soil__active_layer_thickness'] = self._model.Zal
 
     def update_frac(self, time_fraction):
@@ -264,7 +263,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         return 0.0
 
     def get_current_time(self):
-        return self._model.year
+        return self._model.year - self._model.start_year
 
     def get_end_time(self):
         return self._model.end_year - self._model.start_year + 1.0
