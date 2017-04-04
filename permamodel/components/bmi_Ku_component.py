@@ -412,4 +412,4 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         int
             Rank of grid.
         """
-        return len(self.get_grid_shape(self.get_var_grid(var_id)))
+        return len(self.get_grid_shape(var_id))
