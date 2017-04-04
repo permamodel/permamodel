@@ -231,13 +231,16 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         self._values['soil__active_layer_thickness'] = self._model.Zal
 
     def update_frac(self, time_fraction):
-
-        return
+        time_step = self.get_time_step()
+        self._model.dt = time_fraction * time_step
+        self.update()
+        self._model.dt = time_step
     
-    def update_until(self, stop_year):
-
-        return
-
+    def update_until(self, then):
+        n_steps = (then - self.get_current_time()) / self.get_time_step()
+        for _ in xrange(int(n_steps)):
+            self.update()
+        self.update_frac(n_steps - int(n_steps))
 
     def finalize(self):
         SILENT = True
