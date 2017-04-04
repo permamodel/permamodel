@@ -6,58 +6,34 @@ comp_status:
     choices:
     - Enabled
     - Disabled
-    units: '-'
 in_directory:
   description: Input directory
   value:
     type: string
     default: permamodel/examples
-    units: '-'
 out_directory:
   description: Output directory
   value:
     type: string
     default: .
-    units: '-'
 permafrost_dir:
   description: permafrost directory
   value:
     type: string
     default: .
-    units: '-'    
 site_prefix:
   description: File prefix for the study site
   value:
     type: string
     default: Test
-    units: '-'
 case_prefix:
   description: File prefix for the model scenario
   value:
     type: string
     default: Case_test
-    units: '-'
 
-lat_ptype:
-  description: Latitude
-  value:
-    type: choice
-    default: Scalar
-    choices:
-      - Scalar
-      - Time_Series
-    units: degN
-lat_dtype:
-  description: lat data type
-  value:
-    type: choice
-    default: float
-    choices:
-      - float
-      - string
-    units: '-'
 lat:
-  description: Scalar value
+  description: Latitude
   value:
     type: float
     default: 64.8378
@@ -65,33 +41,8 @@ lat:
       min: -90.0
       max: 90.0
     units: degN
-lat_file:
-  description: Time series file
-  value:
-    type: file
-    default: 'off'
-    files:
-      - 'off'
-lon_ptype:
-  description: Longitude
-  value:
-    type: choice
-    default: Scalar
-    choices:
-      - Scalar
-      - Time_Series
-    units: degE
-lon_dtype:
-  description: lon data type
-  value:
-    type: choice
-    default: float
-    choices:
-      - float
-      - string
-    units: '-'
 lon:
-  description: Scalar value
+  description: Longitude
   value:
     type: float
     default: -147.7164
@@ -99,16 +50,9 @@ lon:
       min: -180.0
       max: 180.0
     units: degE
-lon_file:
-  description: Time series file
-  value:
-    type: file
-    default: 'off'
-    files:
-      - 'off'
 
 start_year:
-  description: begining of the simulation time 
+  description: Begining of the simulation time 
   value:
     type: float
     default: 2009
@@ -117,7 +61,7 @@ start_year:
       max: 100000000
     units: yr
 end_year:
-  description: end of the simulation time 
+  description: End of the simulation time 
   value:
     type: float
     default: 2009
