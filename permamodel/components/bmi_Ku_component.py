@@ -230,8 +230,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         # Ensure that we've already initialized the run
         assert(self._model.status == 'initialized')
 
-        # Calculate the new frost number values
-        self._model.update()
+        self._model.update(self._model.dt)
         self._values['soil__active_layer_thickness'] = self._model.Zal
 
     def update_frac(self, time_fraction):
