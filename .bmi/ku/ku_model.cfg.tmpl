@@ -8,10 +8,8 @@ out_directory    | .              | string           | output directory
 permafrost_dir   | .              | string           | root permafrost code directory
 site_prefix      | {site_prefix}    | string           | file prefix for the study site
 case_prefix      | {case_prefix}    | string           | file prefix for the model scenario
-lat_type         | {lat_ptype}      | string           | allowed input types {Scalar; Time_Series}
-lat              | {lat}            | {lat_dtype}      | 64.8378N, 147.7164W
-lon_type         | {lon_ptype}      | string           | allowed input types {Scalar; Time_Series}
-lon              | {lon}            | {lon_dtype}      | GIS coordinates
+lat              | {lat}            | float            | 64.8378N, 147.7164W
+lon              | {lon}            | float            | GIS coordinates
 start_year       | {start_year}     | long             | begining of the simulation time [year]
 end_year         | {end_year}       | long             | begining of the simulation time [year]
 dt               | {dt}             | float            | timestep for permafrost process [s]
