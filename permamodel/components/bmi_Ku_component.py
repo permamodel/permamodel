@@ -227,9 +227,6 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
 
     def update(self):
-        # Ensure that we've already initialized the run
-        assert(self._model.status == 'initialized')
-
         self._model.update(self._model.dt)
         self._values['soil__active_layer_thickness'] = self._model.Zal
 
