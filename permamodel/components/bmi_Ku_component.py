@@ -227,22 +227,20 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
 
     def update(self):
-        # Ensure that we've already initialized the run
-        assert(self._model.status == 'initialized')
-
-        # Calculate the new frost number values
-        self._model.update()
-        
+        self._model.update(self._model.dt)
         self._values['soil__active_layer_thickness'] = self._model.Zal
 
     def update_frac(self, time_fraction):
-
-        return
+        time_step = self.get_time_step()
+        self._model.dt = time_fraction * time_step
+        self.update()
+        self._model.dt = time_step
     
-    def update_until(self, stop_year):
-
-        return
-
+    def update_until(self, then):
+        n_steps = (then - self.get_current_time()) / self.get_time_step()
+        for _ in xrange(int(n_steps)):
+            self.update()
+        self.update_frac(n_steps - int(n_steps))
 
     def finalize(self):
         SILENT = True
@@ -264,7 +262,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         return 0.0
 
     def get_current_time(self):
-        return self._model.year
+        return self._model.time.item()
 
     def get_end_time(self):
         return self._model.end_year - self._model.start_year + 1.0
@@ -414,4 +412,4 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         int
             Rank of grid.
         """
-        return len(self.get_grid_shape(self.get_var_grid(var_id)))
+        return len(self.get_grid_shape(var_id))
