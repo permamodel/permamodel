@@ -106,7 +106,7 @@ T_air_max_file:
 start_year:
   description: Simulation start time
   value:
-    type: int
+    type: long
     default: 2000
     range:
       min: 1000
@@ -115,7 +115,7 @@ start_year:
 end_year:
   description: Simulation end time
   value:
-    type: int
+    type: long
     default: 2000
     range:
       min: 1000
