@@ -2,7 +2,7 @@
 # S.D. Peckham
 # June 4, 2010
 # July 26, 2010 (file_exists() & count_lines() from tf_utils.)
-'''
+"""
 *The MIT License (MIT)*
 Copyright (c) 2016 permamodel
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,7 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *
-'''
+"""
+
 import glob
 ## import os     (for os.remove)
 import os.path
