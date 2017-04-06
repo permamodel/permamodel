@@ -54,7 +54,7 @@ lon:
 start_year:
   description: Begining of the simulation time 
   value:
-    type: float
+    type: int
     default: 2009
     range:
       min: 0
@@ -63,7 +63,7 @@ start_year:
 end_year:
   description: End of the simulation time 
   value:
-    type: float
+    type: int
     default: 2009
     range:
       min: 0
