@@ -52,7 +52,7 @@ lon:
     units: degE
 
 start_year:
-  description: Begining of the simulation time 
+  description: Simulation start time
   value:
     type: int
     default: 2009
@@ -61,7 +61,7 @@ start_year:
       max: 100000000
     units: yr
 end_year:
-  description: End of the simulation time 
+  description: Simulation end time
   value:
     type: int
     default: 2009
@@ -70,7 +70,7 @@ end_year:
       max: 100000000
     units: yr
 dt:
-  description: Timestep for infiltration process (a year)
+  description: Simulation time step
   value:
     type: float
     default: 1.0
@@ -80,7 +80,7 @@ dt:
     units: yr
 
 T_air_ptype:
-  description: Near-surface air temperature (annual mean)
+  description: Surface air temperature (annual mean)
   value:
     type: choice
     default: Scalar
@@ -114,7 +114,7 @@ T_air_file:
     files:
       - 'off'
 A_air_ptype:
-  description: Near-surface air temperature amplitude (annual mean)
+  description: Surface air temperature amplitude (annual mean)
   value:
     type: choice
     default: Scalar
