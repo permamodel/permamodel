@@ -73,11 +73,11 @@ dt:
   description: Timestep for infiltration process (a year)
   value:
     type: float
-    default: 31536000.000
+    default: 1.0
     range:
-      min: 0
-      max: 1e12
-    units: s
+      min: 0.001
+      max: 1e3
+    units: yr
 
 T_air_ptype:
   description: Near-surface air temperature (annual mean)
