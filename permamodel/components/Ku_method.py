@@ -4,6 +4,29 @@
      Author: Kang Wang, 03/29/2016
      Modified: Elchin Jafarov, 03/29/2016
 
+*The MIT License (MIT)*
+
+Copyright (c) 2016 permamodel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*
+
 Input:
     (1) Location:
         input_lat: Latitude
@@ -838,8 +861,21 @@ class Ku_method( perma_base.PermafrostComponent ):
         # Initialize the output variables (internal names)
         self.Tps = np.float32(-999.99)
         self.Zal = np.float32(-999.99)
+
+        #-----------------------------------------------
+        # Load component parameters from a config file
+        #-----------------------------------------------
+        self.set_constants()
+        self.initialize_config_vars()
+        # At this stage we are going to ignore read_grid_info b/c
+        # we do not have rti file associated with our model
+        # we also skipping the basin_vars which calls the outlets
+        #self.read_grid_info()
+        #self.initialize_basin_vars()
         
-                # Initialize the year to the start year
+        self.initialize_time_vars()
+
+        # Initialize the year to the start year
         #  or to zero if it doesn't exist
         try:
             self.year = self.start_year
@@ -856,22 +892,6 @@ class Ku_method( perma_base.PermafrostComponent ):
             assert(self.end_year >= self.start_year)
         except AttributeError:
             self.end_year = self.start_year
-
-        
-        #print mode, cfg_file
-
-        #-----------------------------------------------
-        # Load component parameters from a config file
-        #-----------------------------------------------
-        self.set_constants()
-        self.initialize_config_vars()
-        # At this stage we are going to ignore read_grid_info b/c
-        # we do not have rti file associated with our model
-        # we also skipping the basin_vars which calls the outlets
-        #self.read_grid_info()
-        #self.initialize_basin_vars()
-        
-        self.initialize_time_vars()
 
         if (self.comp_status == 'Disabled'):
             #########################################

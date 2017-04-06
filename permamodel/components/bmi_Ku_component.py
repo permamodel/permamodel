@@ -1,5 +1,29 @@
 # -*- coding: utf-8 -*-
-"""  Frost Number by Nelson and Outcalt 1983. DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363
+"""  Kudryavtsev model by Anisimov et al. (1997). 
+
+Anisimov, O. A., Shiklomanov, N. I., & Nelson, F. E. (1997).
+Global warming and active-layer thickness: results from transient general circulation models. 
+Global and Planetary Change, 15(3-4), 61-77. DOI:10.1016/S0921-8181(97)00009-X
+
+*The MIT License (MIT)*
+Copyright (c) 2016 permamodel
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*
+
 """
 
 import numpy as np
@@ -11,7 +35,7 @@ from permamodel.components import Ku_method
 import os
 
 """
-class BmiKuMethod( frost_number.BmiFrostnumberMethod ):
+class BmiKuMethod( perma_base.PermafrostComponent ):
     _thisname = 'this name'
 """
 
@@ -227,22 +251,20 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
 
     def update(self):
-        # Ensure that we've already initialized the run
-        assert(self._model.status == 'initialized')
-
-        # Calculate the new frost number values
-        self._model.update()
-        
+        self._model.update(self._model.dt)
         self._values['soil__active_layer_thickness'] = self._model.Zal
 
     def update_frac(self, time_fraction):
-
-        return
+        time_step = self.get_time_step()
+        self._model.dt = time_fraction * time_step
+        self.update()
+        self._model.dt = time_step
     
-    def update_until(self, stop_year):
-
-        return
-
+    def update_until(self, then):
+        n_steps = (then - self.get_current_time()) / self.get_time_step()
+        for _ in xrange(int(n_steps)):
+            self.update()
+        self.update_frac(n_steps - int(n_steps))
 
     def finalize(self):
         SILENT = True
@@ -264,7 +286,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         return 0.0
 
     def get_current_time(self):
-        return self._model.year
+        return self._model.time.item()
 
     def get_end_time(self):
         return self._model.end_year - self._model.start_year + 1.0
@@ -414,4 +436,4 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         int
             Rank of grid.
         """
-        return len(self.get_grid_shape(self.get_var_grid(var_id)))
+        return len(self.get_grid_shape(var_id))

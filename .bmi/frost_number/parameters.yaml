@@ -3,7 +3,6 @@ permafrost_dir:
   value:
     type: string
     default: .
-    units: '-'
 comp_status:
   description: Component status
   value:
@@ -12,31 +11,26 @@ comp_status:
     choices:
     - Enabled
     - Disabled
-    units: '-'
 in_directory:
   description: Input directory
   value:
     type: string
     default: .
-    units: '-'
 out_directory:
   description: Output directory
   value:
     type: string
     default: .
-    units: '-'
 site_prefix:
   description: File prefix for the study site
   value:
     type: string
     default: Test
-    units: '-'
 case_prefix:
   description: File prefix for the model scenario
   value:
     type: string
     default: Case_test
-    units: '-'
 T_air_min_ptype:
   description: Mean temperature of coldest month per modeled year
   value:

@@ -1,3 +1,21 @@
+! The MIT License (MIT)
+! Copyright (c) 2016 permamodel
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+      
       module bmif
       use, intrinsic :: iso_c_binding, only: c_ptr, c_loc, c_f_pointer
       
@@ -646,8 +664,13 @@
 			open(2,file=self%aver_res_file,STATUS='unknown')
 			open(3,file=self%restart_file,STATUS='unknown')
 			write(self%FMT1,'(A30,I0,A12)')'(1x,I10,1x,F12.3,2(1x,F16.12),',self%m_grd,'(1x,F16.12))'
+			write(FMT11,'(A34,I0,A12)')'(7x,A4,1x,A10,2(3x,A10),',self%m_grd,'(1x,F16.4))'
+			write(1,FMT11) 'id','day','bnd_temp','snd', (self%zdepth(self%zdepth_id(i)),i=1,self%m_grd)
+			
 			write(self%FMT2,'(A28,I0,A40)')'(1x,I10,1x,F12.3,2(1x,F8.3),',self%m_grd,'(1x,F8.3),(1x,F8.3,1x,F12.3),(1x,F12.3))'
-
+			write(FMT22,'(A34,I0,A20,A12)')'(7x,A4,1x,A10,2(3x,A10),',self%m_grd,'(1x,F8.3),3(A12))'
+			write(2,FMT22) 'id','day','bnd_temp','snd', (self%zdepth(self%zdepth_id(i)),i=1,self%m_grd),&
+							'alt','frz_up_cur','frz_up_tot'
 		end subroutine open_res_files
 
 		subroutine active_layer(self,k)
