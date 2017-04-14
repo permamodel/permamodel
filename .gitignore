@@ -65,7 +65,7 @@ target/
 .ipynb_checkpoints
 
 # NetCDF data files
-#*.nc
+*.nc
 
 # Emacs backups
 *~
