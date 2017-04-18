@@ -76,6 +76,7 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 from .. import data_directory
+# from permamodel.tests import examples_directory
 
 
 class Ku_method( perma_base.PermafrostComponent ):
@@ -956,8 +957,11 @@ class Ku_method( perma_base.PermafrostComponent ):
             
         elif (var_type.lower() == 'grid'):
             
-            lat = self.ncread(file_name, 'lat')
-            lon = self.ncread(file_name, 'lon')
+            lat = self.ncread(file_name, 'latitude')
+            lon = self.ncread(file_name, 'longitude')
+            
+            if (np.min(lon) > 0.):
+            	lon = np.mod((lon+180.),360.) -180.
             
 #            lat = np.float(lat)
 #            lon = np.float(lon)
