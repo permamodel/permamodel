@@ -128,11 +128,28 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             self._using_Files = True
             self._using_ConfigVals = False
             # At a minimum, there must be temperature information
-            self._temperature_config_filename = \
+            if 'temperature_config_filename' in self._configuration.keys():
+                self._temperature_config_filename = \
                     os.path.join(examples_directory,
                     self._configuration['temperature_config_filename'])
-            assert_true(os.path.isfile(self._temperature_config_filename))
-            self.initialize_temperature_dataset(self._temperature_config_filename)
+                assert_true(os.path.isfile(self._temperature_config_filename))
+                temperature_configuration = \
+                        self.get_config_from_yaml_file(self._temperature_config_filename)
+                self._temperature_source_filename = \
+                        os.path.join(data_directory,
+                        temperature_configuration['temperature_source_filename'])
+                self._temperature_first_date= \
+                        temperature_configuration['dataset_first_date']
+                self._temperature_last_date = \
+                        temperature_configuration['dataset_last_date']
+            else:
+                self._temperature_source_filename = \
+                        os.path.join(data_directory,
+                        self._configuration['temperature_source_filename'])
+                self._temperature_first_date= \
+                        self._configuration['dataset_first_date']
+                self._temperature_last_date = \
+                        self._configuration['dataset_last_date']
 
             if self._configuration['precipitation_config_filename'] is not None:
                 self._precipitation_config_filename = \
@@ -421,19 +438,6 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         #    self._timestep_duration.days
         return int(  (this_date-self._reference_date).total_seconds() / \
                      (self._timestep_duration.total_seconds()       ) +0.5 )
-
-    def initialize_temperature_dataset(self, config_filename):
-        temperature_configuration = \
-                self.get_config_from_yaml_file(config_filename)
-        # Note: while config files are in examples/, data files should
-        #       be in data/
-        self._temperature_source_filename = \
-                os.path.join(data_directory,
-                temperature_configuration['temperature_source_filename'])
-        self._temperature_first_date= \
-                temperature_configuration['dataset_first_date']
-        self._temperature_last_date = \
-                temperature_configuration['dataset_last_date']
 
     def initialize_input_vars_from_files(self):
         # If the model does not have its input variables set by an
