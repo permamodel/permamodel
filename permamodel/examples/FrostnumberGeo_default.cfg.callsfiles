@@ -8,25 +8,10 @@ output_directory:
 output_filename: FrostnumberGeo_output.nc
 #
 # The model grid is described in a separate configuration file
-# Need to provide either grid_description_filename
-# or by specifying values here
-#grid_description_filename: grid_north_slope_lowres.cfg
-grid_region: Alaska
-grid_resolution: low
-grid_type: uniform rectilinear
-grid_shape: !!python/tuple [40, 20]
-i_ul: 50
-j_ul: 25
-i_skip: 1
-j_skip: 1
+grid_description_filename: grid_north_slope_lowres.cfg
 #
 # The duration of the model run is defined in a separate configuration file
-# Or specified
-#run_duration_filename: run_cru_test_decade.cfg
-model_reference_date: 1900-01-01
-model_start_date: 1901-01-01
-model_end_date: 1910-12-31
-model_timestep: !!python/object/apply:datetime.timedelta [1, 0, 0]
+run_duration_filename: run_cru_test_decade.cfg
 #
 # Determine whether to specify input variables from files 
 # or whether input variables will be provided by WMT
@@ -34,6 +19,7 @@ model_timestep: !!python/object/apply:datetime.timedelta [1, 0, 0]
 # Input variables come from files
 input_var_source: Files
 temperature_config_filename: temperature_cru_alaska_lowres.cfg
+#precipitation_config_filename: precipitation_cru_alaska_lowres.cfg
 precipitation_config_filename: 
 soil_properties_config_filename: 
 #

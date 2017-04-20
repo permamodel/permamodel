@@ -51,30 +51,56 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         self._config_description = self._configuration['config_description']
         self._run_description = self._configuration['run_description']
 
-        # Set the other configuration filenames
-        self._grid_description_filename = \
+        # Read information about the grid
+        # Either from a file or directly
+        if 'grid_description_filename' in self._configuration.keys():
+            self._grid_description_filename = \
                 os.path.join(examples_directory,
                 self._configuration['grid_description_filename'])
-        self._run_duration_filename = \
+            grid_config = \
+                self.get_config_from_yaml_file(self._grid_description_filename)
+            self._grid_region = grid_config['grid_region']
+            self._grid_resolution = grid_config['grid_resolution']
+            self._grid_type = grid_config['grid_type']
+            self._grid_shape = grid_config['grid_shape']
+            self._grid_i0 = grid_config['i_ul']
+            self._grid_j0 = grid_config['j_ul']
+            self._grid_iskip = grid_config['i_skip']
+            self._grid_jskip = grid_config['j_skip']
+        else:
+            self._grid_region = self._configuration['grid_region']
+            self._grid_resolution = self._configuration['grid_resolution']
+            self._grid_type = self._configuration['grid_type']
+            self._grid_shape = self._configuration['grid_shape']
+            self._grid_i0 = self._configuration['i_ul']
+            self._grid_j0 = self._configuration['j_ul']
+            self._grid_iskip = self._configuration['i_skip']
+            self._grid_jskip = self._configuration['j_skip']
+
+        # Read information about the model run
+        # Either from a file or directly
+        if 'run_duration_filename' in self._configuration.keys():
+            self._run_duration_filename = \
                 os.path.join(examples_directory,
                 self._configuration['run_duration_filename'])
+            run_config = \
+                self.get_config_from_yaml_file(config_file)
+            self._reference_date = run_config['model_reference_date']
+            self._start_date = run_config['model_start_date']
+            self._end_date = run_config['model_end_date']
+            self._timestep_duration = run_config['model_timestep']
+        else:
+            self._reference_date = self._configuration['model_reference_date']
+            self._start_date = self._configuration['model_start_date']
+            self._end_date = self._configuration['model_end_date']
+            self._timestep_duration = self._configuration['model_timestep']
 
-        # Read in the grid description information
-        grid_config = \
-                self.get_config_from_yaml_file(self._grid_description_filename)
-        self._grid_region = grid_config['grid_region']
-        self._grid_resolution = grid_config['grid_resolution']
-        self._grid_type = grid_config['grid_type']
-        self._grid_shape = grid_config['grid_shape']
+        # Set up the grid subset
         if len(self._grid_shape) == 2:
             (self._grid_ydim, self._grid_xdim) = self._grid_shape
         else:
             raise ValueError("cannot handle grid of shape %s" %
                              str(self._grid_shape))
-        self._grid_i0 = grid_config['i_ul']
-        self._grid_j0 = grid_config['j_ul']
-        self._grid_iskip = grid_config['i_skip']
-        self._grid_jskip = grid_config['j_skip']
         self._grid_i1 = self._grid_i0 + self._grid_iskip * self._grid_xdim
         self._grid_j1 = self._grid_j0 + self._grid_jskip * self._grid_ydim
 
@@ -88,6 +114,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         if self._configuration['input_var_source'] == 'WMT':
             self._using_WMT = True
             self._using_Files = False
+            self._using_ConfigVals = False
             self._calc_surface_fn = \
                 self._configuration['calc_surface_frostnumber']
             self._calc_stefan_fn = \
@@ -99,6 +126,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         elif self._configuration['input_var_source'] == 'Files':
             self._using_WMT = False
             self._using_Files = True
+            self._using_ConfigVals = False
             # At a minimum, there must be temperature information
             self._temperature_config_filename = \
                     os.path.join(examples_directory,
@@ -131,9 +159,9 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
             self.initialize_input_vars_from_files()
         elif self._configuration['input_var_source'] == 'Default':
-            self._using_Default =True
             self._using_WMT = False
             self._using_Files = False
+            self._using_ConfigVals = True
 
         # There are different ways of computing degree days.  Ensure that
         # the method specified has been coded
@@ -160,7 +188,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             self.stefan_frost_number_Geo = None
 
         # Initialize the time information from a configuration file
-        self.initialize_model_time(self._run_duration_filename)
+        self.initialize_model_time()
 
         # Initialize the output filename
         self.initialize_output(self._configuration['output_directory'],
@@ -367,18 +395,10 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         while self._timestep_current < stop_timestep:
             self.update()
 
-    def initialize_model_time(self, config_file):
+    def initialize_model_time(self):
         # The model run duration configuration file has information
         # about the reference time, the start and end times, and
         # the timestep
-        # Read in the information about the duration of the model run
-        run_config = \
-            self.get_config_from_yaml_file(config_file)
-        self._start_date = run_config['model_start_date']
-        self._end_date = run_config['model_end_date']
-        self._timestep_duration = run_config['model_timestep']
-        self._reference_date = run_config['model_reference_date']
-
         # Determine the first and last timesteps, ensure ordering!
         self._timestep_first = self.get_timestep_from_date(self._start_date)
         self._timestep_last = self.get_timestep_from_date(self._end_date)
