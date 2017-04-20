@@ -2,7 +2,7 @@
 """ Frost Number by Nelson and Outcalt 1983.
     DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363
 
-    2D version
+    Geo version
 """
 
 import numpy as np
@@ -18,26 +18,26 @@ from nose.tools import (assert_is_instance, assert_greater_equal,
 import datetime
 from netCDF4 import Dataset
 
-default_frostnumber2D_config_filename = "frostnumber2D_default.cfg"
+default_frostnumberGeo_config_filename = "FrostnumberGeo_default.cfg"
 
-class Frostnumber2DMethod( perma_base.PermafrostComponent ):
+class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
     def __init__(self, cfgfile=None):
         # There is a default configuration file in the examples directory
         if cfgfile is None:
             self._config_filename = \
                     os.path.join(examples_directory,
-                    default_frostnumber2D_config_filename)
+                    default_frostnumberGeo_config_filename)
         else:
             self._config_filename = cfgfile
 
-    def initialize_frostnumber2D_component(self):
+    def initialize_frostnumberGeo_component(self):
         SILENT = True
 
         # Note: Initialized from initialize() in perma_base.py
         if not SILENT:
-            print("Initializing for Frostnumber2DMethod")
+            print("Initializing for FrostnumberGeoMethod")
 
-        self._model = 'FrostNumber2D'
+        self._model = 'FrostNumberGeo'
 
         # Read in the overall configuration from the configuration file
         assert_true(os.path.isfile(self._config_filename))
@@ -81,10 +81,10 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
         # This model can be run such that input variables are either
         # provided by WMT or read directly from Files
         # This is set by the configuration value of 'input_var_source'
-        # as "Files" or "WMT".  
+        # as "Files" or "WMT".
 
         # If this is "WMT", then a flag must be set in the config file
-        # to determine which 
+        # to determine which
         if self._configuration['input_var_source'] == 'WMT':
             self._using_WMT = True
             self._using_Files = False
@@ -93,7 +93,7 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
             self._calc_stefan_fn = \
                 self._configuration['calc_stefan_frostnumber']
 
-        # If this is "Files", then which of the frost numbers will be 
+        # If this is "Files", then which of the frost numbers will be
         # calculated is determined by which filenames are given.
         # Determine which variables will be calculable
         elif self._configuration['input_var_source'] == 'Files':
@@ -130,6 +130,10 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
                 self._calc_stefan_fn = False
 
             self.initialize_input_vars_from_files()
+        elif self._configuration['input_var_source'] == 'Default':
+            self._using_Default =True
+            self._using_WMT = False
+            self._using_Files = False
 
         # There are different ways of computing degree days.  Ensure that
         # the method specified has been coded
@@ -142,18 +146,18 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
         self.ddt.fill(np.nan)
 
         # Initialize the output grids
-        self.air_frost_number_2D = \
+        self.air_frost_number_Geo = \
                 np.zeros(self._grid_shape, dtype=np.float32)
         if self._calc_surface_fn:
-            self.surface_frost_number_2D = \
+            self.surface_frost_number_Geo = \
                     np.zeros(self._grid_shape, dtype=np.float32)
         else:
-            self.surface_frost_number_2D = None
+            self.surface_frost_number_Geo = None
         if self._calc_stefan_fn:
-            self.stefan_frost_number_2D = \
+            self.stefan_frost_number_Geo = \
                     np.zeros(self._grid_shape, dtype=np.float32)
         else:
-            self.stefan_frost_number_2D = None
+            self.stefan_frost_number_Geo = None
 
         # Initialize the time information from a configuration file
         self.initialize_model_time(self._run_duration_filename)
@@ -207,7 +211,7 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
         #  including comments from config files
         setattr(self._output_fid, 'company',
                 'Community Surface Dynamics Modeling System')
-        setattr(self._output_fid, 'Permafrost Component', 'Frostnumber2D')
+        setattr(self._output_fid, 'Permafrost Component', 'FrostnumberGeo')
 
         ### Init dimensions
         # Time dimension
@@ -309,9 +313,9 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
 
     def finalize(self):
         # Define this so we don't call the permamodel base class version
-        self.finalize_frostnumber_2D()
+        self.finalize_frostnumber_Geo()
 
-    def finalize_frostnumber_2D(self):
+    def finalize_frostnumber_Geo(self):
         self._output_fid.close()
 
     def check_whether_output_timestep(self, this_timestep):
@@ -333,11 +337,11 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
             time_index = 12*years + months
             print("Adding output at index %d for date %s" % \
                   (time_index, str(this_date)))
-            self._nc_afn[time_index, :] = self.air_frost_number_2D[:]
+            self._nc_afn[time_index, :] = self.air_frost_number_Geo[:]
             if self._calc_surface_fn:
-                self._nc_sfn[time_index, :] = self.surface_frost_number_2D[:]
+                self._nc_sfn[time_index, :] = self.surface_frost_number_Geo[:]
             if self._calc_stefan_fn:
-                self._nc_stfn[time_index, :] = self.stefan_frost_number_2D[:]
+                self._nc_stfn[time_index, :] = self.stefan_frost_number_Geo[:]
 
     def initial_update(self):
         # Increment the model for the first time step
@@ -414,10 +418,10 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
     def initialize_input_vars_from_files(self):
         # If the model does not have its input variables set by an
         # external runner, e.g. WMT, then the values will have to
-        # be read from data files here.  This routine sets up the 
-        # files needed to do this.  
+        # be read from data files here.  This routine sets up the
+        # files needed to do this.
         # Currently, this is done by reading values from a netcdf
-        # file with the appropriate monthly values for 
+        # file with the appropriate monthly values for
         self._temperature_dataset = \
                 Dataset(self._temperature_source_filename, 'r', mmap=True)
         assert_true(self._temperature_dataset is not None)
@@ -522,9 +526,9 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
 
     def calculate_frost_numbers(self):
         # Calculate all the frost numbers using the current data
-        self.calculate_air_frost_number_2D()
-        self.calculate_surface_frost_number_2D()
-        self.calculate_stefan_frost_number_2D()
+        self.calculate_air_frost_number_Geo()
+        self.calculate_surface_frost_number_Geo()
+        self.calculate_stefan_frost_number_Geo()
 
         # Add these frost numbers to the output dictionary
         #self.update_output()
@@ -534,22 +538,22 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
         # otherwise, use the specified year
         if year > 0:
             print("Year: %d  F_air=%5.3f  F_surface=%5.3f  F_stefan=%5.3f" %
-              (self.year, self.air_frost_number_2D,
-               self.surface_frost_number_2D,
-               self.stefan_frost_number_2D))
+              (self.year, self.air_frost_number_Geo,
+               self.surface_frost_number_Geo,
+               self.stefan_frost_number_Geo))
         else:
             for year in sorted(self.output.keys()):
                 print("Year: %d  output=%s" % (year, self.output[year]))
 
-    def calculate_air_frost_number_2D(self):
+    def calculate_air_frost_number_Geo(self):
         self.compute_degree_days()
-        self.compute_air_frost_number_2D()
+        self.compute_air_frost_number_Geo()
 
-    def calculate_surface_frost_number_2D(self):
+    def calculate_surface_frost_number_Geo(self):
         # For now, a dummy value
         self.surface_frost_number = np.float32(-1.0)
 
-    def calculate_stefan_frost_number_2D(self):
+    def calculate_stefan_frost_number_Geo(self):
         self.stefan_frost_number = np.float32(-1.0)
 
     def compute_degree_days(self):
@@ -604,12 +608,12 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
                 self.ddf[j, i] = -T_winter * L_winter
     #   compute_degree_days()
     #-------------------------------------------------------------------
-    def compute_air_frost_number_2D(self):
+    def compute_air_frost_number_Geo(self):
         # Calculating Reduced Air Frost Number (pages 280-281).
         # The reduced frost number is close 0 for long summers and close to 1 for long winters.
-        self.air_frost_number_2D = np.sqrt(self.ddf) / ( np.sqrt( self.ddf) + np.sqrt( self.ddt) )
+        self.air_frost_number_Geo = np.sqrt(self.ddf) / ( np.sqrt( self.ddf) + np.sqrt( self.ddt) )
 
-    #   update_air_frost_number_2D()
+    #   update_air_frost_number_Geo()
     #-------------------------------------------------------------------
 
     def update_snow_prop(self):
@@ -682,7 +686,7 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
 
     #   update_snow_prop()
     #-------------------------------------------------------------------
-    def update_surface_frost_number_2D(self):
+    def update_surface_frost_number_Geo(self):
         # phi [scalar]: sites latitude
         # Zs [scalar]: an average winter snow thickness
         # Zss [scalar]: a damping depth in snow
@@ -722,7 +726,7 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
 
     #   update_surface_frost_number()
     #-------------------------------------------------------------------
-    def update_stefan_frost_number_2D(self):
+    def update_stefan_frost_number_Geo(self):
         # Zfplus [scalar]: the depth [m] to which forst extends
         # lambda_f [scalar]: frozen soil thermal conductivity [W m-1 C-1]
         # S [scalar]: is a const scalar factor [s d-1]
@@ -770,11 +774,11 @@ class Frostnumber2DMethod( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # Run the Frostnumber2D model
+    # Run the FrostnumberGeo model
     # Currently, this just runs the defaults
-    fn2 = Frostnumber2DMethod()
-    fn2.initialize_frostnumber2D_component()
-    fn2.initial_update()
-    fn2.update_until_timestep(fn2._timestep_last)
-    fn2.finalize()
+    fn_geo = FrostnumberGeoMethod()
+    fn_geo.initialize_frostnumberGeo_component()
+    fn_geo.initial_update()
+    fn_geo.update_until_timestep(fn_geo._timestep_last)
+    fn_geo.finalize()
 

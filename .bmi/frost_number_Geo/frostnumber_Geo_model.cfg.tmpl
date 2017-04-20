@@ -1,0 +1,22 @@
+#===============================================================================
+# PermaModel Config File for: frostnumber_method
+#===============================================================================
+# Input
+permafrost_dir  | {permafrost_dir}          | string   | Set to root dir
+comp_status     | {comp_status}             | string   | component status {Enabled; Disabled}
+in_directory    | {in_directory}            | string   | input directory
+out_directory   | {out_directory}           | string   | output directory
+site_prefix     | {site_prefix}             | string   | file prefix for the study site
+case_prefix     | {case_prefix}             | string   | file prefix for the model scenario
+T_air_min_type  | {T_air_min_ptype}          | string               | allowed: {Scalar; Time_Series}
+T_air_min       | {T_air_min}               | {T_air_min_dtype}   | Mean month air temperature coldest month [C]
+T_air_max_type  | {T_air_max_ptype}          | string               | allowed: {Scalar; Time_Series}
+T_air_max       | {T_air_max}               | {T_air_max_dtype}   | Mean month air temperature warmest month [C]
+start_year      | {start_year}              | long     | begining of the simulation time [year]
+end_year        | {end_year}                | long     | end of the simulation time [year]
+dt              | {dt}                      | float    | Timestep for permafrost process [year]
+#===============================================================================
+# Output saved for user
+#===============================================================================
+fn_out_filename       | {fn_out_filename}   | string       | Name of output file
+
