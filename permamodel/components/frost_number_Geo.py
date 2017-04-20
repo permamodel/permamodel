@@ -84,7 +84,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                 os.path.join(examples_directory,
                 self._configuration['run_duration_filename'])
             run_config = \
-                self.get_config_from_yaml_file(config_file)
+                self.get_config_from_yaml_file(self._run_duration_filename)
             self._reference_date = run_config['model_reference_date']
             self._start_date = run_config['model_start_date']
             self._end_date = run_config['model_end_date']
