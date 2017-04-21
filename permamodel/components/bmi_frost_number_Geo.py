@@ -15,7 +15,8 @@ import os
 
 class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
-    """ Implement the Nelson-Outcalt Frost numbers in Geo"""
+    """ Implement the Nelson-Outcalt Frost numbers
+        for a geographic region"""
 
     # Set up the name of this permafrost module
     _name = 'Frost number module, Geo version'
