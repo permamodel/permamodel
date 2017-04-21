@@ -47,24 +47,24 @@ def test_Geo_frostnumber_can_be_passed_config_filename():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod(cfgfile="a file")
     assert_true(fn_geo._config_filename == "a file")
 
-# The following test should probably come after the next one
-def test_Geo_frostnumber_initializes_from_files_config_file():
-    fn_geo = frost_number_Geo.FrostnumberGeoMethod(cfgfile=files_cfg_file)
-    assert_true(os.path.isfile(fn_geo._config_filename))
-    fn_geo.initialize_frostnumberGeo_component()
-    assert_true(fn_geo._grid_type == 'uniform rectilinear')
-    assert_true(fn_geo._calc_surface_fn is not None)
-    assert_true(fn_geo._calc_stefan_fn is not None)
-    assert_in(fn_geo._dd_method, ('ObservedMinMax', 'MinJanMaxJul',
-            'MonthlyAverages', 'DailyValues'))
-    if fn_geo._dd_method == 'MinJanMaxJul':
-        assert_equal(fn_geo.T_air_min.shape, fn_geo._grid_shape)
-        assert_equal(fn_geo.T_air_max.shape, fn_geo._grid_shape)
-        if fn_geo._using_Files:
-            assert_true(fn_geo._temperature_dataset is not None)
-
-    fn_geo.finalize_frostnumber_Geo()
-    files_to_remove.append(fn_geo.output_filename)
+# Configuration from "Files" not supported for WMT version
+#def test_Geo_frostnumber_initializes_from_files_config_file():
+#    fn_geo = frost_number_Geo.FrostnumberGeoMethod(cfgfile=files_cfg_file)
+#    assert_true(os.path.isfile(fn_geo._config_filename))
+#    fn_geo.initialize_frostnumberGeo_component()
+#    assert_true(fn_geo._grid_type == 'uniform rectilinear')
+#    assert_true(fn_geo._calc_surface_fn is not None)
+#    assert_true(fn_geo._calc_stefan_fn is not None)
+#    assert_in(fn_geo._dd_method, ('ObservedMinMax', 'MinJanMaxJul',
+#            'MonthlyAverages', 'DailyValues'))
+#    if fn_geo._dd_method == 'MinJanMaxJul':
+#        assert_equal(fn_geo.T_air_min.shape, fn_geo._grid_shape)
+#        assert_equal(fn_geo.T_air_max.shape, fn_geo._grid_shape)
+#        if fn_geo._using_Files:
+#            assert_true(fn_geo._temperature_dataset is not None)
+#
+#    fn_geo.finalize_frostnumber_Geo()
+#    files_to_remove.append(fn_geo.output_filename)
 
 def test_Geo_frostnumber_initialize_datacube():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod()

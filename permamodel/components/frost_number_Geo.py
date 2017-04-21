@@ -19,7 +19,7 @@ from nose.tools import (assert_is_instance, assert_greater_equal,
 import datetime
 from netCDF4 import Dataset
 
-default_frostnumberGeo_config_filename = "FrostnumberGeo_default.cfg"
+default_frostnumberGeo_config_filename = "FrostnumberGeo_Default.cfg"
 
 class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
     def __init__(self, cfgfile=None):
@@ -43,7 +43,8 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # Read in the overall configuration from the configuration file
         assert_true(os.path.isfile(self._config_filename))
         self._configuration = \
-                self.get_config_from_yaml_file(self._config_filename)
+                self.get_config_from_oldstyle_file(self._config_filename)
+                # self.get_config_from_yaml_file(self._config_filename)
         # Ensure that this config file is for this type of Method
         assert_equal(self._configuration['config_for_method'],
                      str(self.__class__).split('.')[-1])
@@ -54,9 +55,9 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
         # Determine whether surface and stefan numbers will be generated
         self._calc_surface_fn = \
-            self._configuration['calc_surface_frostnumber']
+            self._configuration['calc_surface_frostnumber'] == 'True'
         self._calc_stefan_fn = \
-            self._configuration['calc_stefan_frostnumber']
+            self._configuration['calc_stefan_frostnumber'] == 'True'
 
         # This model can be run such that input variables are either
         #   read from Files
@@ -381,7 +382,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         setattr(self._nc_time, 'time_long_name', 'time')
         setattr(self._nc_time, 'time_standard_name', 'time')
         setattr(self._nc_time, 'time_units', 'months since 1900-01-01 00:00:00')
-        self._nc_reference_time = datetime.datetime(1900, 1, 15)
+        self._nc_reference_time = datetime.date(1900, 1, 15)
         setattr(self._nc_time, 'time_format', 'modified julian day (MJD)')
         setattr(self._nc_time, 'time_time_zone', 'UTC')
         setattr(self._nc_time, 'time__FillValue', '-9999')
@@ -410,33 +411,6 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         for y in range(self._grid_ydim):
             self._nc_y[y] = y
 
-        """
-        # Latitude and longitude are not yet available...
-        # Allocate Latitude field
-        self._nc_lat = self._output_fid.createVariable('lat', 'f',
-        ('y','x'),zlib=True)
-        setattr(self._nc_lat, 'lat_long_name', 'Latitude')
-        setattr(self._nc_lat, 'lat_standard_name', 'Latitude')
-        setattr(self._nc_lat, 'lat_units', 'degrees north')
-        setattr(self._nc_lat, 'lat__FillValue', 'NaN')
-
-        # Allocate Longitude field
-        self._nc_lon = self._output_fid.createVariable('lon', 'f',
-        ('y','x'),zlib=True)
-        setattr(self._nc_lon, 'lon_long_name', 'Longitude')
-        setattr(self._nc_lon, 'lon_standard_name', 'Longitude')
-        setattr(self._nc_lon, 'lon_units', 'degrees east')
-        setattr(self._nc_lon, 'lon__FillValue', 'NaN')
-
-        # Fill lat and lon fields
-        for y in range(ydim):
-            for x in range(xdim):
-                (lon, lat) = self.get_geotiff_lon_lat_from_x_y(self._nc_x[x],
-                                                               self._nc_y[y])
-                self._nc_lat[y, x] = lat
-                self._nc_lon[y, x] = lon
-        """
-
         ### Init grids with sizes
         # Allocate air frost number field
         self._nc_afn= \
@@ -461,9 +435,8 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # Allocate Stefan frost number field, if computing it
         if self._calc_stefan_fn:
             self._nc_stfn= \
-                    self._output_fid.createVariable('surface_fn', 'f', ('time',
-                                                                        'y',
-                                                                        'x'),zlib=True)
+                    self._output_fid.createVariable(
+                        'stefan_fn', 'f', ('time', 'y', 'x'),zlib=True)
             setattr(self._nc_stfn, 'stfn_long_name', 'Stefan Frost Number')
             setattr(self._nc_stfn, 'stfn_standard_name', 'Frostnumber_stefan')
             setattr(self._nc_stfn, 'stfn_units', 'none')
@@ -662,6 +635,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             self.SoilProperties = None
 
     def get_config_from_yaml_file(self, cfg_filename):
+        raise RuntimeError("config from YAML not currently supported")
         cfg_struct = None
         try:
             with open(cfg_filename, 'r') as cfg_file:
@@ -670,6 +644,80 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             print("\nError opening configuration file in\
                   get_config_from_yaml_file()")
             raise
+
+        return cfg_struct
+
+    def get_config_from_oldstyle_file(self, cfg_filename):
+        cfg_struct = {}
+        grid_struct = {}
+        try:
+            with open(cfg_filename, 'r') as cfg_file:
+                # this was originally modeled after read_config_file()
+                # in BMI_base.py as modified for cruAKtemp.py
+                while True:
+                    # Read lines from config file until no more remain
+                    line = cfg_file.readline()
+                    if line == "":
+                        break
+
+                    # Comments start with '#'
+                    COMMENT = (line[0] == '#')
+
+                    words = line.split('|')
+                    if (len(words) ==4) and (not COMMENT):
+                        var_name = words[0].strip()
+                        value = words[1].strip()
+                        var_type = words[2].strip()
+
+                        # Process the variables based on variable name
+                        if var_name[-4:] == 'date':
+                            # date variables end with "_date"
+                            cfg_struct[var_name] = \
+                                datetime.datetime.strptime(
+                                    value, "%Y-%m-%d").date()
+                                #datetime.datetime.strptime(value, "%Y-%m-%d")
+                        elif var_name[0:4] == 'grid':
+                            # grid variables are processed after cfg file read
+                            grid_struct[var_name] = value
+                        elif var_name == 'timestep' \
+                                or var_name == 'model_timestep':
+                            # timestep is a timedelta object
+                            cfg_struct[var_name] = \
+                                datetime.timedelta(days=int(value))
+                        elif var_type == 'int':
+                            # Convert integers to int
+                            cfg_struct[var_name] = int(value)
+                        else:
+                            # Everything else is just passed as a string
+                            assert_equal(var_type, 'string')
+                            cfg_struct[var_name] = value
+
+        except:
+            print("\nError opening configuration file in\
+                  get_config_from_yaml_file()")
+            raise
+
+        # Process the grid information
+        # I think I had rows and columns switched in cruAKtemp!
+        #cfg_struct['grid_shape'] = (int(grid_struct['grid_columns']),
+        #                            int(grid_struct['grid_rows']))
+        cfg_struct['grid_shape'] = (int(grid_struct['grid_rows']),
+                                    int(grid_struct['grid_columns']))
+        cfg_struct['grid_type'] = grid_struct['grid_type']
+
+        #for keyname in cfg_struct.keys():
+        #    print(keyname)
+        cfg_struct['grids'] = {'temperature': 'np.float'}
+        if cfg_struct['n_precipitation_grid_fields'] > 0:
+            cfg_struct['grids'] = {'precipitation': 'np.float'}
+            self._calc_surface_fn = True
+        else:
+            self._calc_surface_fn = False
+        if cfg_struct['n_soilproperties_grid_fields'] > 0:
+            cfg_struct['grids'] = {'soilproperties': 'np.float'}
+            self._calc_stefan_fn = True
+        else:
+            self._calc_stefan_fn = False
 
         return cfg_struct
 
