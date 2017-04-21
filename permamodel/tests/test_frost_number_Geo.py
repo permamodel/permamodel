@@ -16,6 +16,7 @@ from nose.tools import (assert_is_instance, assert_greater_equal,
 # List of files to be removed after testing is complete
 # use files_to_remove.append(<filename>) to add to it
 files_to_remove = []
+files_cfg_file = os.path.join(examples_directory, "FrostnumberGeo_Files.cfg")
 
 def setup_module():
     """ Standard fixture called before any tests in this file are performed """
@@ -44,6 +45,46 @@ def test_Geo_frostnumber_has_default_config_file():
 def test_Geo_frostnumber_can_be_passed_config_filename():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod(cfgfile="a file")
     assert_true(fn_geo._config_filename == "a file")
+
+# The following test should probably come after the next one
+def test_Geo_frostnumber_initializes_from_files_config_file():
+    fn_geo = frost_number_Geo.FrostnumberGeoMethod(cfgfile=files_cfg_file)
+    assert_true(os.path.isfile(fn_geo._config_filename))
+    fn_geo.initialize_frostnumberGeo_component()
+    assert_true(fn_geo._grid_type == 'uniform rectilinear')
+    assert_true(fn_geo._calc_surface_fn is not None)
+    assert_true(fn_geo._calc_stefan_fn is not None)
+    assert_in(fn_geo._dd_method, ('ObservedMinMax', 'MinJanMaxJul',
+            'MonthlyAverages', 'DailyValues'))
+    if fn_geo._dd_method == 'MinJanMaxJul':
+        assert_equal(fn_geo.T_air_min.shape, fn_geo._grid_shape)
+        assert_equal(fn_geo.T_air_max.shape, fn_geo._grid_shape)
+        if fn_geo._using_Files:
+            assert_true(fn_geo._temperature_dataset is not None)
+
+    fn_geo.finalize_frostnumber_Geo()
+    files_to_remove.append(fn_geo.output_filename)
+
+def test_Geo_frostnumber_initialize_datacube():
+    fn_geo = frost_number_Geo.FrostnumberGeoMethod()
+    config_dict = \
+        {'n_temperature_grid_fields': 4,
+         'temperature_grid_date_0': '1901-01-01',
+         'temperature_grid_data_0': '((-10, -5), (-20, -15), (0, 5))',
+         'temperature_grid_date_1': '1901-07-01',
+         'temperature_grid_data_1': '((10, 15), (0, 5), (20, 15))',
+         'temperature_grid_date_2': '1902-01-01',
+         'temperature_grid_data_2': '((-7, -2), (-17, -12), (3, 8))',
+         'temperature_grid_date_3': '1902-07-01',
+         'temperature_grid_data_3': '((7, 2), (17, 12), (23, 28))'}
+    dates, cube = fn_geo.initialize_datacube('temperature', config_dict)
+
+    assert_in(datetime.date(1901,7,1), dates)  # second date
+
+    assert_equal(cube[0, 0, 0], -10)  # very first value
+    assert_equal(cube[3, 2, 1], 28)   # very last value
+    assert_equal(cube[2, 1, 0], -17)   # 3rd date, 2nd set, 1st value
+
 
 def test_Geo_frostnumber_initializes_from_default_config_file():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod()

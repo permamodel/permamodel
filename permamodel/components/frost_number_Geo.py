@@ -6,6 +6,7 @@
 """
 
 import numpy as np
+import ast
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 from .. import examples_directory, data_directory
@@ -184,18 +185,49 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             self._using_Files = False
             self._using_ConfigVals = False
 
-            self._grid_type = self._configuration['grid_type']
-            self._grid_shape = self._configuration['grid_shape']
+            # Run duration
             self._reference_date = self._configuration['model_reference_date']
             self._start_date = self._configuration['model_start_date']
             self._end_date = self._configuration['model_end_date']
             self._timestep_duration = self._configuration['model_timestep']
+
+            # Grid shape
+            self._grid_type = self._configuration['grid_type']
+            self._grid_shape = self._configuration['grid_shape']
 
         # If initialized completely from the config file, this is 'Default'
         elif self._configuration['input_var_source'] == 'Default':
             self._using_WMT = False
             self._using_Files = False
             self._using_ConfigVals = True
+
+            # 'Default' has the same values as 'WMT',
+            # but it also specifies a 3D (x, y, time) data array
+            # from which the grids will derive their values
+
+            # Run duration
+            self._reference_date = self._configuration['model_reference_date']
+            self._start_date = self._configuration['model_start_date']
+            self._end_date = self._configuration['model_end_date']
+            self._timestep_duration = self._configuration['model_timestep']
+
+            # Grid shape
+            self._grid_type = self._configuration['grid_type']
+            self._grid_shape = self._configuration['grid_shape']
+
+            # Parse the (x, y, time) data cube from which the values
+            # will be drawn at the appropriate time
+            self._temperature_datacube = \
+                self.initialize_datacube('temperature',
+                                         self._configuration)
+            if n_precipitation_grid_fields > 0:
+                self._temperature_datacube = \
+                    self.initialize_datacube('precipitation',
+                                             self._configuration)
+            if n_soilproperties_grid_fields > 0:
+                self._temperature_datacube = \
+                    self.initialize_datacube('soilproperties',
+                                             self._configuration)
 
         # There are different ways of computing degree days.  Ensure that
         # the method specified has been coded
@@ -232,6 +264,25 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # Note: initialization only allocates for values; it doesn't
         #       calculate the first timestep's values
         """
+
+    def initialize_datacube(self, gridname, config):
+        # Determine the number of lines for this grid
+        exec("ngridlines = config['n_%s_grid_fields']" % gridname)
+
+        # Create the datelist for this grid
+        datelist = []
+        for n in range(ngridlines):
+            exec("thisdate = datetime.datetime.strptime(config['%s_grid_date_%d' % (gridname, n)], '%Y-%m-%d').date()")
+            datelist.append(thisdate)
+
+        # Create the datacube for this grid
+        slicelist = []
+        for n in range(ngridlines):
+            config_arg = eval(config['%s_grid_data_%d' % (gridname, n)])
+            slicelist.append(np.array(config_arg))
+        datacube = np.stack(slicelist)
+
+        return datelist, datacube
 
     def initialize_output(self, outdirname, outfilename):
         """ Initialize the output file
