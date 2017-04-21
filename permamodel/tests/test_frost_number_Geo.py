@@ -11,7 +11,8 @@ from .. import permamodel_directory, examples_directory
 from nose.tools import (assert_is_instance, assert_greater_equal,
                         assert_less_equal, assert_almost_equal,
                         assert_greater, assert_less, assert_in,
-                        assert_false, assert_true, assert_equal)
+                        assert_false, assert_true, assert_equal,
+                        assert_raises)
 
 # List of files to be removed after testing is complete
 # use files_to_remove.append(<filename>) to add to it
@@ -84,6 +85,37 @@ def test_Geo_frostnumber_initialize_datacube():
     assert_equal(cube[0, 0, 0], -10)  # very first value
     assert_equal(cube[3, 2, 1], 28)   # very last value
     assert_equal(cube[2, 1, 0], -17)   # 3rd date, 2nd set, 1st value
+
+
+def test_Geo_frostnumber_get_datacube_slice():
+    fn_geo = frost_number_Geo.FrostnumberGeoMethod()
+    config_dict = \
+        {'n_temperature_grid_fields': 4,
+         'temperature_grid_date_0': '1901-01-01',
+         'temperature_grid_data_0': '((-10, -5), (-20, -15), (0, 5))',
+         'temperature_grid_date_1': '1901-07-01',
+         'temperature_grid_data_1': '((10, 15), (0, 5), (20, 15))',
+         'temperature_grid_date_2': '1902-01-01',
+         'temperature_grid_data_2': '((-7, -2), (-17, -12), (3, 8))',
+         'temperature_grid_date_3': '1902-07-01',
+         'temperature_grid_data_3': '((7, 2), (17, 12), (23, 28))'}
+    dates, cube = fn_geo.initialize_datacube('temperature', config_dict)
+
+    test_date = datetime.date(1901, 2, 27)
+    test_field = fn_geo.get_datacube_slice(test_date, cube, dates)
+    assert_equal(test_field[0, 0], -10)
+    assert_equal(test_field[1, 1], -15)
+
+    test_date = datetime.date(1902, 3, 10)
+    test_field = fn_geo.get_datacube_slice(test_date, cube, dates)
+    assert_equal(test_field[1, 0], -17)
+    assert_equal(test_field[2, 1], 8)
+
+    test_date = datetime.date(1900, 3, 10)
+    assert_raises(ValueError, fn_geo.get_datacube_slice, test_date, cube, dates)
+
+    test_date = datetime.date(1980, 3, 10)
+    assert_raises(ValueError, fn_geo.get_datacube_slice, test_date, cube, dates)
 
 
 def test_Geo_frostnumber_initializes_from_default_config_file():

@@ -284,6 +284,28 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
         return datelist, datacube
 
+    def get_datacube_slice(self, thisdate, datacube, cubedates):
+        # Data are invalid until the first date in the datacube
+        if thisdate < cubedates[0]:
+            raise ValueError(
+                "Date %s is before first valid date (%s) in datacube" %
+                (thisdate, cubedates[0]))
+
+        if thisdate > cubedates[-1]:
+            raise ValueError(
+                "Date %s is after last valid date (%s) in datacube" %
+                (thisdate, cubedates[-1]))
+
+        for date_okay, checkdate in enumerate(cubedates):
+            if thisdate > checkdate:
+                pass
+            else:
+                break
+
+        date_okay -= 1
+        return datacube[date_okay, :]
+
+
     def initialize_output(self, outdirname, outfilename):
         """ Initialize the output file
 
