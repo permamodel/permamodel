@@ -58,21 +58,17 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             self._configuration['calc_stefan_frostnumber']
 
         # This model can be run such that input variables are either
-        # provided by WMT or read directly from Files
-        # This is set by the configuration value of 'input_var_source'
-        # as "Files" or "WMT".
-
-        # If this is "WMT", then a flag must be set in the config file
-        # to determine which
-        if self._configuration['input_var_source'] == 'WMT':
-            self._using_WMT = True
-            self._using_Files = False
-            self._using_ConfigVals = False
+        #   read from Files
+        #   provided by WMT or
+        #   completely described in the config file (default)
+        #
+        #   This is set by the configuration value of 'input_var_source'
+        #   as "Files", "WMT", or "Default".
 
         # If this is "Files", then which of the frost numbers will be
         # calculated is determined by which filenames are given.
         # Determine which variables will be calculable
-        elif self._configuration['input_var_source'] == 'Files':
+        if self._configuration['input_var_source'] == 'Files':
             self._using_WMT = False
             self._using_Files = True
             self._using_ConfigVals = False
@@ -180,6 +176,22 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                 self._calc_stefan_fn = False
 
             self.initialize_input_vars_from_files()
+
+        # If this is "WMT", then a flag must be set in the config file
+        # to determine which
+        elif self._configuration['input_var_source'] == 'WMT':
+            self._using_WMT = True
+            self._using_Files = False
+            self._using_ConfigVals = False
+
+            self._grid_type = self._configuration['grid_type']
+            self._grid_shape = self._configuration['grid_shape']
+            self._reference_date = self._configuration['model_reference_date']
+            self._start_date = self._configuration['model_start_date']
+            self._end_date = self._configuration['model_end_date']
+            self._timestep_duration = self._configuration['model_timestep']
+
+        # If initialized completely from the config file, this is 'Default'
         elif self._configuration['input_var_source'] == 'Default':
             self._using_WMT = False
             self._using_Files = False
