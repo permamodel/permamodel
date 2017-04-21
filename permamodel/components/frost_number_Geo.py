@@ -51,58 +51,11 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         self._config_description = self._configuration['config_description']
         self._run_description = self._configuration['run_description']
 
-        # Read information about the grid
-        # Either from a file or directly
-        if 'grid_description_filename' in self._configuration.keys():
-            self._grid_description_filename = \
-                os.path.join(examples_directory,
-                self._configuration['grid_description_filename'])
-            grid_config = \
-                self.get_config_from_yaml_file(self._grid_description_filename)
-            self._grid_region = grid_config['grid_region']
-            self._grid_resolution = grid_config['grid_resolution']
-            self._grid_type = grid_config['grid_type']
-            self._grid_shape = grid_config['grid_shape']
-            self._grid_i0 = grid_config['i_ul']
-            self._grid_j0 = grid_config['j_ul']
-            self._grid_iskip = grid_config['i_skip']
-            self._grid_jskip = grid_config['j_skip']
-        else:
-            self._grid_region = self._configuration['grid_region']
-            self._grid_resolution = self._configuration['grid_resolution']
-            self._grid_type = self._configuration['grid_type']
-            self._grid_shape = self._configuration['grid_shape']
-            self._grid_i0 = self._configuration['i_ul']
-            self._grid_j0 = self._configuration['j_ul']
-            self._grid_iskip = self._configuration['i_skip']
-            self._grid_jskip = self._configuration['j_skip']
-
-        # Read information about the model run
-        # Either from a file or directly
-        if 'run_duration_filename' in self._configuration.keys():
-            self._run_duration_filename = \
-                os.path.join(examples_directory,
-                self._configuration['run_duration_filename'])
-            run_config = \
-                self.get_config_from_yaml_file(self._run_duration_filename)
-            self._reference_date = run_config['model_reference_date']
-            self._start_date = run_config['model_start_date']
-            self._end_date = run_config['model_end_date']
-            self._timestep_duration = run_config['model_timestep']
-        else:
-            self._reference_date = self._configuration['model_reference_date']
-            self._start_date = self._configuration['model_start_date']
-            self._end_date = self._configuration['model_end_date']
-            self._timestep_duration = self._configuration['model_timestep']
-
-        # Set up the grid subset
-        if len(self._grid_shape) == 2:
-            (self._grid_ydim, self._grid_xdim) = self._grid_shape
-        else:
-            raise ValueError("cannot handle grid of shape %s" %
-                             str(self._grid_shape))
-        self._grid_i1 = self._grid_i0 + self._grid_iskip * self._grid_xdim
-        self._grid_j1 = self._grid_j0 + self._grid_jskip * self._grid_ydim
+        # Determine whether surface and stefan numbers will be generated
+        self._calc_surface_fn = \
+            self._configuration['calc_surface_frostnumber']
+        self._calc_stefan_fn = \
+            self._configuration['calc_stefan_frostnumber']
 
         # This model can be run such that input variables are either
         # provided by WMT or read directly from Files
@@ -115,10 +68,6 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             self._using_WMT = True
             self._using_Files = False
             self._using_ConfigVals = False
-            self._calc_surface_fn = \
-                self._configuration['calc_surface_frostnumber']
-            self._calc_stefan_fn = \
-                self._configuration['calc_stefan_frostnumber']
 
         # If this is "Files", then which of the frost numbers will be
         # calculated is determined by which filenames are given.
@@ -127,6 +76,62 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             self._using_WMT = False
             self._using_Files = True
             self._using_ConfigVals = False
+
+            # Read information about the grid
+            # Either from a file or directly
+            if 'grid_description_filename' in self._configuration.keys():
+                self._grid_description_filename = \
+                    os.path.join(examples_directory,
+                    self._configuration['grid_description_filename'])
+                grid_config = \
+                    self.get_config_from_yaml_file(
+                        self._grid_description_filename)
+                self._grid_region = grid_config['grid_region']
+                self._grid_resolution = grid_config['grid_resolution']
+                self._grid_type = grid_config['grid_type']
+                self._grid_shape = grid_config['grid_shape']
+                self._grid_i0 = grid_config['i_ul']
+                self._grid_j0 = grid_config['j_ul']
+                self._grid_iskip = grid_config['i_skip']
+                self._grid_jskip = grid_config['j_skip']
+            else:
+                self._grid_region = self._configuration['grid_region']
+                self._grid_resolution = self._configuration['grid_resolution']
+                self._grid_type = self._configuration['grid_type']
+                self._grid_shape = self._configuration['grid_shape']
+                self._grid_i0 = self._configuration['i_ul']
+                self._grid_j0 = self._configuration['j_ul']
+                self._grid_iskip = self._configuration['i_skip']
+                self._grid_jskip = self._configuration['j_skip']
+
+            # Read information about the model run
+            # Either from a file or directly
+            if 'run_duration_filename' in self._configuration.keys():
+                self._run_duration_filename = \
+                    os.path.join(examples_directory,
+                    self._configuration['run_duration_filename'])
+                run_config = \
+                    self.get_config_from_yaml_file(self._run_duration_filename)
+                self._reference_date = run_config['model_reference_date']
+                self._start_date = run_config['model_start_date']
+                self._end_date = run_config['model_end_date']
+                self._timestep_duration = run_config['model_timestep']
+            else:
+                self._reference_date = \
+                        self._configuration['model_reference_date']
+                self._start_date = self._configuration['model_start_date']
+                self._end_date = self._configuration['model_end_date']
+                self._timestep_duration = self._configuration['model_timestep']
+
+            # Set up the grid subset
+            if len(self._grid_shape) == 2:
+                (self._grid_ydim, self._grid_xdim) = self._grid_shape
+            else:
+                raise ValueError("cannot handle grid of shape %s" %
+                                str(self._grid_shape))
+            self._grid_i1 = self._grid_i0 + self._grid_iskip * self._grid_xdim
+            self._grid_j1 = self._grid_j0 + self._grid_jskip * self._grid_ydim
+
             # At a minimum, there must be temperature information
             if 'temperature_config_filename' in self._configuration.keys():
                 self._temperature_config_filename = \

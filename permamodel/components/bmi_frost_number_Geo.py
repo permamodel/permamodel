@@ -2,39 +2,39 @@
 """  Frost Number by Nelson and Outcalt 1983.
      DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363
 
-     This version is 2D
+     This is the Geo version
 """
 
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
-from permamodel.components import frost_number_2D
+from permamodel.components import frost_number_Geo
 from permamodel.components.perma_base import *
 from permamodel.tests import examples_directory
 import os
 
-class BmiFrostnumber2DMethod( perma_base.PermafrostComponent ):
+class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
-    """ Implement the Nelson-Outcalt Frost numbers in 2D"""
+    """ Implement the Nelson-Outcalt Frost numbers in Geo"""
 
     # Set up the name of this permafrost module
-    _name = 'Frost number module, 2D version'
+    _name = 'Frost number module, Geo version'
 
     #-------------------------------------------------------------------
     _att_map = {
     # NOTE: this will change in the future
-        'model_name':         'PermaModel_frostnumber_2D_method',
+        'model_name':         'PermaModel_frostnumber_Geo_method',
         'version':            '0.1',
         'author_name':        'J. Scott Stewart',
         'grid_type':          'none',
         'time_step_type':     'fixed',
         'step_method':        'explicit',
         #-------------------------------------------------------------
-        'comp_name':          'frostnumber2D',
+        'comp_name':          'frostnumberGeo',
         'model_family':       'PermaModel',
-        'cfg_extension':      '_frostnumber2D_model.cfg',
+        'cfg_extension':      '_frostnumberGeo_model.cfg',
         'cmt_var_prefix':     '/input/',
-        'gui_yaml_file':      '/input/frostnumber2D_model.yaml',
+        'gui_yaml_file':      '/input/frostnumberGeo_model.yaml',
         'time_units':         'years' }
 
     _input_var_names = (
@@ -52,9 +52,9 @@ class BmiFrostnumber2DMethod( perma_base.PermafrostComponent ):
         'atmosphere_bottom_air__temperature':        'T_air',
         'datetime__start':                           'start_year',
         'datetime__end':                             'end_year',
-        'frostnumber__air':                          'air_frost_number_2D',
-        'frostnumber__surface':                      'surface_frost_number_2D',
-        'frostnumber__stefan':                       'stefan_frost_number_2D'}
+        'frostnumber__air':                          'air_frost_number_Geo',
+        'frostnumber__surface':                      'surface_frost_number_Geo',
+        'frostnumber__stefan':                       'stefan_frost_number_Geo'}
 
 
     _var_units_map = {
@@ -73,13 +73,13 @@ class BmiFrostnumber2DMethod( perma_base.PermafrostComponent ):
         self._grid_type = {}
 
     def initialize(self, cfg_file=None):
-        self._model = frost_number_2D.Frostnumber2DMethod()
+        self._model = frost_number_Geo.FrostnumberGeoMethod()
 
         self._model.initialize_from_config_file(cfg_file=cfg_file)
         self._model.initialize_frostnumber_component()
 
         # Set the name of this component
-        self._name = "Permamodel Frostnumber2D Component"
+        self._name = "Permamodel FrostnumberGeo Component"
 
         # Verify that all input and output variable names are in the
         # variable name and the units map
@@ -122,9 +122,9 @@ class BmiFrostnumber2DMethod( perma_base.PermafrostComponent ):
             'atmosphere_bottom_air__temperature':    self._model.T_air,
             'datetime__start':          self._model.start_year,
             'datetime__end':            self._model.end_year,
-            'frostnumber__air':         self._model.air_frost_number_2D,
-            'frostnumber__surface':     self._model.surface_frost_number_2D,
-            'frostnumber__stefan':      self._model.stefan_frost_number_2D}
+            'frostnumber__air':         self._model.air_frost_number_Geo,
+            'frostnumber__surface':     self._model.surface_frost_number_Geo,
+            'frostnumber__stefan':      self._model.stefan_frost_number_Geo}
 
         # initialize() tasks complete.  Update status.
         self.status = 'initialized'
@@ -175,8 +175,8 @@ class BmiFrostnumber2DMethod( perma_base.PermafrostComponent ):
         assert(self._model.status == 'initialized')
 
         # Calculate the new frost number values
-        self._model.calculate_frost_numbers_2D()
-        self._values['frostnumber__air'] = self._model.air_frost_number_2D
+        self._model.calculate_frost_numbers_Geo()
+        self._values['frostnumber__air'] = self._model.air_frost_number_Geo
 
         # Update the time
         self._model.year += self._model.dt
@@ -204,8 +204,8 @@ class BmiFrostnumber2DMethod( perma_base.PermafrostComponent ):
             self._model.read_input_files()
 
             # Calculate the new frost number values
-            self._model.calculate_frost_numbers_2D()
-            self._values['frostnumber__air'] = self._model.air_frost_number_2D
+            self._model.calculate_frost_numbers_Geo()
+            self._values['frostnumber__air'] = self._model.air_frost_number_Geo
 
     def update_until(self, stop_year):
         # Ensure that stop_year is at least the current year
@@ -246,7 +246,7 @@ class BmiFrostnumber2DMethod( perma_base.PermafrostComponent ):
         # Print final report, as desired
         if not SILENT:
             self._model.print_final_report(\
-                    comp_name='Permamodel FrostNumber2D component')
+                    comp_name='Permamodel FrostNumberGeo component')
 
     def get_start_time(self):
         return 0.0
