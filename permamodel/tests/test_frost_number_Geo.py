@@ -91,13 +91,13 @@ def test_Geo_frostnumber_get_datacube_slice():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod()
     config_dict = \
         {'n_temperature_grid_fields': 4,
-         'temperature_grid_date_0': '1901-01-01',
+         'temperature_grid_date_0': datetime.date(1901, 01, 01),
          'temperature_grid_data_0': '((-10, -5), (-20, -15), (0, 5))',
-         'temperature_grid_date_1': '1901-07-01',
+         'temperature_grid_date_1': datetime.date(1901, 07, 01),
          'temperature_grid_data_1': '((10, 15), (0, 5), (20, 15))',
-         'temperature_grid_date_2': '1902-01-01',
+         'temperature_grid_date_2': datetime.date(1902, 01, 01),
          'temperature_grid_data_2': '((-7, -2), (-17, -12), (3, 8))',
-         'temperature_grid_date_3': '1902-07-01',
+         'temperature_grid_date_3': datetime.date(1902, 07, 01),
          'temperature_grid_data_3': '((7, 2), (17, 12), (23, 28))'}
     dates, cube = fn_geo.initialize_datacube('temperature', config_dict)
 
@@ -191,12 +191,10 @@ def test_Geo_frostnumber_compute_array_of_degree_days():
 
     if fn_geo._using_WMT:
         print("Can't test WMT in standalone mode")
-    elif not fn_geo._using_Files:
-        raise ValueError("Frostnumber must use either Files \
+        return
+    elif not (fn_geo._using_Files or fn_geo._using_ConfigVals):
+        raise ValueError("Frostnumber must use either Files, ConfigVals, \
                          or WMT to get input variables")
-
-    # After this, we assume we are using Files for input data
-    assert_true(fn_geo._using_Files)
 
     # Test that we get NaN-filled arrays when no input vars available
     fn_geo.set_current_date_and_timestep_with_timestep(-100)

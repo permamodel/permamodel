@@ -214,18 +214,31 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             # Grid shape
             self._grid_type = self._configuration['grid_type']
             self._grid_shape = self._configuration['grid_shape']
+            if len(self._grid_shape) == 2:
+                (self._grid_ydim, self._grid_xdim) = self._grid_shape
+            else:
+                raise ValueError("cannot handle grid of shape %s" %
+                                str(self._grid_shape))
+
+            # Set the valid dates for which temperature is available
+            self._temperature_first_date = \
+                self.datefrom(self._configuration['temperature_grid_date_0'])
+            last_date_varname = 'temperature_grid_date_%d' % \
+                (int(self._configuration['n_temperature_grid_fields']) - 1)
+            self._temperature_last_date = \
+                eval("self.datefrom(self._configuration['%s'])" % last_date_varname)
 
             # Parse the (x, y, time) data cube from which the values
             # will be drawn at the appropriate time
-            self._temperature_datacube = \
+            self._temperature_dates, self._temperature_datacube = \
                 self.initialize_datacube('temperature',
                                          self._configuration)
-            if n_precipitation_grid_fields > 0:
-                self._temperature_datacube = \
+            if self._configuration['n_precipitation_grid_fields'] > 0:
+                self._precipitation_dates, self._precipitation_datacube = \
                     self.initialize_datacube('precipitation',
                                              self._configuration)
-            if n_soilproperties_grid_fields > 0:
-                self._temperature_datacube = \
+            if self._configuration['n_soilproperties_grid_fields'] > 0:
+                self._soilproperties_dates, self._soilproperties_datacube = \
                     self.initialize_datacube('soilproperties',
                                              self._configuration)
 
@@ -265,6 +278,13 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         #       calculate the first timestep's values
         """
 
+    def datefrom(self, datestring):
+        if isinstance(datestring, str):
+            return datetime.datetime.strptime(datestring, '%Y-%m-%d').date()
+        else:
+            return datestring
+
+
     def initialize_datacube(self, gridname, config):
         # Determine the number of lines for this grid
         exec("ngridlines = config['n_%s_grid_fields']" % gridname)
@@ -272,7 +292,11 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # Create the datelist for this grid
         datelist = []
         for n in range(ngridlines):
-            exec("thisdate = datetime.datetime.strptime(config['%s_grid_date_%d' % (gridname, n)], '%Y-%m-%d').date()")
+            # This version converts a string to a datetime.date object
+            # exec("thisdate = datetime.datetime.strptime(config['%s_grid_date_%d' % (gridname, n)], '%Y-%m-%d').date()")
+            exec("thisdate = config['%s_grid_date_%d' % (gridname, n)]")
+            if isinstance(thisdate, str):
+                thisdate = self.datefrom(thisdate)
             datelist.append(thisdate)
 
         # Create the datacube for this grid
@@ -544,7 +568,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         if self._using_WMT:
             # With WMT, the input variables will be set externally via BMI
             return
-        elif self._using_Files:
+        elif self._using_Files or self._using_ConfigVals:
             # In standalone mode, variables must be set locally
             # All frost number types need temperature data
             if self._dd_method == 'MinJanMaxJul':
@@ -554,7 +578,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                 self.T_air_min = self.get_temperature_field(mindate)
                 self.T_air_max = self.get_temperature_field(maxdate)
         else:
-            raise ValueError("Frostnumber must use either Files \
+            raise ValueError("Frostnumber must use either Files, ConfigVals \
                               or WMT to get input variables")
 
     def get_temperature_field(self, t_date = None):
@@ -570,11 +594,22 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
             t_index = self.get_temperature_month_index(t_date)
 
-            temperature_subregion = \
-                self._temperature_dataset.variables['temp']\
-                    [t_index]\
-                    [self._grid_j0:self._grid_j1:self._grid_jskip,\
-                    self._grid_i0:self._grid_i1:self._grid_iskip]
+            if self._using_Files:
+                # Files uses netcdf input
+                temperature_subregion = \
+                    self._temperature_dataset.variables['temp']\
+                        [t_index]\
+                        [self._grid_j0:self._grid_j1:self._grid_jskip,\
+                        self._grid_i0:self._grid_i1:self._grid_iskip]
+            elif self._using_ConfigVals:
+                # ConfigVals is the Default, where the grids are in cfg file
+                temperature_subregion = \
+                        self.get_datacube_slice(t_date,
+                                                self._temperature_datacube,
+                                                self._temperature_dates).astype(np.float32)
+            elif self._using_WMT:
+                # Using WMT, this value will be set elsewhere
+                pass
 
             assert_equal(temperature_subregion.shape, self._grid_shape)
 
