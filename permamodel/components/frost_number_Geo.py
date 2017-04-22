@@ -308,8 +308,6 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # In NumPy 1.10 later, we can use np.stack()
         # But for v1.09 -- which pip seems to install -- we need np.dstack()
         # datacube = np.stack(slicelist)
-        print("slicelist:")
-        print(slicelist)
         datacube = self.np_stack(slicelist)
 
         return datelist, datacube
