@@ -30,6 +30,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                     default_frostnumberGeo_config_filename)
         else:
             self._config_filename = cfgfile
+        self.status = 'defined'
 
     def initialize_frostnumberGeo_component(self):
         SILENT = True
@@ -38,7 +39,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         if not SILENT:
             print("Initializing for FrostnumberGeoMethod")
 
-        self._model = 'FrostNumberGeo'
+        self._model_name = 'FrostNumberGeo'
 
         # Read in the overall configuration from the configuration file
         assert_true(os.path.isfile(self._config_filename))
@@ -277,6 +278,9 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         """
         # Note: initialization only allocates for values; it doesn't
         #       calculate the first timestep's values
+
+        # This is to allow another routine, e.g. from WMT, to set the
+        # necessary values
         """
 
     def datefrom(self, datestring):
@@ -537,8 +541,8 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             years = this_date.year - self._nc_reference_time.year
             months = this_date.month - self._nc_reference_time.month
             time_index = 12*years + months
-            print("Adding output at index %d for date %s" % \
-                  (time_index, str(this_date)))
+            # print("Adding output at index %d for date %s" % \
+            #       (time_index, str(this_date)))
             self._nc_afn[time_index, :] = self.air_frost_number_Geo[:]
             if self._calc_surface_fn:
                 self._nc_sfn[time_index, :] = self.surface_frost_number_Geo[:]
@@ -551,19 +555,26 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # set by WMT and this can't be called until that is done
         self.get_input_vars()
         self.compute_degree_days()
-        self.calculate_frost_numbers()
+        self.calculate_frost_numbers_Geo()
         self.add_to_output()
 
-    def update(self):
+    def update(self, frac=None):
         # Increment the model one time step
-        self._date_current += self._timestep_duration
+        if frac is None:
+            self._date_current += self._timestep_duration
+        else:
+            self._date_current += frac * self._timestep_duration
+
         self._timestep_current = \
                 self.get_timestep_from_date(self._date_current)
 
         self.get_input_vars()
         self.compute_degree_days()
-        self.calculate_frost_numbers()
+        self.calculate_frost_numbers_Geo()
         self.add_to_output()
+
+    def update_frac(self, frac):
+        self.update(frac=frac)
 
     def update_until_timestep(self, stop_timestep):
         while self._timestep_current < stop_timestep:
@@ -791,7 +802,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
         return cfg_struct
 
-    def calculate_frost_numbers(self):
+    def calculate_frost_numbers_Geo(self):
         # Calculate all the frost numbers using the current data
         self.calculate_air_frost_number_Geo()
         self.calculate_surface_frost_number_Geo()

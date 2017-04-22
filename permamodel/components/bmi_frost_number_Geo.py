@@ -6,10 +6,8 @@
 """
 
 import numpy as np
-from permamodel.utils import model_input
 from permamodel.components import perma_base
 from permamodel.components import frost_number_Geo
-from permamodel.components.perma_base import *
 from .. import examples_directory
 import os
 
@@ -33,10 +31,7 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         #-------------------------------------------------------------
         'comp_name':          'frostnumberGeo',
         'model_family':       'PermaModel',
-        'cfg_extension':      '_frostnumberGeo_model.cfg',
-        'cmt_var_prefix':     '/input/',
-        'gui_yaml_file':      '/input/frostnumberGeo_model.yaml',
-        'time_units':         'years' }
+        'time_units':         'days' }
 
     _input_var_names = (
         'atmosphere_bottom_air__temperature',
@@ -50,9 +45,9 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
     _var_name_map = {
         # These are the corresponding CSDMS standard names
         # NOTE: we need to look up for the corresponding standard names
-        'atmosphere_bottom_air__temperature':        'T_air',
-        'datetime__start':                           'start_year',
-        'datetime__end':                             'end_year',
+        'atmosphere_bottom_air__temperature':        'T_air_min',
+        'datetime__start':                           '_start_date',
+        'datetime__end':                             '_end_date',
         'frostnumber__air':                          'air_frost_number_Geo',
         'frostnumber__surface':                      'surface_frost_number_Geo',
         'frostnumber__stefan':                       'stefan_frost_number_Geo'}
@@ -76,8 +71,8 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
     def initialize(self, cfg_file=None):
         self._model = frost_number_Geo.FrostnumberGeoMethod()
 
-        self._model.initialize_from_config_file(cfg_file=cfg_file)
-        self._model.initialize_frostnumber_component()
+        self._model.status = 'initializing'
+        self._model.initialize_frostnumberGeo_component()
 
         # Set the name of this component
         self._name = "Permamodel FrostnumberGeo Component"
@@ -120,15 +115,15 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         self._values = _values = {
         # These are the links to the model's variables and
         # should be consistent with _var_name_map
-            'atmosphere_bottom_air__temperature':    self._model.T_air,
-            'datetime__start':          self._model.start_year,
-            'datetime__end':            self._model.end_year,
+            'atmosphere_bottom_air__temperature':    self._model.T_air_min,
+            'datetime__start':          self._model._start_date,
+            'datetime__end':            self._model._end_date,
             'frostnumber__air':         self._model.air_frost_number_Geo,
             'frostnumber__surface':     self._model.surface_frost_number_Geo,
             'frostnumber__stefan':      self._model.stefan_frost_number_Geo}
 
         # initialize() tasks complete.  Update status.
-        self.status = 'initialized'
+        self._model.status = 'initialized'
 
     def get_attribute(self, att_name):
 
@@ -173,58 +168,32 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
     def update(self):
         # Ensure that we've already initialized the run
-        assert(self._model.status == 'initialized')
+        assert self._model.status == 'initialized'
 
-        # Calculate the new frost number values
-        self._model.calculate_frost_numbers_Geo()
-        self._values['frostnumber__air'] = self._model.air_frost_number_Geo
-
-        # Update the time
-        self._model.year += self._model.dt
-
-        # Get new input values
-        self._model.read_input_files()
+        self._model.update()
 
     def update_frac(self, time_fraction):
         # Only increment the time by a partial time step
         # Ensure that we've already initialized the run
         assert(self._model.status == 'initialized')
 
-        # Determine which year the model is currently in
-        current_model_year = int(self._model.year)
+        self._model.update_frac(frac=time_fraction)
 
-        # Update the time with a partial time step
-        self._model.year += time_fraction * self._model.dt
-
-        # Determine if the model year is now different
-        new_model_year = int(self._model.year)
-
-        # If the year has changed, change the values
-        if new_model_year > current_model_year:
-            # Get new input values
-            self._model.read_input_files()
-
-            # Calculate the new frost number values
-            self._model.calculate_frost_numbers_Geo()
-            self._values['frostnumber__air'] = self._model.air_frost_number_Geo
-
-    def update_until(self, stop_year):
+    def update_until(self, stop_date):
         # Ensure that stop_year is at least the current year
-        if stop_year < self._model.year:
+        if stop_date < self._model._date_current:
             print("Warning: update_until year is less than current year")
             print("  no update run")
             return
 
-        if stop_year > self._model.end_year:
+        if stop_date > self._model._end_date:
             print("Warning: update_until year was greater than end_year")
-            print("  setting stop_year to end_year")
-            stop_year = self.end_year
+            print("  setting stop_date to end_date")
+            stop_date = self._end_date
 
         # Implement the loop to update until stop_year
-        year = self._model.year
-        while year < stop_year:
+        while self._model._date_current < stop_date:
             self.update()
-            year = self._model.year
 
     def finalize(self):
         SILENT = True
@@ -232,16 +201,10 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # Finish with the run
         self._model.status = 'finalizing'  # (OpenMI)
 
-        # Close the input files
-        self._model.close_input_files()   # Close any input files
+        # frost_number_Geo has a finalize() method
+        self._model.finalize()   # Close any input files
 
-        # Write output last output
-        self._model.write_output_to_file(SILENT=True)
-
-        # Close the output files
-        self._model.close_output_files()
-
-        # Done finalizing  
+        # Done finalizing
         self._model.status = 'finalized'  # (OpenMI)
 
         # Print final report, as desired
@@ -253,10 +216,15 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         return 0.0
 
     def get_current_time(self):
-        return self._model.year - self._model.start_year
+        """ Am assuming current time is number of timesteps since start """
+        return((self._model._date_current - \
+               self._model._start_date).total_seconds()/ \
+               self._model._timestep_duration.total_seconds())
 
     def get_end_time(self):
-        return self._model.end_year - self._model.start_year + 1.0
+        return((self._model._end_date - \
+               self._model._start_date).total_seconds()/ \
+               self._model._timestep_duration.total_seconds())
 
     # ----------------------------------
     # Functions added to pass bmi-tester
@@ -265,9 +233,9 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         return self._grid_type[grid_number]
 
     def get_time_step(self):
-        return self._model.dt
+        return self._model._timestep_duration.total_seconds() / \
+               datetime.timedelta(days=1).total_seconds()
 
-    # Note: get_value_ref() copied from bmi_heat.py
     def get_value_ref(self, var_name):
         """Reference to values.
 
@@ -344,9 +312,8 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         return str(self.get_value_ref(var_name).dtype)
 
     def get_component_name(self):
-        return self._name
+        return self._model_name
 
-    # Copied from bmi_heat.py
     def get_var_grid(self, var_name):
         """Grid id for a variable.
 

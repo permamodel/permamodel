@@ -247,7 +247,7 @@ def test_Geo_frostnumber_output_a_netcdf_file():
     for t in range(0, 10):
         fn_geo.get_input_vars()
         fn_geo.compute_degree_days()
-        fn_geo.calculate_frost_numbers()
+        fn_geo.calculate_frost_numbers_Geo()
         fn_geo.add_to_output()
         fn_geo.update()
     fn_geo.finalize()
