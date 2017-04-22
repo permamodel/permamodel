@@ -15,4 +15,7 @@ summary: "From Nelson and Outcalt (1987), the 'frost number', a
   portraying the distribution of contemporary permafrost at
   continental scales, it is not capable of detecting relict permafrost
   and should not be mapped over small areas unless numerous climate
-  stations are located in the region of interest."
+  stations are located in the region of interest.  
+  
+  This version computes the frost number on a two-dimensional
+  grid."
