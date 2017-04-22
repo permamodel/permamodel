@@ -9,7 +9,7 @@ import numpy as np
 import ast
 from permamodel.utils import model_input
 from permamodel.components import perma_base
-from .. import examples_directory, data_directory
+from permamodel import examples_directory, data_directory
 import os
 import yaml
 from nose.tools import (assert_is_instance, assert_greater_equal,
