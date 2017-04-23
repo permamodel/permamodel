@@ -9,6 +9,11 @@ import numpy as np
 from permamodel.components import perma_base
 from permamodel.components import frost_number_Geo
 from .. import examples_directory
+from nose.tools import (assert_is_instance, assert_greater_equal,
+                        assert_less_equal, assert_almost_equal,
+                        assert_greater, assert_in, assert_true,
+                        assert_false, assert_equal, assert_raises)
+
 import os
 
 class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
@@ -16,49 +21,11 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
     """ Implement the Nelson-Outcalt Frost numbers
         for a geographic region"""
 
-    # Set up the name of this permafrost module
-    _name = 'Frost number module, Geo version'
+    # Note: The definitions of _att_map, _var_name_map, etc.
+    # have been moved inside the __init__(self) function because
+    # otherwise changing thme once changes them for future
+    # instantiations, .e.g during testing!
 
-    #-------------------------------------------------------------------
-    _att_map = {
-    # NOTE: this will change in the future
-        'model_name':         'PermaModel_frostnumber_Geo_method',
-        'version':            '0.1',
-        'author_name':        'J. Scott Stewart',
-        'grid_type':          'none',
-        'time_step_type':     'fixed',
-        'step_method':        'explicit',
-        #-------------------------------------------------------------
-        'comp_name':          'frostnumberGeo',
-        'model_family':       'PermaModel',
-        'time_units':         'days' }
-
-    _input_var_names = (
-        'atmosphere_bottom_air__temperature',
-        )
-
-    _output_var_names = (
-        'frostnumber__air',            # Air Frost number
-        'frostnumber__surface',        # Surface Frost number
-        'frostnumber__stefan' )        # Stefan Frost number
-
-    _var_name_map = {
-        # These are the corresponding CSDMS standard names
-        # NOTE: we need to look up for the corresponding standard names
-        'atmosphere_bottom_air__temperature':        'T_air_min',
-        'datetime__start':                           '_start_date',
-        'datetime__end':                             '_end_date',
-        'frostnumber__air':                          'air_frost_number_Geo',
-        'frostnumber__surface':                      'surface_frost_number_Geo',
-        'frostnumber__stefan':                       'stefan_frost_number_Geo'}
-
-
-    _var_units_map = {
-        # These are the links to the model's variables' units
-        'atmosphere_bottom_air__temperature':                 'deg_C',
-        'frostnumber__air':                                   '1',
-        'frostnumber__surface':                               '1',
-        'frostnumber__stefan':                                '1' }
 
     #-------------------------------------------------------------------
     def __init__(self):
@@ -67,6 +34,49 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         self._var_units = {}
         self._grids = {}
         self._grid_type = {}
+        # Set up the name of this permafrost module
+        self._name = 'Frost number module, Geo version'
+
+        #-------------------------------------------------------------------
+        self._att_map = {
+        # NOTE: this will change in the future
+            'model_name':         'PermaModel_frostnumber_Geo_method',
+            'version':            '0.1',
+            'author_name':        'J. Scott Stewart',
+            'grid_type':          'none',
+            'time_step_type':     'fixed',
+            'step_method':        'explicit',
+            #-------------------------------------------------------------
+            'comp_name':          'frostnumberGeo',
+            'model_family':       'PermaModel',
+            'time_units':         'days' }
+
+        self._input_var_names = (
+            'atmosphere_bottom_air__temperature',
+            )
+
+        self._output_var_names = (
+            'frostnumber__air',            # Air Frost number
+            'frostnumber__surface',        # Surface Frost number
+            'frostnumber__stefan' )        # Stefan Frost number
+
+        self._var_name_map = {
+            # These are the corresponding CSDMS standard names
+            # NOTE: we need to look up for the corresponding standard names
+            'atmosphere_bottom_air__temperature':        'T_air_min',
+            'datetime__start':                           '_start_date',
+            'datetime__end':                             '_end_date',
+            'frostnumber__air':                          'air_frost_number_Geo',
+            'frostnumber__surface':                      'surface_frost_number_Geo',
+            'frostnumber__stefan':                       'stefan_frost_number_Geo'}
+
+
+        self._var_units_map = {
+            # These are the links to the model's variables' units
+            'atmosphere_bottom_air__temperature':                 'deg_C',
+            'frostnumber__air':                                   '1',
+            'frostnumber__surface':                               '1',
+            'frostnumber__stefan':                                '1' }
 
     def initialize(self, cfg_file=None):
         self._model = frost_number_Geo.FrostnumberGeoMethod()
@@ -76,38 +86,6 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
         # Set the name of this component
         self._name = "Permamodel FrostnumberGeo Component"
-
-        # Verify that all input and output variable names are in the
-        # variable name and the units map
-        for varname in self._input_var_names:
-            assert(varname in self._var_name_map)
-            assert(varname in self._var_units_map)
-            #print("Input var %s is in the name map and the units map"\
-            #      % varname)
-        for varname in self._output_var_names:
-            assert(varname in self._var_name_map)
-            assert(varname in self._var_units_map)
-            #print("Output var %s is in the name map and the units map"\
-            #      % varname)
-
-        # Set the Frost Number grids, based on input and output variables
-        #print("Number of input variables: %d" % len(self._input_var_names))
-        #print("Number of output variables: %d" % len(self._output_var_names))
-
-        # Set the names and types of the grids
-        # Note: A single value is a uniform rectilinear grid of shape (1)
-        #       and size 1
-        gridnumber = 0
-        for varname in self._input_var_names:
-            self._grids[gridnumber] = varname
-            self._grid_type[gridnumber] = 'uniform_rectilinear'
-            #self._grid_type[gridnumber] = 'scalar'
-            gridnumber += 1
-        for varname in self._output_var_names:
-            self._grids[gridnumber] = varname
-            self._grid_type[gridnumber] = 'uniform_rectilinear'
-            #self._grid_type[gridnumber] = 'scalar'
-            gridnumber += 1
 
         # Set the internal (frost number) variables that correspond
         # to the input and output variable names
@@ -121,6 +99,50 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
             'frostnumber__air':         self._model.air_frost_number_Geo,
             'frostnumber__surface':     self._model.surface_frost_number_Geo,
             'frostnumber__stefan':      self._model.stefan_frost_number_Geo}
+
+        # Surface and Stefan numbers are not necessarily calculated
+        if not self._model._calc_surface_fn and \
+                'frostnumber__surface' in self._values.keys():
+            del self._var_name_map['frostnumber__surface']
+            del self._var_units_map['frostnumber__surface']
+            del self._values['frostnumber__surface']
+            # _output_var_names is an (immutable)
+            self._output_var_names = tuple(v for v in self._output_var_names
+                                            if v != 'frostnumber__surface')
+
+        if not self._model._calc_stefan_fn and \
+                'frostnumber__stefan' in self._values.keys():
+            del self._var_name_map['frostnumber__stefan']
+            del self._var_units_map['frostnumber__stefan']
+            del self._values['frostnumber__stefan']
+            self._output_var_names = tuple(v for v in self._output_var_names
+                                            if v != 'frostnumber__stefan')
+
+        # Verify that all input and output variable names are in the
+        # variable name and the units map
+        for varname in self._input_var_names:
+            assert_in(varname, self._var_name_map)
+            assert_in(varname, self._var_units_map)
+        for varname in self._output_var_names:
+            assert_in(varname, self._var_name_map)
+            assert_in(varname, self._var_units_map)
+
+        # Set the Frost Number grids, based on input and output variables
+        #print("Number of input variables: %d" % len(self._input_var_names))
+        #print("Number of output variables: %d" % len(self._output_var_names))
+
+        # Set the names and types of the grids
+        # Note: A single value is a uniform rectilinear grid of shape (1)
+        #       and size 1
+        gridnumber = 0
+        for varname in self._input_var_names:
+            self._grids[gridnumber] = varname
+            self._grid_type[gridnumber] = 'uniform_rectilinear'
+            gridnumber += 1
+        for varname in self._output_var_names:
+            self._grids[gridnumber] = varname
+            self._grid_type[gridnumber] = 'uniform_rectilinear'
+            gridnumber += 1
 
         # initialize() tasks complete.  Update status.
         self._model.status = 'initialized'
