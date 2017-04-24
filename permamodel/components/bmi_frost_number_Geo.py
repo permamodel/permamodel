@@ -13,6 +13,7 @@ from nose.tools import (assert_is_instance, assert_greater_equal,
                         assert_less_equal, assert_almost_equal,
                         assert_greater, assert_in, assert_true,
                         assert_false, assert_equal, assert_raises)
+import datetime
 
 import os
 
@@ -334,7 +335,7 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         return str(self.get_value_ref(var_name).dtype)
 
     def get_component_name(self):
-        return self._model_name
+        return self._name
 
     def get_var_grid(self, var_name):
         """Grid id for a variable.

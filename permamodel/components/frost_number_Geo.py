@@ -39,7 +39,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         if not SILENT:
             print("Initializing for FrostnumberGeoMethod")
 
-        self._model_name = 'FrostNumberGeo'
+        self._name = 'FrostNumberGeo'
 
         # Read in the overall configuration from the configuration file
         assert_true(os.path.isfile(self._config_filename))
