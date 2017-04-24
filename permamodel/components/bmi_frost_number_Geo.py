@@ -128,10 +128,6 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
             assert_in(varname, self._var_name_map)
             assert_in(varname, self._var_units_map)
 
-        # Set the Frost Number grids, based on input and output variables
-        #print("Number of input variables: %d" % len(self._input_var_names))
-        #print("Number of output variables: %d" % len(self._output_var_names))
-
         # Set the names and types of the grids
         # Note: A single value is a uniform rectilinear grid of shape (1)
         #       and size 1
