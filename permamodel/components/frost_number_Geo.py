@@ -197,6 +197,11 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             self._grid_type = self._configuration['grid_type']
             self._grid_shape = self._configuration['grid_shape']
 
+            # WMT provides an array called self._temperature_current[]
+            # which will be set elsewhere and used in get_
+            # ... this is set after this mode check so the code can
+            #     pass the bmitester ...
+
         # If initialized completely from the config file, this is 'Default'
         elif self._configuration['input_var_source'] == 'Default':
             self._using_WMT = False
@@ -244,11 +249,35 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                     self.initialize_datacube('soilproperties',
                                              self._configuration)
 
+        # Initialize the temperature min/max arrays
+        self.T_air_min = np.zeros(self._grid_shape, dtype=np.float32)
+        self.T_air_min.fill(np.nan)
+        self.T_air_max = np.zeros(self._grid_shape, dtype=np.float32)
+        self.T_air_max.fill(np.nan)
+
+        # Initialize the current temperature array
+        # Even though this is only used in WMT-mode, it needs to be set
+        # generally to pass the bmi-tester
+        self._temperature_current = np.zeros(self._grid_shape,
+                                             dtype=np.float32)
+        self._temperature_current.fill(np.nan)
+
+        # Initialize the Precip and SoilProperites arrays if needed
+        if self._calc_surface_fn:
+            self.Precip = np.zeros(self._grid_shape, dtype=np.float32)
+            self.Precip.fill(np.nan)
+        else:
+            self.Precip = None
+
+        if self._calc_stefan_fn:
+            self.SoilProperties = np.zeros(self._grid_shape, dtype=np.float32)
+            self.SoilProperties.fill(np.nan)
+        else:
+            self.SoilProperties = None
+
         # There are different ways of computing degree days.  Ensure that
         # the method specified has been coded
         self._dd_method = self._configuration['degree_days_method']
-        if self._dd_method == 'MinJanMaxJul':
-            self.initialize_MinJanMaxJul()
         self.ddf = np.zeros(self._grid_shape, dtype=np.float32)
         self.ddf.fill(np.nan)
         self.ddt = np.zeros(self._grid_shape, dtype=np.float32)
@@ -621,6 +650,15 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
     def get_input_vars(self):
         if self._using_WMT:
             # With WMT, the input variables will be set externally via BMI
+            if self._dd_method == 'MinJanMaxJul':
+                if self._date_current.month == 7:
+                    self.T_air_min = self._temperature_current
+                else:
+                    self.T_air_max = self._temperature_current
+            else:
+                raise ValueError("Degree days method %s not recognized"
+                                 % self._dd_method)
+
             return
         elif self._using_Files or self._using_ConfigVals:
             # In standalone mode, variables must be set locally
@@ -631,6 +669,9 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                         self.get_min_and_max_dates(self._date_current)
                 self.T_air_min = self.get_temperature_field(mindate)
                 self.T_air_max = self.get_temperature_field(maxdate)
+            else:
+                raise ValueError("Degree days method %s not recognized"
+                                 % self._dd_method)
         else:
             raise ValueError("Frostnumber must use either Files, ConfigVals \
                               or WMT to get input variables")
@@ -658,12 +699,21 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             elif self._using_ConfigVals:
                 # ConfigVals is the Default, where the grids are in cfg file
                 temperature_subregion = \
-                        self.get_datacube_slice(t_date,
-                                                self._temperature_datacube,
-                                                self._temperature_dates).astype(np.float32)
+                        self.get_datacube_slice(
+                            t_date,
+                            self._temperature_datacube,
+                            self._temperature_dates).astype(np.float32)
             elif self._using_WMT:
-                # Using WMT, this value will be set elsewhere
-                pass
+                # Note: I don't think this functionality is currently
+                # used because get_input_vars doesn't call this routine
+                # for WMT
+                # The standalone versions read from a data file
+                # or a datacube.
+                #
+                # Using WMT, this value will be set elsewhere -- via
+                # BMI functions -- which will modify the array
+                # self._temperature_current[]
+                temperature_subregion = self._temperature_current
 
             assert_equal(temperature_subregion.shape, self._grid_shape)
 
@@ -696,24 +746,6 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         t_index = 12*year_offset + month_offset
         return t_index
 
-    def initialize_MinJanMaxJul(self):
-        # Initialize the temperature (and as needed, the precip and soil) grids
-        self.T_air_min = np.zeros(self._grid_shape, dtype=np.float32)
-        self.T_air_min.fill(np.nan)
-        self.T_air_max = np.zeros(self._grid_shape, dtype=np.float32)
-        self.T_air_max.fill(np.nan)
-
-        if self._calc_surface_fn:
-            self.Precip = np.zeros(self._grid_shape, dtype=np.float32)
-            self.Precip.fill(np.nan)
-        else:
-            self.Precip = None
-
-        if self._calc_stefan_fn:
-            self.SoilProperties = np.zeros(self._grid_shape, dtype=np.float32)
-            self.SoilProperties.fill(np.nan)
-        else:
-            self.SoilProperties = None
 
     def get_config_from_yaml_file(self, cfg_filename):
         raise RuntimeError("config from YAML not currently supported")

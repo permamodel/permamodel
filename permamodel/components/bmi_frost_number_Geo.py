@@ -64,12 +64,12 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         self._var_name_map = {
             # These are the corresponding CSDMS standard names
             # NOTE: we need to look up for the corresponding standard names
-            'atmosphere_bottom_air__temperature':        'T_air_min',
-            'datetime__start':                           '_start_date',
-            'datetime__end':                             '_end_date',
-            'frostnumber__air':                          'air_frost_number_Geo',
-            'frostnumber__surface':                      'surface_frost_number_Geo',
-            'frostnumber__stefan':                       'stefan_frost_number_Geo'}
+            'atmosphere_bottom_air__temperature': '_temperature_current',
+            'datetime__start':                    '_start_date',
+            'datetime__end':                      '_end_date',
+            'frostnumber__air':                   'air_frost_number_Geo',
+            'frostnumber__surface':               'surface_frost_number_Geo',
+            'frostnumber__stefan':                'stefan_frost_number_Geo'}
 
 
         self._var_units_map = {
@@ -94,7 +94,8 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         self._values = _values = {
         # These are the links to the model's variables and
         # should be consistent with _var_name_map
-            'atmosphere_bottom_air__temperature':    self._model.T_air_min,
+            'atmosphere_bottom_air__temperature':
+                                        self._model._temperature_current,
             'datetime__start':          self._model._start_date,
             'datetime__end':            self._model._end_date,
             'frostnumber__air':         self._model.air_frost_number_Geo,
@@ -273,7 +274,8 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
     def set_value(self, var_name, new_var_values):
         self._values[var_name] = new_var_values
 
-    def set_value_at_indices(self, var_name, new_var_values, indices):
+    #def set_value_at_indices(self, var_name, new_var_values, indices):
+    def set_value_at_indices(self, var_name, indices, new_var_values):
         self.get_value_ref(var_name).flat[indices] = new_var_values
 
     def get_var_itemsize(self, var_name):
