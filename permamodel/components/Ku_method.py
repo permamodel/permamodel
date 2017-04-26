@@ -514,7 +514,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         if n_grid >1 :               
         
             K_star = self.Kf
-            K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
+            
+            if np.size(self.Kf)>1:
+            	K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
             
         else:
             if Tps_numerator<=0.0:
@@ -548,9 +550,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         
             K = self.Kt
             C = self.Ct       
-                    
-            K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
-            C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
+            if np.size(self.Kf)>1:        
+            	K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
+            	C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
             
         else:
             
