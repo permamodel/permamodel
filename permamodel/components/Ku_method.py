@@ -1004,6 +1004,7 @@ class Ku_method( perma_base.PermafrostComponent ):
             # File is ASCII text with one value per line.
             #----------------------------------------------
             data = np.loadtxt(file_name)
+            data = data[0:(self.end_year-self.start_year+1.0)];
             
         elif (var_type.lower() == 'grid'):
             #----------------------------------------------
