@@ -1,8 +1,6 @@
-name: Ku_model
+name: KuModel
 language: python
 
-package: permamodel
-class: Ku_method
-
-build:
-  - python setup.py install
+package: permamodel.components.bmi_Ku_component
+class: BmiKuMethod
+initialize_args: "ku_model.cfg"

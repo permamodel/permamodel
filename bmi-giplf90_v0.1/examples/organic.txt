@@ -1,0 +1,5 @@
+total number of classes.
+ 1
+class_id number_of_layers
+ 1  0
+vwc	a	b	cap_frz		cap_thw		k_thw	k_frz	layer_dz
