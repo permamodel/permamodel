@@ -47,7 +47,7 @@ degree_days_method:
     default: MinJanMaxJul
     units: '-'
 input_var_source:
-  description: source of input variables: WMT or Default
+  description: 'source of input variables: WMT or Default'
   value:
     type: string
     default: Default
