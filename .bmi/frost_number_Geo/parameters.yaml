@@ -16,6 +16,12 @@ config_description:
     type: string
     default: Default configuration for FrostnumberGeo
     units: '-'
+run_description:
+  description: description of this run
+  value:
+    type: string
+    default: Default FrostnumberGeo run
+    units: '-'
 calc_surface_frostnumber:
   description: whether to calculate surface FN
   value:
