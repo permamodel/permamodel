@@ -86,19 +86,19 @@ model_reference_date:
   description: model dates are relative to this date
   value:
     type: string
-    default: 1900-01-01
+    default: '1900-01-01'
     units: '-'
 model_start_date:
   description: first day of model run
   value:
     type: string
-    default: 1901-01-01
+    default: '1901-01-01'
     units: '-'
 model_end_date:
   description: last day of model run
   value:
     type: string
-    default: 1905-12-31
+    default: '1905-12-31'
     units: '-'
 model_timestep:
   description: model timestep (days)
@@ -116,7 +116,7 @@ temperature_grid_date_0:
   description: date from which this field is valid
   value:
     type: string
-    default: 1901-01-01
+    default: '1901-01-01'
     units: '-'
 temperature_grid_data_0:
   description: complete field start at the above date
@@ -128,7 +128,7 @@ temperature_grid_date_1:
   description: date from which this field is valid
   value:
     type: string
-    default: 1901-07-01
+    default: '1901-07-01'
     units: '-'
 temperature_grid_data_1:
   description: complete field start at the above date
@@ -140,7 +140,7 @@ temperature_grid_date_2:
   description: date from which this field is valid
   value:
     type: string
-    default: 1902-01-01
+    default: '1902-01-01'
     units: '-'
 temperature_grid_data_2:
   description: complete field start at the above date
@@ -152,7 +152,7 @@ temperature_grid_date_3:
   description: date from which this field is valid
   value:
     type: string
-    default: 1902-07-01
+    default: '1902-07-01'
     units: '-'
 temperature_grid_data_3:
   description: complete field start at the above date
@@ -164,7 +164,7 @@ temperature_grid_date_4:
   description: date from which this field is valid
   value:
     type: string
-    default: 1903-01-01
+    default: '1903-01-01'
     units: '-'
 temperature_grid_data_4:
   description: complete field start at the above date
@@ -176,7 +176,7 @@ temperature_grid_date_5:
   description: date from which this field is valid
   value:
     type: string
-    default: 1903-07-01
+    default: '1903-07-01'
     units: '-'
 temperature_grid_data_5:
   description: complete field start at the above date
@@ -188,7 +188,7 @@ temperature_grid_date_6:
   description: date from which this field is valid
   value:
     type: string
-    default: 1904-01-01
+    default: '1904-01-01'
     units: '-'
 temperature_grid_data_6:
   description: complete field start at the above date
@@ -200,7 +200,7 @@ temperature_grid_date_7:
   description: date from which this field is valid
   value:
     type: string
-    default: 1904-07-01
+    default: '1904-07-01'
     units: '-'
 temperature_grid_data_7:
   description: complete field start at the above date
@@ -212,7 +212,7 @@ temperature_grid_date_8:
   description: date from which this field is valid
   value:
     type: string
-    default: 1905-01-01
+    default: '1905-01-01'
     units: '-'
 temperature_grid_data_8:
   description: complete field start at the above date
@@ -224,7 +224,7 @@ temperature_grid_date_9:
   description: date from which this field is valid
   value:
     type: string
-    default: 1905-07-01
+    default: '1905-07-01'
     units: '-'
 temperature_grid_data_9:
   description: complete field start at the above date
@@ -236,7 +236,7 @@ temperature_grid_date_10:
   description: date from which this field is valid
   value:
     type: string
-    default: 1906-01-01
+    default: '1906-01-01'
     units: '-'
 temperature_grid_data_10:
   description: complete field start at the above date
