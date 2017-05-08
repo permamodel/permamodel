@@ -1,5 +1,5 @@
 config_filename:
-  description: name of this config file
+  description: Name of this config file
   value:
     type: string
     default: FrostnumberGeo_Default.cfg
@@ -11,19 +11,19 @@ config_for_method:
     default: FrostnumberGeoMethod
     units: '-'
 config_description:
-  description: description of this configuration
+  description: Description of this configuration
   value:
     type: string
     default: Default configuration for FrostnumberGeo
     units: '-'
 run_description:
-  description: description of this run
+  description: Description of this run
   value:
     type: string
     default: Default FrostnumberGeo run
     units: '-'
 calc_surface_frostnumber:
-  description: whether to calculate surface FN
+  description: Calculate surface Frost number
   value:
     type: choice
     default: No
@@ -32,7 +32,7 @@ calc_surface_frostnumber:
       - No
     units: '-'
 calc_stefan_frostnumber:
-  description: whether to calculate stefan FN
+  description: Calculate Stefan Frost number
   value:
     type: choice
     default: No
@@ -41,13 +41,13 @@ calc_stefan_frostnumber:
       - No
     units: '-'
 output_directory:
-  description: output directory, '.' for default
+  description: "Output directory, '.' for default"
   value:
     type: string
     default: '.'
     units: '-'
 output_filename:
-  description: name of output file
+  description: Name of output file
   value:
     type: string
     default: FrostnumberGeo_output.nc
@@ -59,199 +59,199 @@ degree_days_method:
     default: MinJanMaxJul
     units: '-'
 input_var_source:
-  description: 'source of input variables: WMT or Default'
+  description: 'Source of input variables: WMT or Default'
   value:
     type: string
     default: Default
     units: '-'
 grid_type:
-  description: form of the grid
+  description: Form of the grid
   value:
     type: string
     default: uniform rectangular
     units: '-'
 grid_rows:
-  description: number of rows in model grid (ydim)
+  description: Number of rows in model grid (ydim)
   value:
     type: int
     default: 3
     units: '-'
 grid_columns:
-  description: number of columns in model grid (xdim)
+  description: Number of columns in model grid (xdim)
   value:
     type: int
     default: 2
     units: '-'
 model_reference_date:
-  description: model dates are relative to this date
+  description: Model time is relative to this date
   value:
     type: string
     default: '1900-01-01'
     units: '-'
 model_start_date:
-  description: first day of model run
+  description: First day of model run
   value:
     type: string
     default: '1901-01-01'
     units: '-'
 model_end_date:
-  description: last day of model run
+  description: Last day of model run
   value:
     type: string
     default: '1905-12-31'
     units: '-'
 model_timestep:
-  description: model timestep (days)
+  description: Model time step
   value:
     type: int
     default: 1
     units: 'days'
 n_temperature_grid_fields:
-  description: number of full grids provided
+  description: Number of full grids provided
   value:
     type: int
     default: 11
     units: '-'
 temperature_grid_date_0:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1901-01-01'
     units: '-'
 temperature_grid_data_0:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((-10, -5), (-20, -15), (0, 5))
     units: '-'
 temperature_grid_date_1:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1901-07-01'
     units: '-'
 temperature_grid_data_1:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((10, 15), (0, 5), (20, 15))
     units: '-'
 temperature_grid_date_2:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1902-01-01'
     units: '-'
 temperature_grid_data_2:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((-7, -2), (-17, -12), (3, 8))
     units: '-'
 temperature_grid_date_3:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1902-07-01'
     units: '-'
 temperature_grid_data_3:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((13, 18), (3, 8), (23, 18))
     units: '-'
 temperature_grid_date_4:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1903-01-01'
     units: '-'
 temperature_grid_data_4:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((-15, -10), (-25, -20), (-5, 0))
     units: '-'
 temperature_grid_date_5:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1903-07-01'
     units: '-'
 temperature_grid_data_5:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((5, 10), (-5, 0), (15, 10))
     units: '-'
 temperature_grid_date_6:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1904-01-01'
     units: '-'
 temperature_grid_data_6:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((-20, -15), (-30, -25), (-10, -5))
     units: '-'
 temperature_grid_date_7:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1904-07-01'
     units: '-'
 temperature_grid_data_7:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((0, 5), (-10, -5), (10, 5))
     units: '-'
 temperature_grid_date_8:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1905-01-01'
     units: '-'
 temperature_grid_data_8:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((0, 5), (-10, -5), (10, 15))
     units: '-'
 temperature_grid_date_9:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1905-07-01'
     units: '-'
 temperature_grid_data_9:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((20, 25), (10, 15), (30, 25))
     units: '-'
 temperature_grid_date_10:
-  description: date from which this field is valid
+  description: Date from which this field is valid
   value:
     type: string
     default: '1906-01-01'
     units: '-'
 temperature_grid_data_10:
-  description: complete field start at the above date
+  description: Complete field start at the above date
   value:
     type: string
     default: ((-10, -5), (-20, -15), (0, 5))
     units: '-'
 n_precipitation_grid_fields:
-  description: number of full grids provided
+  description: Number of full grids provided
   value:
     type: int
     default: 11
     units: '-'
 n_soilproperties_grid_fields:
-  description: number of full grids provided
+  description: Number of full grids provided
   value:
     type: int
     default: 11
