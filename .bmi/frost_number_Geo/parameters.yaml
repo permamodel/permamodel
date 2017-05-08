@@ -25,14 +25,20 @@ run_description:
 calc_surface_frostnumber:
   description: whether to calculate surface FN
   value:
-    type: string
-    default: False
+    type: choice
+    default: No
+    choices:
+      - Yes
+      - No
     units: '-'
 calc_stefan_frostnumber:
   description: whether to calculate stefan FN
   value:
-    type: string
-    default: False
+    type: choice
+    default: No
+    choices:
+      - Yes
+      - No
     units: '-'
 output_directory:
   description: output directory, '.' for default
