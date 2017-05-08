@@ -511,10 +511,11 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         n_grid = np.size(self.T_air)
         
-        if n_grid >1 :               
-        
-            K_star = self.Kf
-            K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
+        if n_grid >1 :
+                	        
+            K_star = self.Kf;
+            if np.size(self.Kf)>1:
+            	K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
             
         else:
             if Tps_numerator<=0.0:
@@ -548,9 +549,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         
             K = self.Kt
             C = self.Ct       
-                    
-            K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
-            C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
+            if np.size(self.Kf)>1:        
+            	K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
+            	C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
             
         else:
             
@@ -1140,7 +1141,12 @@ class Ku_method( perma_base.PermafrostComponent ):
         
         if (self.SAVE_ALT_GRIDS):
             self.write_out_ncfile(self.ALT_file,self.Zal)
-
+            
+        self.TPS_file  = self.out_directory + self.TPS_file
+        
+        if (self.SAVE_TPS_GRIDS):
+            self.write_out_ncfile(self.TPS_file,self.Tps)
+            
         #if (self.SAVE_SW_GRIDS):
         #    model_output.add_grid( self, self.Tps, 'Tps', self.time_min )
 
@@ -1169,9 +1175,18 @@ class Ku_method( perma_base.PermafrostComponent ):
         n_lat = np.size(self.lat)
         n_lon = np.size(self.lon)
         
-        ALT = self.Zal+0.;
+        ALT = varname+0.;
         idx = np.where(np.isnan(ALT))
         ALT[idx] = -999.99;
+        
+        #print output_file[-1-2]
+        
+        if (output_file[-1-2] == 'T'):
+        	units = 'degree C';
+        	long_name = 'Temperature at top of permafrost';
+        else:
+        	units = 'm'; 
+        	long_name = 'Active Layer Thickness'
         
         # Open a file to save the final result
         w_nc_fid = Dataset(output_file+'.nc', 'w', format='NETCDF4');
@@ -1196,11 +1211,21 @@ class Ku_method( perma_base.PermafrostComponent ):
         lons.axis = 'X'
         lons[:] = self.lon
         
+        # ==== Time ====
+
+        w_nc_fid.createDimension('time', self.end_year-self.start_year+1.0) # Create Dimension
+        time = w_nc_fid.createVariable('time',np.dtype('float32').char,('time',))
+        time.units = 'Year'
+#         time.standard_name = 'longitude'
+#         time.long_name = 'longitude'
+        time.axis = 'Z'
+        time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
+               
         # ==== Data ====
-        temp = w_nc_fid.createVariable('ALT',np.dtype('float32').char,('lat','lon'))
-        temp.units = 'm'
+        temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('lat','lon','time'))
+        temp.units = units
         temp.missing_value = '-999.99'
-        temp.long_name = 'Active Layer Thickness'
+        temp.long_name = long_name
         temp[:] = ALT;
 #        
         w_nc_fid.close()  # close the new file
