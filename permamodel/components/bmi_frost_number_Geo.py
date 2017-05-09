@@ -378,6 +378,22 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         else:
             return int(np.prod(grid_size))
 
+    def get_grid_spacing(self, grid_id):
+        """Distance between nodes of grid.
+
+        Parameters
+        ----------
+        grid_id : int
+            Identifier of a grid.
+
+        Returns
+        -------
+        array_like
+            The grid spacing.
+
+        """
+        return np.array([1,1], dtype='float32')
+
     def get_grid_rank(self, var_id):
         """Rank of grid.
 
