@@ -1767,7 +1767,7 @@ class BMI_component:
         # the "." to the full CFG_file directory. (9/21/14)
         #------------------------------------------------------------
         if (self.cfg_file != None):
-            cfg_directory = os.path.dirname(self.cfg_file) + os.sep
+            cfg_directory = os.path.dirname(os.path.realpath(self.cfg_file))
             ## print 'cfg_directory =', cfg_directory
             self.cfg_directory = cfg_directory
             if (self.in_directory[0] == '.'):
