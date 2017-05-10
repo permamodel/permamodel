@@ -75,6 +75,19 @@ def test_frostnumber_method_calculates_fn():
     fn.initialize()
     assert_almost_equal(fn.air_frost_number, 0.63267, places=3)
 
+def test_frostnumber_method_calculates_exact_fn():
+    """ Test fn gets calculated """
+    fn = frost_number.FrostnumberMethod()
+    fn.initialize()
+    fn.T_air_min = [5.0]
+    fn.T_air_max = [15.0]
+    fn.calculate_air_frost_number()
+    assert_almost_equal(fn.air_frost_number, 0.0, places=3)
+    fn.T_air_min = [-25.0]
+    fn.T_air_max = [-5.0]
+    fn.calculate_air_frost_number()
+    assert_almost_equal(fn.air_frost_number, 1.0, places=3)
+
 def test_frostnumber_method_cant_update_scalar():
     """ Test fn update() fails with scalar """
     fn = frost_number.FrostnumberMethod()
