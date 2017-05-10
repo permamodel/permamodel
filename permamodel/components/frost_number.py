@@ -53,7 +53,6 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.T_amplitude = -99.0
         self.ddt = []
         self.ddf = []
-        self.r_snow = -99.0
         self.h_snow = -99.0
         self.c_snow = -99.0
         self.Fplus = -99.0
@@ -71,7 +70,6 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.A_air = -1.0
         self.lat = -999
         self.lon = -999
-        self.h_snow = 0.0
         self.rho_snow = 0.0
         self.vwc_H2O = 0.0
         self.Hvgf = 0.0
@@ -103,13 +101,8 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
                                            'fn_t_air_max.dat')
         self.T_air_max_unit = open(self.T_air_max_file, "r")
 
-        # lat and lon not implemented yet
-
     def read_input_files(self):
         """ Overrides read_input_files() from perma_base """
-        #-------------------------------------------------------
-        # All grids are assumed to have a data type of Float32.
-        #-------------------------------------------------------
         T_air_min = model_input.read_next_modified(self.T_air_min_unit,
                                                    self.T_air_min_type)
         if T_air_min is not None:
@@ -127,21 +120,12 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
     def initialize_frostnumber_component(self):
         """ Set the starting values for the frostnumber component """
-        # Initialize the output variables (internal names)
         self.air_frost_number = np.float32(-1.0)
         self.surface_frost_number = np.float32(-1.0)
         self.stefan_frost_number = np.float32(-1.0)
 
-        # Initialize the year to the start year
-        #  or to zero if it doesn't exist
         self.year = self.start_year
 
-        # Ensure that the end_year is not before the start_year
-        # If no end_year is given,
-        #   it is assumed that this will run for one year
-        #   so the end_year is the same as the start_year
-        print("start_year: %s " % str(self.start_year))
-        print("end_year: %s " % str(self.end_year))
         try:
             assert_greater_equal(self.end_year, self.start_year)
         except AssertionError:
@@ -194,15 +178,16 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.stefan_frost_number = np.float32(-1.0)
 
     def compute_degree_days(self):
-        """ From the min and max temperatures, compute degree freezing
-            and thawing days as per Outcalt paper
         """
+        From the min and max temperatures, compute degree freezing
+        and thawing days as per Outcalt paper
 
-        # Input: T_hot (avg temp of warmest month)
-        #        T_cold (avg temp of coldest month)
+        Input: T_hot (avg temp of warmest month)
+               T_cold (avg temp of coldest month)
 
-        # Output: ddf (degree freezing days)
-        #         ddt (degree thawing days)
+        Output: ddf (degree freezing days)
+                ddt (degree thawing days)
+        """
 
         # In the first test case, we used T_air_max and T_air_min
         T_cold = self.T_air_min
@@ -277,186 +262,6 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.air_frost_number = \
             np.sqrt(self.ddf) / \
             (np.sqrt(self.ddf) + np.sqrt(self.ddt))
-
-    def update_snow_prop(self):
-        """ Snow properties are needed for Stefan frost number """
-        # find indexes for which temp > 0 and make precip = 0
-        if self.T_air_type != 'Scalar':  # if not should stop
-            precipitation_filename = self.permafrost_dir +\
-                "permamodel/examples/prec.txt"
-            wk = np.loadtxt(precipitation_filename, skiprows=1, unpack=False)
-            # t_month = wk[:, 0]
-            prec_month = wk[:, 1]
-
-        pos_temp_ind = np.array(np.where(self.ta_month > 0))
-        prec_month[pos_temp_ind] = 0
-        neg_temp_ind = np.array(np.where(self.ta_month <= 0))
-
-        if not pos_temp_ind.any():
-            # monthly temp is always below zero
-            # i.e. it constantly snows over whole year
-            # the point associated with glaciaer and needs to excluded
-            print('snows constatly: stop!')
-
-        m = np.size(neg_temp_ind)
-        # assume only 50% of precip change to at the beg
-        # and end of the snow season
-        pp = 0.5
-
-        # this is portions of the code assumes a perfect winter season
-        # needs to be used with care when there is a warm month
-        # during snow season
-        if m == 1:
-            s_idx = neg_temp_ind[:, 0]
-            e_idx = neg_temp_ind[:, m - 1]
-            prec_month[s_idx] = prec_month[s_idx] * pp
-        else:
-            s_idx = neg_temp_ind[:, 0]
-            e_idx = neg_temp_ind[:, m - 1]
-            prec_month[s_idx] = prec_month[s_idx] * pp
-            prec_month[e_idx] = prec_month[e_idx] * pp
-
-        # sum up precip to get SWE
-        j = 0
-        s = 0
-        swe = np.zeros(m)
-        for i in range(s_idx, e_idx + 1):
-            s = s + prec_month[i]
-            swe[j] = s
-            j = j + 1
-
-        #calculating snow density, depth and thermal counductivity
-        r_snow = np.zeros(m)  # snow density in kg/m3
-        h_snow = np.zeros(m)  # snow depth in m
-        c_snow = np.zeros(m)  # snow depth in W/mK
-        # allowed min and max snow density
-        rho_sn_min = 200
-        rho_sn_max = 300
-        # e-folding value (see Verseghy, 1991)
-        tauf = 0.24
-
-        s = rho_sn_min
-        s = ((s - rho_sn_max) * np.exp(-tauf)) + rho_sn_max
-        r_snow[0] = s
-        for i in range(1, m):
-            # starting from month 2 tauf should be multpled by the 30 days
-            # otherwise snow thermal conductivity can be low and
-            # insulate ground well enough over the season
-            # usually we assume constant max snow thermal conductivity
-            # over snow season
-            s = ((s - rho_sn_max) * np.exp(-tauf)) + rho_sn_max
-            r_snow[i] = s
-
-        h_snow = (swe / (r_snow * 0.001))
-        # snow thermal conductivity according to M. Sturm, 1997.
-        c_snow = (0.138 - 1.01 * r_snow + 3.233 * (r_snow**2)) * 1e-6
-
-        self.r_snow = r_snow
-        self.h_snow = h_snow
-        self.c_snow = c_snow
-
-    def update_surface_frost_number(self):
-        """ re-compute surface frost number values """
-        # phi [scalar]: sites latitude
-        # Zs [scalar]: an average winter snow thickness
-        # Zss [scalar]: a damping depth in snow
-        # P [scalar]: length of an annual temperature cycle
-        # k [scalar]: number of winter months
-        # rho_s [scalar]: density of snow [kg m-3]
-        # lambda_s [scalar]: snow thermal conductivity [W m-1 C-1]
-        # c_s [scalar]: snow specific heat capacity [J kg-1 C-1]
-        # alpha_s [scalar]: thermal diffusivity of snow
-        # Uw [scalar]: mean winter wind speed [m s-1]
-        # Aplus [scalar]: temperature amplitude at the surface with snow
-        # Twplus [scalar]: the mean winter surface temperature
-        # DDFplus [scalar]: freezing index at the surface
-        # Tplus [scalar]: mean annual tempratures at the surface
-        # Fplus [scalar] : surface frost number
-
-        rho_s = np.mean(self.r_snow)
-        lambda_s = np.mean(self.c_snow)
-        Zs = np.mean(self.h_snow)
-        # i am not sure what they mean by length of the annual temprature cycle
-        # Something worthwhile discussing
-        P = 2 * np.pi / 365
-
-        #(eqn. 7)
-        c_s = 7.79 * self.Tw + 2115
-        #(eqn. 8)
-        alpha_s = lambda_s / (c_s * rho_s)
-        #(eqn. 10)
-        Zss = np.sqrt(alpha_s * P / np.pi)
-        #(eqn. 9)
-        Aplus = self.A_air * np.exp(-Zs / Zss)
-        #(eqn. 11)
-        Twplus = self.T_air - Aplus * np.sin(self.beta / (np.pi - self.beta))
-        # Twplus is a mean winter surface temprature, I think,
-        # should be warmer than air temperature?
-        # Here is another problem. DDFplus degree days winter
-        # should be positive.
-        # The way it is written in the paper is wrong. I added a minus sign
-        # to fix it (see eqn. 2.9)
-        #(eqn. 12)
-        DDFplus = -Twplus * self.Lw
-        #(eqn. 13)
-        # Tplus = (self.ddt - DDFplus) / 365
-        #Nevertheless the surface frost number is smaller than air
-        # which looks resonable to me.
-        #(eqn. 14)
-        self.Fplus = np.sqrt(DDFplus) / (np.sqrt(self.ddt) + np.sqrt(DDFplus))
-        self.Twplus = Twplus
-
-    #   update_surface_frost_number()
-    #-------------------------------------------------------------------
-    def update_stefan_frost_number(self):
-        """ Bring Stefan frost number calculation up to date """
-        # Zfplus [scalar]: the depth [m] to which forst extends
-        # lambda_f [scalar]: frozen soil thermal conductivity [W m-1 C-1]
-        # S [scalar]: is a const scalar factor [s d-1]
-        # rho_d [scalar]: dry density of soil [kg m-3]
-        # wf [scalar] : soil water content (proportion of dry weight)
-        # L [scalar] : is a latent heat of fusion of water [J kg-1]
-
-        lambda_f = 1.67  # some dummy thermal conductivity
-        # https://shop.bgs.ac.uk/GeoReports/examples/modules/C012.pdf
-        sec_per_day = 86400
-        rho_d = 2.798  # dry density of silt
-        wf = 0.4       # tipical for silty soils
-        denominator = rho_d * wf * self.Lf
-        #(eqn. 15)
-        self.Zfplus = np.sqrt(2 * lambda_f * sec_per_day *
-                              np.abs(self.Twplus) * self.Lw / denominator)
-        print('Zfplus = %f' % self.Zfplus)
-
-        # assuming 3 soil layers with thickness 0.25, 0.5 and 1.75 m
-        # and thermal conductivities 0.08, 1.5, and 2.1
-        soil_thick = np.array([0.25, 0.5, 1.75])
-        lambda_b = np.array([0.08, 1.5, 2.1])
-        # resistivity R
-        R = soil_thick / lambda_b
-        # volumetric latent heat, 1000 s a density of water
-        QL = self.Lf / 1000
-        #partial freezing thawing index DD
-        DD = np.zeros(3)
-        Z = np.zeros(3)
-        DD[0] = 0.5 * QL * soil_thick[0] * R[0] / sec_per_day
-        S = 0
-        for i in range(1, 3):
-            S = R[i] + S
-            DD[i] = (S + 0.5 * R[i - 1]) * QL * soil_thick[i] / sec_per_day
-            #The depth of the frost thaw penetration
-        S = 0
-        Z_tot = 0
-        for i in range(0, 3):
-            #The depth of the frost thaw penetration
-            Z[i] = np.sqrt(2 * lambda_b[i] * sec_per_day * DD[i] / QL +
-                           lambda_b[i]**2 * S ** 2) - lambda_b[i] * S
-            S = R[i] + S
-            Z_tot = Z_tot + Z[i]
-
-        self.Z_tot = Z_tot
-        self.stefan_number = np.sqrt(self.Fplus) / \
-            (np.sqrt(self.Fplus) + np.sqrt(self.Z_tot))
 
     def close_input_files(self):
         """ As per topoflow, close the input files to finalize() """
