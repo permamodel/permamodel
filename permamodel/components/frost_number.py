@@ -120,8 +120,13 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         if T_air_max is not None:
             self.T_air_max = T_air_max
 
+    def initialize(self, cfg_file=None):
+        """ Set starting values for frost number """
+        self.initialize_from_config_file(cfg_file=cfg_file)
+        self.initialize_frostnumber_component()
+
     def initialize_frostnumber_component(self):
-        """ Set the staring values for the frostnumber component """
+        """ Set the starting values for the frostnumber component """
         SILENT = True
 
         # Note: Initialized from initialize() in perma_base.py

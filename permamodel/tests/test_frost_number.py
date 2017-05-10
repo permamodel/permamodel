@@ -3,11 +3,10 @@ test_frost_number.py
   tests of the frost_number component of permamodel
 """
 
-from permamodel.components import frost_number
-from permamodel.components import bmi_frost_number
 import os
-import numpy as np
-from .. import permamodel_directory, examples_directory
+from permamodel.components import frost_number
+from .. import examples_directory
+from nose.tools import (assert_equal, assert_greater_equal)
 
 # List of files to be removed after testing is complete
 # use files_to_remove.append(<filename>) to add to it
@@ -28,17 +27,17 @@ def teardown_module():
 # ---------------------------------------------------
 def test_can_initialize_frostnumber_method_from_file():
     """ Test fn initialization from config file """
-    fn = bmi_frost_number.BmiFrostnumberMethod()
+    fn = frost_number.FrostnumberMethod()
     cfg_file = os.path.join(examples_directory,
                             'Fairbanks_frostnumber_method.cfg')
     fn.initialize(cfg_file=cfg_file)
-    files_to_remove.append(fn._model.fn_out_filename)
+    files_to_remove.append(fn.fn_out_filename)
 
 def test_frostnumber_method_has_date_info():
     """ Test that fn has time values """
-    fn = bmi_frost_number.BmiFrostnumberMethod()
+    fn = frost_number.FrostnumberMethod()
     cfg_file = os.path.join(examples_directory,
                             'Fairbanks_frostnumber_method.cfg')
     fn.initialize(cfg_file=cfg_file)
-    assert(fn._model.year >= 0)
-    assert(fn._model.year == fn._model.start_year)
+    assert_greater_equal(fn.year, 0)
+    assert_equal(fn.year, fn.start_year)
