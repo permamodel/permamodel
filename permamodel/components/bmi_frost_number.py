@@ -34,6 +34,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         """ This overwrites __init__() method of PermafrostComponent """
         self._name = "Permamodel Frostnumber Component"
         self._model = None
+        self.model = None
         self._values = {}
         self._var_units = {}
         self._grids = {}
@@ -200,21 +201,14 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
 
     def finalize(self):
         """ BMI-required, wrap up all things including writing output """
-        SILENT = True
-
         # Close the input files
         self._model.close_input_files()   # Close any input files
 
         # Write output last output
-        self._model.write_output_to_file(SILENT=True)
+        self._model.write_output_to_file()
 
         # Close the output files
         self._model.close_output_files()
-
-        # Print final report, as desired
-        if not SILENT:
-            self._model.print_final_report(\
-                    comp_name='Permamodel FrostNumber component')
 
     def get_start_time(self):
         """ BMI-required although all WMT models start at time=0 """

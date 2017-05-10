@@ -65,7 +65,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
         # Not sure why these aren't set elsewhere
         self.DEBUG = True
-        self.SILENT = False
+        self.SILENT = True
         self.cfg_prefix = ""
         self.T_air = -1.0
         self.A_air = -1.0
@@ -127,12 +127,6 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
     def initialize_frostnumber_component(self):
         """ Set the starting values for the frostnumber component """
-        SILENT = True
-
-        # Note: Initialized from initialize() in perma_base.py
-        if not SILENT:
-            print("Initializing for FrostnumberMethod")
-
         self._model = 'FrostNumber'
 
         # Here, initialize the variables which are unique to the
@@ -479,12 +473,8 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         if self.T_air_max_type != 'Scalar':
             self.T_air_max_unit.close()
 
-    def write_output_to_file(self, SILENT=True):
+    def write_output_to_file(self):
         """ Part of finalize, write the output to file(s) """
-        # Write the output to the screen unless we're silent
-        if not SILENT:
-            self.print_frost_numbers(self.year)
-
         # Write the output to a file
         with open(self.fn_out_filename, 'w') as f_out:
             for year in sorted(self.output.keys()):
