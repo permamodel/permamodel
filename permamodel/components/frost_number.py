@@ -28,13 +28,13 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 from .. import examples_directory
+from nose.tools import assert_greater_equal
 
 
 class FrostnumberMethod(perma_base.PermafrostComponent):
     """ Provides 1D Frostnumber component """
     def __init__(self):
         # These are set in open_input_files
-        self._model = ""
         self.air_frost_number = -99.0
         self.surface_frost_number = -99.0
         self.stefan_frost_number = -99.0
@@ -127,11 +127,6 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
     def initialize_frostnumber_component(self):
         """ Set the starting values for the frostnumber component """
-        self._model = 'FrostNumber'
-
-        # Here, initialize the variables which are unique to the
-        # frost_number component
-
         # Initialize the output variables (internal names)
         self.air_frost_number = np.float32(-1.0)
         self.surface_frost_number = np.float32(-1.0)
@@ -139,20 +134,17 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
         # Initialize the year to the start year
         #  or to zero if it doesn't exist
-        try:
-            self.year = self.start_year
-        except AttributeError:
-            self.year = 0
-            self.start_year = 0
-            self.end_year = 0
+        self.year = self.start_year
 
         # Ensure that the end_year is not before the start_year
         # If no end_year is given,
         #   it is assumed that this will run for one year
         #   so the end_year is the same as the start_year
+        print("start_year: %s " % str(self.start_year))
+        print("end_year: %s " % str(self.end_year))
         try:
-            assert self.end_year >= self.start_year
-        except AttributeError:
+            assert_greater_equal(self.end_year, self.start_year)
+        except AssertionError:
             self.end_year = self.start_year
 
         # Create a dictionary to hold the output values
@@ -216,7 +208,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         T_cold = self.T_air_min
         T_hot = self.T_air_max
 
-        assert T_hot > T_cold
+        assert_greater_equal(T_hot, T_cold)
         T_avg = (T_hot + T_cold) / 2.0
 
         # Note that these conditions should cover T_hot == T_cold
