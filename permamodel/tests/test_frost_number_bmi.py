@@ -5,9 +5,9 @@ test_frost_number_bmi.py
 
 import os
 from permamodel.components import bmi_frost_number
-from .. import examples_directory
-from nose.tools import (assert_is_instance,
-                        assert_true,
+from permamodel import examples_directory
+from nose.tools import (assert_is_instance, assert_raises,
+                        assert_true, assert_in,
                         assert_false, assert_equal)
 
 
@@ -15,13 +15,9 @@ from nose.tools import (assert_is_instance,
 onesite_oneyear_filename = \
         os.path.join(examples_directory,
                      'Frostnumber_example_scalar.cfg')
-        #            'Frostnumber_example_singlesite_singleyear.cfg')
-        #'./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg'
 onesite_multiyear_filename = \
         os.path.join(examples_directory,
                      'Frostnumber_example_timeseries.cfg')
-        #            'Frostnumber_example_singlesite_multiyear.cfg')
-        #'./permamodel/examples/Frostnumber_example_singlesite_multiyear.cfg'
 
 # List of files to be removed after testing is complete
 # use files_to_remove.append(<filename>) to add to it
@@ -125,9 +121,52 @@ def test_frost_number_get_current_time_returns_scalar_float():
     current_time = fn.get_current_time()
     assert_is_instance(current_time, float)
 
-def  test_frost_number_get_end_time_returns_scalar_float():
+def test_frost_number_get_end_time_returns_scalar_float():
     """ Test that end time is floating point """
     fn = bmi_frost_number.BmiFrostnumberMethod()
     fn.initialize(cfg_file=onesite_multiyear_filename)
     end_time = fn.get_end_time()
     assert_is_instance(end_time, float)
+
+def test_frostnumber_get_attribute():
+    fn = bmi_frost_number.BmiFrostnumberMethod()
+    fn.initialize(cfg_file=onesite_multiyear_filename)
+    this_att = fn.get_attribute('time_units')
+    assert_equal(this_att, 'years')
+    this_att = fn.get_attribute('not_an_attribute')
+    assert_raises(KeyError, this_att, 'years')
+
+def test_frostnumber_update_frac():
+    fn = bmi_frost_number.BmiFrostnumberMethod()
+    fn.initialize(cfg_file=onesite_multiyear_filename)
+    fn.update()
+
+def test_frostnumber_update_frac():
+    fn = bmi_frost_number.BmiFrostnumberMethod()
+    fn.initialize(cfg_file=onesite_multiyear_filename)
+    fn.update_frac(2)
+
+def test_bmi_fn_get_input_var_names():
+    fn = bmi_frost_number.BmiFrostnumberMethod()
+    fn.initialize(cfg_file=onesite_multiyear_filename)
+    assert_in('atmosphere_bottom_air__temperature',
+              fn.get_input_var_names())
+
+def test_bmi_fn_get_output_var_names():
+    fn = bmi_frost_number.BmiFrostnumberMethod()
+    fn.initialize(cfg_file=onesite_multiyear_filename)
+    assert_in('frostnumber__air',
+              fn.get_output_var_names())
+
+def test_bmi_fn_get_var_name():
+    fn = bmi_frost_number.BmiFrostnumberMethod()
+    fn.initialize(cfg_file=onesite_multiyear_filename)
+    assert_in('air_frost_number',
+              fn.get_var_name('frostnumber__air'))
+
+def test_bmi_fn_get_var_units():
+    fn = bmi_frost_number.BmiFrostnumberMethod()
+    fn.initialize(cfg_file=onesite_multiyear_filename)
+    assert_in('deg',
+              fn.get_var_units('atmosphere_bottom_air__temperature'))
+

@@ -121,7 +121,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
     def get_attribute(self, att_name):
         try:
             return self._att_map[att_name.lower()]
-        except ValueError:
+        except KeyError:
             print('###################################################')
             print(' ERROR: Could not find attribute: %s' % att_name)
             print('###################################################')
