@@ -7,7 +7,8 @@ from __future__ import print_function
 import os
 from permamodel.components import frost_number
 from .. import examples_directory
-from nose.tools import (assert_equal, assert_greater_equal)
+from nose.tools import (assert_equal, assert_greater_equal,
+                        assert_almost_equal, assert_raises)
 
 # List of files to be removed after testing is complete
 # use files_to_remove.append(<filename>) to add to it
@@ -27,13 +28,14 @@ def teardown_module():
 # Tests that input data is being read correctly
 # ---------------------------------------------------
 def test_initialize_frostnumber_method():
-    """ Test fn initialization from config file """
+    """ Test fn initialization without config file """
     fn = frost_number.FrostnumberMethod()
-    fn.initialize_frostnumber_component()
+    fn.initialize()
 
 def test_end_year_before_start_year_error():
-    """ Test fn initialization from config file """
+    """ Test end_year before start_year """
     fn = frost_number.FrostnumberMethod()
+    fn.initialize()
     print("fn.start_year: %s" % str(fn.start_year))
     print("fn.end_year: %s" % str(fn.end_year))
     fn.start_year = 2000
@@ -41,11 +43,11 @@ def test_end_year_before_start_year_error():
     fn.initialize_frostnumber_component()
     assert_equal(fn.start_year, fn.end_year)
 
-def test_can_initialize_frostnumber_method_from_file():
-    """ Test fn initialization from config file """
+def test_can_initialize_frostnumber_method_from_scalar_file():
+    """ Test fn initialization from config file (scalar) """
     fn = frost_number.FrostnumberMethod()
     cfg_file = os.path.join(examples_directory,
-                            'Fairbanks_frostnumber_method.cfg')
+                            'Frostnumber_example_scalar.cfg')
     fn.initialize(cfg_file=cfg_file)
     files_to_remove.append(fn.fn_out_filename)
 
@@ -53,7 +55,38 @@ def test_frostnumber_method_has_date_info():
     """ Test that fn has time values """
     fn = frost_number.FrostnumberMethod()
     cfg_file = os.path.join(examples_directory,
-                            'Fairbanks_frostnumber_method.cfg')
+                            'Frostnumber_example_scalar.cfg')
     fn.initialize(cfg_file=cfg_file)
     assert_greater_equal(fn.year, 0)
     assert_equal(fn.year, fn.start_year)
+
+def test_can_initialize_frostnumber_method_from_timeseries_file():
+    """ Test fn initialization from config file (time series) """
+    fn = frost_number.FrostnumberMethod()
+    cfg_file = os.path.join(examples_directory,
+                            'Frostnumber_example_timeseries.cfg')
+    fn.initialize(cfg_file=cfg_file)
+    files_to_remove.append(fn.fn_out_filename)
+
+def test_frostnumber_method_calculates_fn():
+    """ Test fn gets calculated """
+    fn = frost_number.FrostnumberMethod()
+    fn.initialize()
+    assert_almost_equal(fn.air_frost_number, 0.63267, places=3)
+
+def test_frostnumber_method_cant_update_scalar():
+    """ Test fn update() fails with scalar """
+    fn = frost_number.FrostnumberMethod()
+    fn.initialize()
+    assert_raises(ValueError, fn.update)
+
+def test_frostnumber_method_updates():
+    """ Test fn update() """
+    fn = frost_number.FrostnumberMethod()
+    cfg_file = os.path.join(examples_directory,
+                            'Frostnumber_example_timeseries.cfg')
+    fn.initialize(cfg_file=cfg_file)
+    fn.update()
+    assert_equal(fn.year, 2001)
+    assert_almost_equal(fn.air_frost_number, 0.5, places=3)
+

@@ -28,13 +28,12 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 from .. import examples_directory
-from nose.tools import assert_greater_equal
+from nose.tools import assert_greater_equal, assert_true, assert_equal
 
 
 class FrostnumberMethod(perma_base.PermafrostComponent):
     """ Provides 1D Frostnumber component """
     def __init__(self):
-        # These are set in open_input_files
         self.air_frost_number = -99.0
         self.surface_frost_number = -99.0
         self.stefan_frost_number = -99.0
@@ -115,8 +114,54 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
     def initialize(self, cfg_file=None):
         """ Set starting values for frost number """
-        self.initialize_from_config_file(cfg_file=cfg_file)
+        if cfg_file is not None:
+            self.initialize_from_config_file(cfg_file)
+        else:
+            # Default configuration (one value)
+            self.start_year = 2000
+            self.end_year = 2000
+            self.T_air_min_type = 'scalar'
+            self.T_air_max_type = 'scalar'
+            self.T_air_min = np.array([-20.0], dtype=np.float32)
+            self.T_air_max = np.array([10.0], dtype=np.float32)
+            self.fn_out_filename = "default_fn_config_outfile.dat"
+
         self.initialize_frostnumber_component()
+
+    def initialize_from_config_file(self, cfg_file):
+        """ Use oldstyle configuration file format """
+        self._configuration = self.get_config_from_oldstyle_file(cfg_file)
+
+        # Easy configuration values, simply passed
+        self.start_year = self._configuration['start_year']
+        self.end_year = self._configuration['end_year']
+        self.fn_out_filename = self._configuration['fn_out_filename']
+
+        # These don't need to be used after this routine
+        T_air_min_type = self._configuration['T_air_min_type']
+        T_air_max_type = self._configuration['T_air_max_type']
+
+        if self.start_year == self.end_year:
+            # Only one year specified, so inputs should be scalar
+            assert_equal(T_air_min_type.lower(), 'scalar')
+            assert_equal(T_air_max_type.lower(), 'scalar')
+            self.T_air_min = np.array([self._configuration['T_air_min']],
+                                 dtype=np.float32)
+            self.T_air_max = np.array([self._configuration['T_air_max']],
+                                 dtype=np.float32)
+        else:
+            # Several years specified, should be timesteps
+            fname = os.path.join(examples_directory,
+                                 self._configuration['T_air_min'])
+            assert_true(os.path.isfile(fname))
+            Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
+            self.T_air_min = np.array(Tvalues, dtype=np.float32)
+
+            fname = os.path.join(examples_directory,
+                                 self._configuration['T_air_max'])
+            assert_true(os.path.isfile(fname))
+            Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
+            self.T_air_max = np.array(Tvalues, dtype=np.float32)
 
     def initialize_frostnumber_component(self):
         """ Set the starting values for the frostnumber component """
@@ -190,8 +235,8 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         """
 
         # In the first test case, we used T_air_max and T_air_min
-        T_cold = self.T_air_min
-        T_hot = self.T_air_max
+        T_cold = self.T_air_min[int(self.year - self.start_year)]
+        T_hot = self.T_air_max[int(self.year - self.start_year)]
 
         assert_greater_equal(T_hot, T_cold)
         T_avg = (T_hot + T_cold) / 2.0
@@ -214,29 +259,6 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             L_summer = 365.0
             T_average = (T_hot + T_cold) / 2.0
             T_amplitude = (T_hot - T_cold) / 2.0
-
-            """ this section shows how to read a series of temperatures
-        elif (self.T_air_type != 'Scalar'):
-            #wk = np.loadtxt('examples/temp_copy.txt', skiprows=1,unpack=False)
-            temperature_filename = self.permafrost_dir +\
-                "permamodel/examples/temp_copy.txt"
-            wk = np.loadtxt(temperature_filename, skiprows=1,unpack=False)
-            t_month = wk[:,0]
-            T_month = wk[:,1]
-            Th=max(T_month)
-            Tc=min(T_month)
-            T=(Th+Tc)/2                                      #(eqn. 2.1)
-            A=(Th-Tc)/2                                      #(eqn. 2.2)
-            Beta=np.arccos(-T/A)                             #(eqn. 2.3)
-            Ts=T+A*np.sin(Beta/Beta)                         #(eqn. 2.4)
-            Tw=T-A*np.sin(Beta/(np.pi-Beta))                 #(eqn. 2.5)
-            L_summer=365*(Beta/np.pi)                        #(eqn. 2.6)
-            L_winter = 365-L_summer                          #(eqn. 2.7)
-            print('winter length:',Lw,'summer length:',Ls)
-            ddt = Ts*L_summer                                #(eqn. 2.8)
-            ddf = -Tw*L_winter                               #(eqn. 2.9)
-            print Th,Tc
-        """
         else:
             # Assume cosine fit for temp series
             T_average = (T_hot + T_cold) / 2.0
@@ -277,3 +299,67 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             for year in sorted(self.output.keys()):
                 f_out.write("Year: %d  output=%s\n" %
                             (year, self.output[year]))
+
+    def write_output_to_file2(self):
+        """ Part of finalize, write the output to file(s) """
+        # Write the output to a file
+        with open(self.fn_out_filename, 'w') as f_out:
+            for year in sorted(self.output.keys()):
+                f_out.write("Year: %d  output=%s\n" %
+                            (year, self.output[year]))
+
+    def get_config_from_oldstyle_file(self, cfg_filename):
+        """ Modified from that in _Geo code """
+        cfg_struct = {}
+        try:
+            with open(cfg_filename, 'r') as cfg_file:
+                # this was originally modeled after read_config_file()
+                # in BMI_base.py as modified for cruAKtemp.py
+                while True:
+                    # Read lines from config file until no more remain
+                    line = cfg_file.readline()
+                    if line == "":
+                        break
+
+                    # Comments start with '#'
+                    COMMENT = (line[0] == '#')
+
+                    words = line.split('|')
+                    if (len(words) ==4) and (not COMMENT):
+                        var_name = words[0].strip()
+                        value = words[1].strip()
+                        var_type = words[2].strip()
+
+                        # Process the variables based on variable name
+                        if var_name[-4:] == 'date':
+                            # date variables end with "_date"
+                            cfg_struct[var_name] = \
+                                datetime.datetime.strptime(
+                                    value, "%Y-%m-%d").date()
+                                #datetime.datetime.strptime(value, "%Y-%m-%d")
+                        elif var_type == 'int':
+                            # Convert integers to int
+                            cfg_struct[var_name] = int(value)
+                        elif var_type == 'float':
+                            # Convert integers to float
+                            cfg_struct[var_name] = float(value)
+                        else:
+                            # Everything else is just passed as a string
+                            assert_equal(var_type, 'string')
+                            cfg_struct[var_name] = value
+
+        except:
+            print("\nError opening configuration file in\
+                  get_config_from_oldstyle_file()")
+            raise
+
+        return cfg_struct
+
+    def update(self):
+        """ Move to the next timestep and update calculations """
+        self.year += self.dt
+        if self.year <= self.end_year:
+            self.calculate_frost_numbers()
+        else:
+            raise ValueError("Year is past last year")
+
