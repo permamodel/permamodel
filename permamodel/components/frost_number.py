@@ -47,6 +47,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.year = -1
         self.start_year = -1
         self.end_year = -1
+        self.dt = 1
         self.output = {}
         self.T_average = -99.0
         self.T_amplitude = -99.0

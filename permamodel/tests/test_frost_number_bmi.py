@@ -50,7 +50,7 @@ def test_frost_number_has_initialize():
     fn.initialize(cfg_file=onesite_oneyear_filename)
 
 def test_have_output_var_names():
-    fn = bmi_frost_number.BmiFrostnumberMethod
+    fn = bmi_frost_number.BmiFrostnumberMethod()
     assert(fn._output_var_names != None)
 
 def test_frost_number_initialize_sets_year():

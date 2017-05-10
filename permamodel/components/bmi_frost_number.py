@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""  Frost Number by Nelson and Outcalt 1983. DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363
+"""  Frost Number by Nelson and Outcalt 1983.
+DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363
 
 *The MIT License (MIT)*
 Copyright (c) 2016 permamodel
@@ -21,226 +22,129 @@ SOFTWARE.
 *
 
 """
+from __future__ import print_function
 
 import numpy as np
-from permamodel.utils import model_input
 from permamodel.components import perma_base
 from permamodel.components import frost_number
-from permamodel.components.perma_base import *
-from .. import examples_directory
-import os
 
-"""
-class FrostnumberMethod( frost_number.BmiFrostnumberMethod ):
-    _thisname = 'this name'
-"""
-
-class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
-
-    """ Implement the Nelson-Outcalt Frost numbers """
-
-    # Set up the name of this permafrost module
-    _name = 'Frost number module'
-
-    """ Note: all of these are defined below instead!
-    # Indicate the CSDMS standard names of input and output variables
-    _input_var_names = ('land_surface_air__temperature',
-                        'land_surface__latitude',
-                        'land_surface__longitude',
-                       )
-                       # other standard names that might apply?
-                       # land_surface__temperature
-                       # model__initial_time_step
-                       # model__max_allowed_time_step
-                       # model__min_allowed_time_step
-                       # model__run_time
-                       # model__spinup_time
-                       # model__start_time
-                       # model__stop_time
-                       # model__time
-                       # model__time_step
-                       # model__time_step_count
-    _output_var_names = ('frost_number_air',
-                         'frost_number_surface',
-                         'frost_number_stefan',
-                        )
-                        # other standard names that might apply?
-                        # soil_permafrost__thickness
-                        # soil_permafrost_top__depth
-                        # soil_permafrost_bottom__depth
-    """
-
-    #-------------------------------------------------------------------
-    _att_map = {
-    # NOTE: this will change in the future
-        'model_name':         'PermaModel_frostnumber_method',
-        'version':            '0.1',
-        'author_name':        'J. Scott Stewart and Elchin Jafarov',
-        'grid_type':          'none',
-        'time_step_type':     'fixed',
-        'step_method':        'explicit',
-        #-------------------------------------------------------------
-        'comp_name':          'frostnumber',
-        'model_family':       'PermaModel',
-        'cfg_extension':      '_frostnumber_model.cfg',
-        'cmt_var_prefix':     '/input/',
-        'gui_yaml_file':      '/input/frostnumber_model.yaml',
-        'time_units':         'years' }
-
-    # This used to be [...] instead of (...)
-    _input_var_names = (
-        #'latitude',
-        #'longitude',
-        'atmosphere_bottom_air__temperature_min',
-        'atmosphere_bottom_air__temperature_max',
-        'datetime__start',
-        'datetime__end')
-
-    _output_var_names = (
-        'frostnumber__air',            # Air Frost number
-        'frostnumber__surface',        # Surface Frost number
-        'frostnumber__stefan' )        # Stefan Frost number
-
-    _var_name_map = {
-        # These are the corresponding CSDMS standard names
-        # NOTE: we need to look up for the corresponding standard names
-        #'latitude':                                  'lat',
-        #'longitude':                                 'lon',
-        'atmosphere_bottom_air__temperature_min':    'T_air_min',
-        'atmosphere_bottom_air__temperature_max':    'T_air_max',
-        'datetime__start':                           'start_year',
-        'datetime__end':                             'end_year',
-        'frostnumber__air':                          'air_frost_number',
-        'frostnumber__surface':                      'surface_frost_number',
-        'frostnumber__stefan':                       'stefan_frost_number'}
-
-
-    _var_units_map = {
-        # These are the links to the model's variables' units
-        #'latitude':                                           'deg',
-        #'longitude':                                          'deg',
-        'atmosphere_bottom_air__temperature_min':             'deg_C',
-        'atmosphere_bottom_air__temperature_max':             'deg_C',
-        'datetime__start':                                    'year',
-        'datetime__end':                                      'year',
-        'frostnumber__air':                                   '1',
-        'frostnumber__surface':                               '1',
-        'frostnumber__stefan':                                '1' }
-
-    #-------------------------------------------------------------------
+class BmiFrostnumberMethod(perma_base.PermafrostComponent):
+    """ Implement BMI interface to the Nelson-Outcalt Frost number code """
     def __init__(self):
+        """ This overwrites __init__() method of PermafrostComponent """
+        self._name = "Permamodel Frostnumber Component"
         self._model = None
         self._values = {}
         self._var_units = {}
         self._grids = {}
         self._grid_type = {}
 
+        self._att_map = {
+            'model_name':         'PermaModel_frostnumber_method',
+            'version':            '0.1',
+            'author_name':        'J. Scott Stewart and Elchin Jafarov',
+            'grid_type':          'none',
+            'time_step_type':     'fixed',
+            'step_method':        'explicit',
+            #-------------------------------------------------------------
+            'comp_name':          'frostnumber',
+            'model_family':       'PermaModel',
+            'cfg_extension':      '_frostnumber_model.cfg',
+            'cmt_var_prefix':     '/input/',
+            'gui_yaml_file':      '/input/frostnumber_model.yaml',
+            'time_units':         'years'}
+
+        self._input_var_names = (
+            'atmosphere_bottom_air__temperature',
+            )
+
+        self._output_var_names = (
+            'frostnumber__air',            # Air Frost number
+            'frostnumber__surface',        # Surface Frost number
+            'frostnumber__stefan')        # Stefan Frost number
+
+        self._var_name_map = {
+            'atmosphere_bottom_air__temperature':  'T_air_min',
+            'frostnumber__air':                    'air_frost_number',
+            'frostnumber__surface':                'surface_frost_number',
+            'frostnumber__stefan':                 'stefan_frost_number'}
+
+        self._var_units_map = {
+            'atmosphere_bottom_air__temperature':   'deg_C',
+            'frostnumber__air':                     '1',
+            'frostnumber__surface':                 '1',
+            'frostnumber__stefan':                  '1'}
+
     def initialize(self, cfg_file=None):
+        """ this overwrites initialize() in PermafrostComponent """
         self._model = frost_number.FrostnumberMethod()
 
         self._model.initialize_from_config_file(cfg_file=cfg_file)
         self._model.initialize_frostnumber_component()
 
-        # Set the name of this component
-        self._name = "Permamodel Frostnumber Component"
-
         # Verify that all input and output variable names are in the
         # variable name and the units map
         for varname in self._input_var_names:
-            assert(varname in self._var_name_map)
-            assert(varname in self._var_units_map)
-            #print("Input var %s is in the name map and the units map"\
-            #      % varname)
+            assert varname in self._var_name_map
+            assert varname in self._var_units_map
         for varname in self._output_var_names:
-            assert(varname in self._var_name_map)
-            assert(varname in self._var_units_map)
-            #print("Output var %s is in the name map and the units map"\
-            #      % varname)
+            assert varname in self._var_name_map
+            assert varname in self._var_units_map
 
         # Set the Frost Number grids, based on input and output variables
-        #print("Number of input variables: %d" % len(self._input_var_names))
-        #print("Number of output variables: %d" % len(self._output_var_names))
-
         # Set the names and types of the grids
-        # Note: A single value is a uniform rectilinear grid of shape (1)
-        #       and size 1
         gridnumber = 0
         for varname in self._input_var_names:
             self._grids[gridnumber] = varname
-            #self._grid_type[gridnumber] = 'uniform_rectilinear'
             self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
         for varname in self._output_var_names:
             self._grids[gridnumber] = varname
-            #self._grid_type[gridnumber] = 'uniform_rectilinear'
             self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
 
         # Set the internal (frost number) variables that correspond
         # to the input and output variable names
         # Note: since we used Topoflow's _var_name_map for this, it is that
-        self._values = _values = {
-        # These are the links to the model's variables and
-        # should be consistent with _var_name_map
-            #'latitude':                                  self._model.lat,
-            #'longitude':                                 self._model.lon,
-            'atmosphere_bottom_air__temperature_min':    self._model.T_air_min,
-            'atmosphere_bottom_air__temperature_max':    self._model.T_air_max,
-            'datetime__start':          self._model.start_year,
-            'datetime__end':            self._model.end_year,
+        self._values = {
+            # These are the links to the model's variables and
+            # should be consistent with _var_name_map
+            'atmosphere_bottom_air__temperature':    self._model.T_air,
             'frostnumber__air':         self._model.air_frost_number,
             'frostnumber__surface':     self._model.surface_frost_number,
             'frostnumber__stefan':      self._model.stefan_frost_number}
 
-        # initialize() tasks complete.  Update status.
-        self.status = 'initialized'
-        #print(self._model)
-
     def get_attribute(self, att_name):
-
         try:
-            return self._att_map[ att_name.lower() ]
-        except:
-            print '###################################################'
-            print ' ERROR: Could not find attribute: ' + att_name
-            print '###################################################'
-            print ' '
+            return self._att_map[att_name.lower()]
+        except ValueError:
+            print('###################################################')
+            print(' ERROR: Could not find attribute: %s' % att_name)
+            print('###################################################')
+            print(' ')
 
-    #   get_attribute()
-    #-------------------------------------------------------------------
     def get_input_var_names(self):
-
         #--------------------------------------------------------
         # Note: These are currently variables needed from other
         #       components vs. those read from files or GUI.
         #--------------------------------------------------------
         return self._input_var_names
 
-    #   get_input_var_names()
-    #-------------------------------------------------------------------
     def get_output_var_names(self):
 
         return self._output_var_names
 
-    #   get_output_var_names()
-    #-------------------------------------------------------------------
     def get_var_name(self, long_var_name):
 
-        return self._var_name_map[ long_var_name ]
+        return self._var_name_map[long_var_name]
 
-    #   get_var_name()
-    #-------------------------------------------------------------------
     def get_var_units(self, long_var_name):
 
-        return self._var_units_map[ long_var_name ]
-
-    #   get_var_units()
-    #-------------------------------------------------------------------
+        return self._var_units_map[long_var_name]
 
     def update(self):
-        # Ensure that we've already initialized the run
-        assert(self._model.status == 'initialized')
-
+        """ This overwrites update() in Permafrost component
+            and has different number of arguments """
         # Calculate the new frost number values
         self._model.calculate_frost_numbers()
         self._values['frostnumber__air'] = self._model.air_frost_number
@@ -252,9 +156,8 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         self._model.read_input_files()
 
     def update_frac(self, time_fraction):
+        """ This is for BMI compliance """
         # Only increment the time by a partial time step
-        # Ensure that we've already initialized the run
-        assert(self._model.status == 'initialized')
 
         # Determine which year the model is currently in
         current_model_year = int(self._model.year)
@@ -275,6 +178,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             self._values['frostnumber__air'] = self._model.air_frost_number
 
     def update_until(self, stop_year):
+        """ BMI-required, run until a specified time """
         # Ensure that stop_year is at least the current year
         if stop_year < self._model.year:
             print("Warning: update_until year is less than current year")
@@ -284,7 +188,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         if stop_year > self._model.end_year:
             print("Warning: update_until year was greater than end_year")
             print("  setting stop_year to end_year")
-            stop_year = self.end_year
+            stop_year = self._model.end_year
 
         # Implement the loop to update until stop_year
         year = self._model.year
@@ -293,10 +197,8 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
             year = self._model.year
 
     def finalize(self):
+        """ BMI-required, wrap up all things including writing output """
         SILENT = True
-
-        # Finish with the run
-        self._model.status = 'finalizing'  # (OpenMI)
 
         # Close the input files
         self._model.close_input_files()   # Close any input files
@@ -307,33 +209,31 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         # Close the output files
         self._model.close_output_files()
 
-        # Done finalizing  
-        self._model.status = 'finalized'  # (OpenMI)
-
         # Print final report, as desired
         if not SILENT:
             self._model.print_final_report(\
                     comp_name='Permamodel FrostNumber component')
 
     def get_start_time(self):
+        """ BMI-required although all WMT models start at time=0 """
         return 0.0
 
     def get_current_time(self):
+        """ Number of timesteps (years) since start of model run """
         return self._model.year - self._model.start_year
 
     def get_end_time(self):
+        """ Number of timestesp (years) so that last year is included """
         return self._model.end_year - self._model.start_year + 1.0
 
-    # ----------------------------------
-    # Functions added to pass bmi-tester
-    # ----------------------------------
     def get_grid_type(self, grid_number):
+        """ BMI: inquire about the type of this grid """
         return self._grid_type[grid_number]
 
     def get_time_step(self):
+        """ BMI: return the time step value (years) """
         return self._model.dt
 
-    # Note: get_value_ref() copied from bmi_heat.py
     def get_value_ref(self, var_name):
         """Reference to values.
 
@@ -350,18 +250,23 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
+        """ BMI: allow external set-access to model variable """
         self._values[var_name] = new_var_values
 
     def set_value_at_indices(self, var_name, new_var_values, indices):
+        """ BMI: allow external set-access to model array variable """
         self.get_value_ref(var_name).flat[indices] = new_var_values
 
     def get_var_itemsize(self, var_name):
+        """ BMI: determine how many bytes a variable uses """
         return np.asarray(self.get_value_ref(var_name)).flatten()[0].nbytes
 
     def get_value_at_indices(self, var_name, indices):
+        """ BMI: allow external get-access to model array variable """
         return self.get_value_ref(var_name).take(indices)
 
     def get_var_nbytes(self, var_name):
+        """ BMI: number of bytes of a variable """
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
     def get_value(self, var_name):
@@ -393,7 +298,6 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         #   have a shape
         return np.asarray(self.get_value_ref(var_name))
 
-
     def get_var_type(self, var_name):
         """Data type of variable.
 
@@ -410,6 +314,7 @@ class BmiFrostnumberMethod( perma_base.PermafrostComponent ):
         return str(self.get_value_ref(var_name).dtype)
 
     def get_component_name(self):
+        """ BMI: provide this component's name """
         return self._name
 
     # Copied from bmi_heat.py
