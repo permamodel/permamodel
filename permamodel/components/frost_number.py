@@ -90,28 +90,6 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         if instring == "":
             close()
 
-    def open_input_files(self):
-        """ Overrides open_input_files() from perma_base """
-        self.T_air_min_file = os.path.join(examples_directory,
-                                           'fn_t_air_min.dat')
-        self.T_air_min_unit = open(self.T_air_min_file, "r")
-
-        self.T_air_max_file = os.path.join(examples_directory,
-                                           'fn_t_air_max.dat')
-        self.T_air_max_unit = open(self.T_air_max_file, "r")
-
-    def read_input_files(self):
-        """ Overrides read_input_files() from perma_base """
-        T_air_min = model_input.read_next_modified(self.T_air_min_unit,
-                                                   self.T_air_min_type)
-        if T_air_min is not None:
-            self.T_air_min = T_air_min
-
-        T_air_max = model_input.read_next_modified(self.T_air_max_unit,
-                                                   self.T_air_max_type)
-        if T_air_max is not None:
-            self.T_air_max = T_air_max
-
     def initialize(self, cfg_file=None):
         """ Set starting values for frost number """
         if cfg_file is not None:
