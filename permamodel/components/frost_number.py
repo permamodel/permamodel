@@ -61,6 +61,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.Zfplus = -99.0
         self.Z_tot = -99.0
         self.stefan_number = -99.0
+        self.fn_out_filename = ""
 
         # Not sure why these aren't set elsewhere
         self.DEBUG = True

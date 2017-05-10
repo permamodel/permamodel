@@ -78,6 +78,8 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
     def initialize(self, cfg_file=None):
         """ this overwrites initialize() in PermafrostComponent """
         self._model = frost_number.FrostnumberMethod()
+        # This allows testing to not use protected access to _model
+        self.model = self._model
 
         self._model.initialize_from_config_file(cfg_file=cfg_file)
         self._model.initialize_frostnumber_component()
