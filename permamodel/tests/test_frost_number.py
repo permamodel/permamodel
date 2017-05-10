@@ -8,7 +8,8 @@ import os
 from permamodel.components import frost_number
 from .. import examples_directory
 from nose.tools import (assert_equal, assert_greater_equal,
-                        assert_almost_equal, assert_raises)
+                        assert_almost_equal, assert_raises,
+                        assert_true)
 
 # List of files to be removed after testing is complete
 # use files_to_remove.append(<filename>) to add to it
@@ -90,3 +91,13 @@ def test_frostnumber_method_updates():
     assert_equal(fn.year, 2001)
     assert_almost_equal(fn.air_frost_number, 0.5, places=3)
 
+def test_frostnumber_generates_output():
+    """ Test fn generates output file """
+    fn = frost_number.FrostnumberMethod()
+    cfg_file = os.path.join(examples_directory,
+                            'Frostnumber_example_timeseries.cfg')
+    fn.initialize(cfg_file=cfg_file)
+    fn.update()
+    fn.write_output_to_file()
+    assert_true(os.path.isfile(fn.fn_out_filename))
+    files_to_remove.append(fn.fn_out_filename)
