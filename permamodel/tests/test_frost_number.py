@@ -27,13 +27,15 @@ def teardown_module():
 # Tests that input data is being read correctly
 # ---------------------------------------------------
 def test_can_initialize_frostnumber_method_from_file():
+    """ Test fn initialization from config file """
     fn = bmi_frost_number.BmiFrostnumberMethod()
     cfg_file = os.path.join(examples_directory,
                             'Fairbanks_frostnumber_method.cfg')
     fn.initialize(cfg_file=cfg_file)
     files_to_remove.append(fn._model.fn_out_filename)
 
-def test_frostnumber_method_has_date_and_location():
+def test_frostnumber_method_has_date_info():
+    """ Test that fn has time values """
     fn = bmi_frost_number.BmiFrostnumberMethod()
     cfg_file = os.path.join(examples_directory,
                             'Fairbanks_frostnumber_method.cfg')
