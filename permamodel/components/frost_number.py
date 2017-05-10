@@ -27,7 +27,7 @@ import os
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
-from .. import examples_directory
+from permamodel import examples_directory
 from nose.tools import assert_greater_equal, assert_true, assert_equal
 
 
@@ -300,14 +300,6 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
                 f_out.write("Year: %d  output=%s\n" %
                             (year, self.output[year]))
 
-    def write_output_to_file2(self):
-        """ Part of finalize, write the output to file(s) """
-        # Write the output to a file
-        with open(self.fn_out_filename, 'w') as f_out:
-            for year in sorted(self.output.keys()):
-                f_out.write("Year: %d  output=%s\n" %
-                            (year, self.output[year]))
-
     def get_config_from_oldstyle_file(self, cfg_filename):
         """ Modified from that in _Geo code """
         cfg_struct = {}
@@ -363,3 +355,11 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         else:
             raise ValueError("Year is past last year")
 
+if __name__ == "__main__":
+    # Run the code
+    fn = FrostnumberMethod()
+    fn.initialize(cfg_file='../examples/Frostnumber_example_timeseries.cfg')
+    fn.update()
+    fn.update()
+    fn.update()
+    fn.write_output_to_file()

@@ -14,11 +14,13 @@ from nose.tools import (assert_is_instance,
 # Set the file names for the example cfg files
 onesite_oneyear_filename = \
         os.path.join(examples_directory,
-                     'Frostnumber_example_singlesite_singleyear.cfg')
+                     'Frostnumber_example_scalar.cfg')
+        #            'Frostnumber_example_singlesite_singleyear.cfg')
         #'./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg'
 onesite_multiyear_filename = \
         os.path.join(examples_directory,
-                     'Frostnumber_example_singlesite_multiyear.cfg')
+                     'Frostnumber_example_timeseries.cfg')
+        #            'Frostnumber_example_singlesite_multiyear.cfg')
         #'./permamodel/examples/Frostnumber_example_singlesite_multiyear.cfg'
 
 # List of files to be removed after testing is complete

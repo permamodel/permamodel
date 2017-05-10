@@ -28,6 +28,7 @@ import numpy as np
 from permamodel.components import perma_base
 from permamodel.components import frost_number
 
+
 class BmiFrostnumberMethod(perma_base.PermafrostComponent):
     """ Implement BMI interface to the Nelson-Outcalt Frost number code """
     def __init__(self):
@@ -41,7 +42,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         self._grid_type = {}
 
         self._att_map = {
-            'model_name':         'PermaModel_frostnumber_method',
+            'model_name': 'PermaModel_frostnumber_method',
             'version':            '0.1',
             'author_name':        'J. Scott Stewart and Elchin Jafarov',
             'grid_type':          'none',
@@ -149,14 +150,8 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         """ This overwrites update() in Permafrost component
             and has different number of arguments """
         # Calculate the new frost number values
-        self._model.calculate_frost_numbers()
+        self._model.update()
         self._values['frostnumber__air'] = self._model.air_frost_number
-
-        # Update the time
-        self._model.year += self._model.dt
-
-        # Get new input values
-        self._model.read_input_files()
 
     def update_frac(self, time_fraction):
         """ This is for BMI compliance """
@@ -201,14 +196,8 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
 
     def finalize(self):
         """ BMI-required, wrap up all things including writing output """
-        # Close the input files
-        self._model.close_input_files()   # Close any input files
-
         # Write output last output
         self._model.write_output_to_file()
-
-        # Close the output files
-        self._model.close_output_files()
 
     def get_start_time(self):
         """ BMI-required although all WMT models start at time=0 """
@@ -216,11 +205,11 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
 
     def get_current_time(self):
         """ Number of timesteps (years) since start of model run """
-        return self._model.year - self._model.start_year
+        return float(self._model.year - self._model.start_year)
 
     def get_end_time(self):
         """ Number of timestesp (years) so that last year is included """
-        return self._model.end_year - self._model.start_year + 1.0
+        return float(self._model.end_year - self._model.start_year) + 1.0
 
     def get_grid_type(self, grid_number):
         """ BMI: inquire about the type of this grid """
