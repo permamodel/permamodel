@@ -37,6 +37,10 @@ def teardown_module():
 # ---------------------------------------------------
 # Tests that ensure we have bmi functionality
 # ---------------------------------------------------
+def test_can_initialize_bmi_frost_number_module():
+    fn = bmi_frost_number.BmiFrostnumberMethod
+    assert(True)
+
 def test_frost_number_has_initialize():
     # Can we call an initialize function?
     fn = bmi_frost_number.BmiFrostnumberMethod()
@@ -44,6 +48,10 @@ def test_frost_number_has_initialize():
     #fn.initialize(cfg_file='/home/scotts/permamodel/permamodel/examples/Fairbanks_frostnumber_method.cfg', SILENT=True)
     # With relative cfg filename
     fn.initialize(cfg_file=onesite_oneyear_filename)
+
+def test_have_output_var_names():
+    fn = bmi_frost_number.BmiFrostnumberMethod
+    assert(fn._output_var_names != None)
 
 def test_frost_number_initialize_sets_year():
     fn = bmi_frost_number.BmiFrostnumberMethod()

@@ -24,24 +24,6 @@ def teardown_module():
             os.remove(f)
 
 # ---------------------------------------------------
-# Tests that ensure we are reaching this testing file
-# ---------------------------------------------------
-def test_testing():
-    # This should pass as long as this routine is getting called
-    assert(True)
-
-# ---------------------------------------------------
-# Tests that the frost_number module is importing
-# ---------------------------------------------------
-def test_can_initialize_bmi_frost_number_module():
-    fn = bmi_frost_number.BmiFrostnumberMethod
-    assert(True)
-
-def test_have_output_var_names():
-    fn = bmi_frost_number.BmiFrostnumberMethod
-    assert(fn._output_var_names != None)
-
-# ---------------------------------------------------
 # Tests that input data is being read correctly
 # ---------------------------------------------------
 def test_can_initialize_frostnumber_method_from_file():
