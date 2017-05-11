@@ -310,6 +310,9 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
                         elif var_type == 'int':
                             # Convert integers to int
                             cfg_struct[var_name] = int(value)
+                        elif var_type == 'long':
+                            # Convert longs to int
+                            cfg_struct[var_name] = int(value)
                         elif var_type == 'float':
                             # Convert integers to float
                             cfg_struct[var_name] = float(value)
