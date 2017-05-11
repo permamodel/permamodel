@@ -129,13 +129,15 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
                                  dtype=np.float32)
         else:
             # Several years specified, should be timesteps
-            fname = os.path.join(examples_directory,
+            in_dir = os.path.realpath(self._configuration['in_directory'])
+
+            fname = os.path.join(in_dir,
                                  self._configuration['T_air_min'])
             assert_true(os.path.isfile(fname))
             Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
             self.T_air_min = np.array(Tvalues, dtype=np.float32)
 
-            fname = os.path.join(examples_directory,
+            fname = os.path.join(in_dir,
                                  self._configuration['T_air_max'])
             assert_true(os.path.isfile(fname))
             Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
