@@ -1,5 +1,6 @@
 bmi_paths:
   - .bmi/frost_number
+  - .bmi/frost_number_Geo
   - .bmi/ku
 
 build:

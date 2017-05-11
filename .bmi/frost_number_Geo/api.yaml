@@ -1,0 +1,6 @@
+name: FrostNumberGeoModel
+language: python
+
+package: permamodel.components.bmi_frost_number_Geo
+class: BmiFrostnumberGeoMethod
+initialize_args: "frostnumber_Geo_model.cfg"

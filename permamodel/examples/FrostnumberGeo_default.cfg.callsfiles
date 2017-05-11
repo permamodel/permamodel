@@ -1,0 +1,37 @@
+config_filename: FrostnumberGeo_default.cfg
+config_for_method: FrostnumberGeoMethod
+config_description: Default configuration for FrostnumberGeo
+run_description: north slope subset of downscaled cru-ncep temperature data
+#output_directory: EXAMPLES
+output_directory: 
+#output_filename: FrostnumberGeo_output_STARTDATE_ENDDATE_TIMESTEP.nc
+output_filename: FrostnumberGeo_output.nc
+#
+# The model grid is described in a separate configuration file
+grid_description_filename: grid_north_slope_lowres.cfg
+#
+# The duration of the model run is defined in a separate configuration file
+run_duration_filename: run_cru_test_decade.cfg
+#
+# Determine whether to specify input variables from files 
+# or whether input variables will be provided by WMT
+#
+# Input variables come from files
+input_var_source: Files
+temperature_config_filename: temperature_cru_alaska_lowres.cfg
+#precipitation_config_filename: precipitation_cru_alaska_lowres.cfg
+precipitation_config_filename: 
+soil_properties_config_filename: 
+#
+# Input variables come from WMT
+#input_var_source: WMT
+#calc_surface_frostnumber: False
+#calc_stefan_frostnumber: False
+# Input variables are determined by default (e.g. for testing)
+# input_var_source: Default
+#
+# Select the method of computing degree freezing and thawing days
+#degree_days_method: ObservedMinMax
+degree_days_method: MinJanMaxJul
+#degree_days_method: MonthlyAverages
+#degree_days_method: DailyValues
