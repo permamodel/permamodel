@@ -4,30 +4,117 @@
 
     Geo version
 """
+from __future__ import print_function
 
+import os
+import datetime
 import numpy as np
-import ast
-from permamodel.utils import model_input
+from netCDF4 import Dataset
+# import yaml  # Used if yaml-style imports are used instead of Topoflow-like
 from permamodel.components import perma_base
 from permamodel import examples_directory, data_directory
-import os
-import yaml
-from nose.tools import (assert_is_instance, assert_greater_equal,
-                        assert_less_equal, assert_almost_equal,
-                        assert_greater, assert_in, assert_true,
+from nose.tools import (assert_greater_equal,
+                        assert_true,
                         assert_equal)
-import datetime
-from netCDF4 import Dataset
 
 default_frostnumberGeo_config_filename = "FrostnumberGeo_Default.cfg"
 
-class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
+class FrostnumberGeoMethod(perma_base.PermafrostComponent):
     def __init__(self, cfgfile=None):
+        """ Initial definitions and assignments """
+        self._name = 'FrostNumberGeo'
+        self._configuration = {}
+
+        self._config_description = ""
+        self._run_description = ""
+
+        self._calc_surface_fn = False
+        self._calc_stefan_fn = False
+
+        self._using_WMT = False
+        self._using_Files = False
+        self._using_Default = False
+        self._using_ConfigVals = False
+
+        self._grid_description_filename = ""
+        self._run_duration_filename = ""
+        self._temperature_config_filename = ""
+        self._temperature_source_filename = ""
+        self._soil_properties_config_filename = ""
+        self._precipitation_config_filename = ""
+        self.output_filename = ""
+        self.output = {}
+
+        self._output_fid = -1
+        self._nc_time = datetime.date(1900, 1, 1)
+
+        self._temperature_first_date = datetime.date(1900, 1, 1)
+        self._temperature_last_date = datetime.date(1900, 1, 1)
+
+        self._grid_region = ""
+        self._grid_resolution = ""
+        self._grid_type = ""
+        self._grid_shape = ()
+        self._grid_i0 = -1
+        self._grid_j0 = -1
+        self._grid_i1 = -1
+        self._grid_j1 = -1
+        self._grid_iskip = -1
+        self._grid_jskip = -1
+        self._grid_xdim = -1
+        self._grid_ydim = -1
+
+        self._reference_date = datetime.date(1900, 1, 1)
+        self._start_date = datetime.date(1900, 1, 1)
+        self._end_date = datetime.date(1900, 1, 1)
+        self._timestep_duration = datetime.timedelta(days=365)
+
+        self._temperature_dates = []
+        self._temperature_datacube = []
+        self._precipitation_dates = []
+        self._precipitation_datacube = []
+        self._soilproperties_dates = []
+        self._soilproperties_datacube = []
+
+        self.T_air = []
+        self.T_air_min = np.zeros([1])
+        self.T_air_max = np.zeros([1])
+
+        self._temperature_current = np.zeros([1])
+        self.Precip = np.zeros([1])
+        self.SoilProperties = np.zeros([1])
+
+        self._dd_method = self.__init__
+        self.ddf = np.zeros([1])
+        self.ddt = np.zeros([1])
+        self.air_frost_number_Geo = np.zeros([1])
+        self.surface_frost_number_Geo = np.zeros([1])
+        self.stefan_frost_number_Geo = np.zeros([1])
+
+        self._nc_time = datetime.date(1900, 1, 1)
+        self._nc_reference_time = datetime.date(1900, 1, 1)
+        self._nc_last_time_index = 0
+        self._nc_x = np.zeros([1])
+        self._nc_y = np.zeros([1])
+
+        self._nc_afn = np.zeros([1])
+        self._nc_sfn = np.zeros([1])
+        self._nc_stfn = np.zeros([1])
+        self.surface_frost_number = np.float32(-1.0)
+        self.stefan_frost_number = np.float32(-1.0)
+
+        self._timestep_first = -1
+        self._timestep_last = -1
+        self._timestep_current = -1
+        self._date_current = datetime.date(1900, 1, 1)
+
+        self._temperature_dataset = np.zeros([1])
+
         # There is a default configuration file in the examples directory
         if cfgfile is None:
             self._config_filename = \
-                    os.path.join(examples_directory,
-                    default_frostnumberGeo_config_filename)
+                os.path.join(examples_directory,
+                             default_frostnumberGeo_config_filename)
         else:
             self._config_filename = cfgfile
         self.status = 'defined'
@@ -39,7 +126,6 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         if not SILENT:
             print("Initializing for FrostnumberGeoMethod")
 
-        self._name = 'FrostNumberGeo'
 
         # Read in the overall configuration from the configuration file
         assert_true(os.path.isfile(self._config_filename))
@@ -81,7 +167,8 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             if 'grid_description_filename' in self._configuration.keys():
                 self._grid_description_filename = \
                     os.path.join(examples_directory,
-                    self._configuration['grid_description_filename'])
+                                 self._configuration[
+                                     'grid_description_filename'])
                 grid_config = \
                     self.get_config_from_yaml_file(
                         self._grid_description_filename)
@@ -107,10 +194,12 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             # Either from a file or directly
             if 'run_duration_filename' in self._configuration.keys():
                 self._run_duration_filename = \
-                    os.path.join(examples_directory,
-                    self._configuration['run_duration_filename'])
+                    os.path.join(
+                        examples_directory,
+                        self._configuration['run_duration_filename'])
                 run_config = \
-                    self.get_config_from_yaml_file(self._run_duration_filename)
+                    self.get_config_from_yaml_file(
+                        self._run_duration_filename)
                 self._reference_date = run_config['model_reference_date']
                 self._start_date = run_config['model_start_date']
                 self._end_date = run_config['model_end_date']
@@ -127,37 +216,42 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                 (self._grid_ydim, self._grid_xdim) = self._grid_shape
             else:
                 raise ValueError("cannot handle grid of shape %s" %
-                                str(self._grid_shape))
+                                 str(self._grid_shape))
             self._grid_i1 = self._grid_i0 + self._grid_iskip * self._grid_xdim
             self._grid_j1 = self._grid_j0 + self._grid_jskip * self._grid_ydim
 
             # At a minimum, there must be temperature information
             if 'temperature_config_filename' in self._configuration.keys():
                 self._temperature_config_filename = \
-                    os.path.join(examples_directory,
-                    self._configuration['temperature_config_filename'])
+                    os.path.join(
+                        examples_directory,
+                        self._configuration['temperature_config_filename'])
                 assert_true(os.path.isfile(self._temperature_config_filename))
                 temperature_configuration = \
                         self.get_config_from_yaml_file(self._temperature_config_filename)
                 self._temperature_source_filename = \
-                        os.path.join(data_directory,
-                        temperature_configuration['temperature_source_filename'])
-                self._temperature_first_date= \
-                        temperature_configuration['dataset_first_date']
+                        os.path.join(
+                            data_directory,
+                            temperature_configuration[
+                                'temperature_source_filename'])
+                self._temperature_first_date = \
+                    temperature_configuration['dataset_first_date']
                 self._temperature_last_date = \
                         temperature_configuration['dataset_last_date']
             else:
                 self._temperature_source_filename = \
-                        os.path.join(data_directory,
-                        self._configuration['temperature_source_filename'])
-                self._temperature_first_date= \
-                        self._configuration['dataset_first_date']
+                        os.path.join(
+                            data_directory,
+                            self._configuration['temperature_source_filename'])
+                self._temperature_first_date = \
+                    self._configuration['dataset_first_date']
                 self._temperature_last_date = \
                         self._configuration['dataset_last_date']
 
             if self._configuration['precipitation_config_filename'] is not None:
                 self._precipitation_config_filename = \
-                        os.path.join(examples_directory,
+                    os.path.join(
+                        examples_directory,
                         self._configuration['precipitation_config_filename'])
                 assert_true(os.path.isfile(\
                     self._precipitation_config_filename))
@@ -170,9 +264,10 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                self._configuration['soil_properties_config_filename'] \
                     is not None:
                 self._soil_properties_config_filename = \
-                        os.path.join(examples_directory,
+                    os.path.join(
+                        examples_directory,
                         self._configuration['soil_properties_config_filename'])
-                assert_true(os.path.isfile(\
+                assert_true(os.path.isfile(
                     self._soil_properties_config_filename))
                 self._calc_stefan_fn = True
             else:
@@ -225,7 +320,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                 (self._grid_ydim, self._grid_xdim) = self._grid_shape
             else:
                 raise ValueError("cannot handle grid of shape %s" %
-                                str(self._grid_shape))
+                                 str(self._grid_shape))
 
             # Set the valid dates for which temperature is available
             self._temperature_first_date = \
@@ -321,13 +416,16 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
     def initialize_datacube(self, gridname, config):
         # Determine the number of lines for this grid
+        ngridlines = 0
+        thisdate = datetime.date(1900, 1, 1)  # This is a dummy init value
         exec("ngridlines = config['n_%s_grid_fields']" % gridname)
 
         # Create the datelist for this grid
         datelist = []
         for n in range(ngridlines):
             # This version converts a string to a datetime.date object
-            # exec("thisdate = datetime.datetime.strptime(config['%s_grid_date_%d' % (gridname, n)], '%Y-%m-%d').date()")
+            # exec("thisdate = datetime.datetime.strptime(
+            # config['%s_grid_date_%d' % (gridname, n)], '%Y-%m-%d').date()")
             exec("thisdate = config['%s_grid_date_%d' % (gridname, n)]")
             if isinstance(thisdate, str):
                 thisdate = self.datefrom(thisdate)
@@ -424,14 +522,14 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                 "Date %s is after last valid date (%s) in datacube" %
                 (thisdate, cubedates[-1]))
 
+        use_this_date = 0
         for date_okay, checkdate in enumerate(cubedates):
             if thisdate > checkdate:
-                pass
+                use_this_date = date_okay
             else:
                 break
 
-        date_okay -= 1
-        return datacube[date_okay, :]
+        return datacube[use_this_date, :]
 
 
     def initialize_output(self, outdirname, outfilename):
@@ -480,8 +578,8 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # Time dimension
         tdim = 0
         self._output_fid.createDimension("time", tdim)
-        self._nc_time = self._output_fid.createVariable('time', 'i',
-                                                        ('time',),zlib=True)
+        self._nc_time = \
+            self._output_fid.createVariable('time', 'i', ('time',), zlib=True)
         setattr(self._nc_time, 'time_long_name', 'time')
         setattr(self._nc_time, 'time_standard_name', 'time')
         setattr(self._nc_time, 'time_units', 'months since 1900-01-01 00:00:00')
@@ -494,7 +592,8 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         ### For now, the X and Y dimensions are just the indexes
         # X dimension
         self._output_fid.createDimension("x", self._grid_xdim)
-        self._nc_x = self._output_fid.createVariable('x', 'f', ('x',),zlib=True)
+        self._nc_x = \
+            self._output_fid.createVariable('x', 'f', ('x',), zlib=True)
         setattr(self._nc_x, 'x_long_name', 'projected x direction')
         setattr(self._nc_x, 'x_standard_name', 'x')
         setattr(self._nc_x, 'x_units', 'meters')
@@ -505,7 +604,8 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
         # Y dimension
         self._output_fid.createDimension("y", self._grid_ydim)
-        self._nc_y = self._output_fid.createVariable('y', 'f', ('y',),zlib=True)
+        self._nc_y = \
+            self._output_fid.createVariable('y', 'f', ('y',), zlib=True)
         setattr(self._nc_y, 'y_long_name', 'projected y direction')
         setattr(self._nc_y, 'y_standard_name', 'y')
         setattr(self._nc_y, 'y_units', 'meters')
@@ -516,9 +616,9 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
         ### Init grids with sizes
         # Allocate air frost number field
-        self._nc_afn= \
-                self._output_fid.createVariable('air_fn', 'f', ('time', 'y',
-                                                                'x'),zlib=True)
+        self._nc_afn = \
+            self._output_fid.createVariable(
+                'air_fn', 'f', ('time', 'y', 'x'), zlib=True)
         setattr(self._nc_afn, 'afn_long_name', 'Air Frost Number')
         setattr(self._nc_afn, 'afn_standard_name', 'Frostnumber_air')
         setattr(self._nc_afn, 'afn_units', 'none')
@@ -526,10 +626,9 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
         # Allocate surface frost number field, if computing it
         if self._calc_surface_fn:
-            self._nc_sfn= \
-                    self._output_fid.createVariable('surface_fn', 'f', ('time',
-                                                                        'y',
-                                                                        'x'),zlib=True)
+            self._nc_sfn = \
+                self._output_fid.createVariable(
+                    'surface_fn', 'f', ('time', 'y', 'x'), zlib=True)
             setattr(self._nc_sfn, 'sfn_long_name', 'Surface Frost Number')
             setattr(self._nc_sfn, 'sfn_standard_name', 'Frostnumber_surface')
             setattr(self._nc_sfn, 'sfn_units', 'none')
@@ -537,14 +636,13 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
         # Allocate Stefan frost number field, if computing it
         if self._calc_stefan_fn:
-            self._nc_stfn= \
-                    self._output_fid.createVariable(
-                        'stefan_fn', 'f', ('time', 'y', 'x'),zlib=True)
+            self._nc_stfn = \
+                self._output_fid.createVariable(
+                    'stefan_fn', 'f', ('time', 'y', 'x'), zlib=True)
             setattr(self._nc_stfn, 'stfn_long_name', 'Stefan Frost Number')
             setattr(self._nc_stfn, 'stfn_standard_name', 'Frostnumber_stefan')
             setattr(self._nc_stfn, 'stfn_units', 'none')
             setattr(self._nc_stfn, 'stfn__FillValue', '-99')
-
 
     def finalize(self):
         # Define this so we don't call the permamodel base class version
@@ -556,10 +654,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
     def check_whether_output_timestep(self, this_timestep):
         # Only output on the 15th of each month
         this_date = self.get_date_from_timestep(this_timestep)
-        if this_date.day == 15:
-            return True
-        else:
-            return False
+        return this_date.day == 15
 
     def add_to_output(self):
         do_add = self.check_whether_output_timestep(self._timestep_current)
@@ -633,8 +728,8 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # If the timestep is an integer number of days, this would be fine:
         #return (this_date-self._reference_date).days /\
         #    self._timestep_duration.days
-        return int(  (this_date-self._reference_date).total_seconds() / \
-                     (self._timestep_duration.total_seconds()       ) +0.5 )
+        return int((this_date-self._reference_date).total_seconds() / \
+                   (self._timestep_duration.total_seconds()) + 0.5)
 
     def initialize_input_vars_from_files(self):
         # If the model does not have its input variables set by an
@@ -676,7 +771,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             raise ValueError("Frostnumber must use either Files, ConfigVals \
                               or WMT to get input variables")
 
-    def get_temperature_field(self, t_date = None):
+    def get_temperature_field(self, t_date=None):
         # By default, return the temperature field at the date of the current
         # timestep
         if t_date is None:
@@ -748,7 +843,9 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
 
     def get_config_from_yaml_file(self, cfg_filename):
+        print("Ignoring %s" % cfg_filename)
         raise RuntimeError("config from YAML not currently supported")
+        """
         cfg_struct = None
         try:
             with open(cfg_filename, 'r') as cfg_file:
@@ -759,6 +856,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
             raise
 
         return cfg_struct
+        """
 
     def get_config_from_oldstyle_file(self, cfg_filename):
         cfg_struct = {}
@@ -777,7 +875,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
                     COMMENT = (line[0] == '#')
 
                     words = line.split('|')
-                    if (len(words) ==4) and (not COMMENT):
+                    if (len(words) == 4) and (not COMMENT):
                         var_name = words[0].strip()
                         value = words[1].strip()
                         var_type = words[2].strip()
@@ -848,9 +946,9 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # otherwise, use the specified year
         if year > 0:
             print("Year: %d  F_air=%5.3f  F_surface=%5.3f  F_stefan=%5.3f" %
-              (self.year, self.air_frost_number_Geo,
-               self.surface_frost_number_Geo,
-               self.stefan_frost_number_Geo))
+                  (year, self.air_frost_number_Geo,
+                   self.surface_frost_number_Geo,
+                   self.stefan_frost_number_Geo))
         else:
             for year in sorted(self.output.keys()):
                 print("Year: %d  output=%s" % (year, self.output[year]))
@@ -884,12 +982,11 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         #self.ddf[nan_locations] = np.nan
         #self.ddt[nan_locations] = np.nan
 
-
         # Try looping...
         for (j, i), maxvalue in np.ndenumerate(self.T_air_max):
             minvalue = self.T_air_min[j, i]
 
-            if minvalue==np.nan or maxvalue==np.nan:
+            if minvalue == np.nan or maxvalue == np.nan:
                 # Any non-numbers invalidate the dd calcs
                 self.ddf[j, i] = np.nan
                 self.ddt[j, i] = np.nan
@@ -921,14 +1018,16 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
     def compute_air_frost_number_Geo(self):
         # Calculating Reduced Air Frost Number (pages 280-281).
         # The reduced frost number is close 0 for long summers and close to 1 for long winters.
-        self.air_frost_number_Geo = np.sqrt(self.ddf) / ( np.sqrt( self.ddf) + np.sqrt( self.ddt) )
+        self.air_frost_number_Geo = np.sqrt(self.ddf) / \
+            (np.sqrt(self.ddf) + np.sqrt(self.ddt))
 
     #   update_air_frost_number_Geo()
     #-------------------------------------------------------------------
 
+    '''
     def update_snow_prop(self):
         # find indexes for which temp > 0 and make precip = 0
-        if (self.T_air_type != 'Scalar'): # if not should stop
+        if self.T_air_type != 'Scalar': # if not should stop
             #wk = np.loadtxt('examples/prec.txt', skiprows=1,unpack=False)
             precipitation_filename = self.permafrost_dir +\
                 "permamodel/examples/prec.txt"
@@ -944,7 +1043,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         # monthly temp is always below zero
         # i.e. it constantly snows over whole year
         # the point associated with glaciaer and needs to excluded
-            print 'snows constatly: stop!'
+            print('snows constatly: stop!')
 
         m=np.size(neg_temp_ind)
         pp=0.5; # assume only 50% of precip change to at the beg and end of the snow season
@@ -1051,7 +1150,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
         wf=0.4       # tipical for silty soils
         denominator=rho_d*wf*self.Lf
         self.Zfplus=np.sqrt(2*lambda_f*sec_per_day*np.abs(self.Twplus)*self.Lw/denominator)               #(eqn. 15)
-        print 'Zfplus=',self.Zfplus
+        print('Zfplus = %f' % self.Zfplus)
 
         # assuming 3 soil layers with thickness 0.25, 0.5 and 1.75 m
         # and thermal conductivities 0.08, 1.5, and 2.1
@@ -1082,6 +1181,7 @@ class FrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
     #   update_stefan_frost_number()
     #-------------------------------------------------------------------
+    '''
 
 if __name__ == "__main__":
     # Run the FrostnumberGeo model
