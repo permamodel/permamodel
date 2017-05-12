@@ -6,6 +6,7 @@ test_frost_number_bmi.py
 from permamodel.components import frost_number_Geo
 from permamodel.components import bmi_frost_number_Geo
 from permamodel.components import perma_base
+from dateutil.relativedelta import relativedelta
 import os
 import numpy as np
 from .. import examples_directory
@@ -73,7 +74,8 @@ def test_frost_number_update_increments_time():
     fng.update()
 
     assert_equal(fng._model._date_current,
-                 fng._model._start_date + fng._model._timestep_duration)
+                 fng._model._start_date + \
+                 relativedelta(years=fng._model._timestep_duration))
     fng.finalize()
 
 def test_frost_number_update_changes_air_frost_number():
@@ -92,6 +94,22 @@ def test_frost_number_update_changes_air_frost_number():
         pass
     fng.finalize()
 
+def test_frost_number_get_current_time_returns_scalar():
+    fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
+    fng.initialize()
+    current_time = fng.get_current_time()
+    assert_true(isinstance(current_time, float) \
+                or isinstance(current_time, int))
+    fng.finalize()
+
+def test_frost_number_get_end_time_returns_scalar():
+    fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
+    fng.initialize()
+    end_time = fng.get_end_time()
+    assert(isinstance(end_time, float) \
+           or isinstance(end_time, int))
+    fng.finalize()
+
 def test_frost_number_implements_update_until():
     fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
     fng.initialize()
@@ -101,16 +119,21 @@ def test_frost_number_implements_update_until():
 
     fng.finalize()
 
-def test_frost_number_get_current_time_returns_scalar_float():
+def test_FNGeo_computes_default_values():
     fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
     fng.initialize()
-    current_time = fng.get_current_time()
-    assert_true(isinstance(current_time, float))
-    fng.finalize()
-
-def  test_frost_number_get_end_time_returns_scalar_float():
-    fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
-    fng.initialize()
-    end_time = fng.get_end_time()
-    assert(isinstance(end_time, float))
+    for n in range(5):
+        if (fng._model.T_air_min[0, 0] + fng._model.T_air_max[0, 0]) == 0:
+            assert_equal(fng._values['frostnumber__air'][0, 0], 0.5)
+        if (fng._model.T_air_min[0, 0] <= 0.0) and \
+           (fng._model.T_air_max[0, 0] <= 0.0):
+            assert_equal(fng._values['frostnumber__air'][0, 0], 1.0)
+        if (fng._model.T_air_min[0, 0] > 0.0) and \
+           (fng._model.T_air_max[0, 0] > 0.0):
+            assert_equal(fng._values['frostnumber__air'][0, 0], 0.0)
+        #print("FNGeo frostnumber__air: %d" % n)
+        #print(fng._model.T_air_min)
+        #print(fng._model.T_air_max)
+        #print(fng._values['frostnumber__air'])
+        fng.update()
     fng.finalize()

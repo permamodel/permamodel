@@ -140,12 +140,11 @@ def test_Geo_frostnumber_can_compute_real_date_from_timestep():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod()
     fn_geo.initialize_frostnumberGeo_component()
 
-    # Timestep should be one day
-    assert_equal(fn_geo._timestep_duration, datetime.timedelta(days=1))
+    # Timestep should be one year
+    assert_equal(fn_geo._timestep_duration, 1)
 
     # Model reference date should have timestep of zero
-    assert_equal(fn_geo.get_timestep_from_date(fn_geo._reference_date),
-                 datetime.timedelta(days=0).days)
+    assert_equal(fn_geo.get_timestep_from_date(fn_geo._reference_date), 0)
 
     # Timestep of first date should be first timestep
     assert_equal(fn_geo._timestep_first,
@@ -215,7 +214,7 @@ def test_Geo_frostnumber_compute_array_of_degree_days():
         assert_true(np.all(np.isnan(fn_geo.air_frost_number_Geo)))
 
     # Test that we get real values
-    fn_geo.set_current_date_and_timestep_with_timestep(1000)
+    fn_geo.set_current_date_and_timestep_with_timestep(2)
     fn_geo.get_input_vars()
     assert_greater_equal(fn_geo._date_current, fn_geo._temperature_first_date)
     if fn_geo._dd_method == 'MinJanMaxJul':

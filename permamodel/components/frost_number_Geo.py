@@ -9,17 +9,19 @@ from __future__ import print_function
 import os
 import datetime
 import numpy as np
+from dateutil.relativedelta import relativedelta
 from netCDF4 import Dataset
 # import yaml  # Used if yaml-style imports are used instead of Topoflow-like
 from permamodel.components import perma_base
 from permamodel import examples_directory, data_directory
-from nose.tools import (assert_greater_equal,
+from nose.tools import (assert_greater_equal, assert_less_equal,
                         assert_true,
                         assert_equal)
 
 default_frostnumberGeo_config_filename = "FrostnumberGeo_Default.cfg"
 
 class FrostnumberGeoMethod(perma_base.PermafrostComponent):
+    # Note: the current version interprets timesteps in years
     def __init__(self, cfgfile=None):
         """ Initial definitions and assignments """
         self._name = 'FrostNumberGeo'
@@ -45,11 +47,16 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         self.output_filename = ""
         self.output = {}
 
-        self._output_fid = -1
-        self._nc_time = datetime.date(1900, 1, 1)
+        # For now, we are assuming year-timesteps with nominal date of
+        #   12/15/<year>
+        self.month = 12
+        self.day = 15
 
-        self._temperature_first_date = datetime.date(1900, 1, 1)
-        self._temperature_last_date = datetime.date(1900, 1, 1)
+        self._output_fid = -1
+        self._nc_time = datetime.date(1900, self.month, self.day)
+
+        self._temperature_first_date = datetime.date(1900, self.month, self.day)
+        self._temperature_last_date = datetime.date(1900, self.month, self.day)
 
         self._grid_region = ""
         self._grid_resolution = ""
@@ -64,10 +71,10 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         self._grid_xdim = -1
         self._grid_ydim = -1
 
-        self._reference_date = datetime.date(1900, 1, 1)
-        self._start_date = datetime.date(1900, 1, 1)
-        self._end_date = datetime.date(1900, 1, 1)
-        self._timestep_duration = datetime.timedelta(days=365)
+        self._reference_date = datetime.date(1900, self.month, self.day)
+        self._start_date = datetime.date(1900, self.month, self.day)
+        self._end_date = datetime.date(1900, self.month, self.day)
+        self._timestep_duration = -1
 
         self._temperature_dates = []
         self._temperature_datacube = []
@@ -91,8 +98,8 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         self.surface_frost_number_Geo = np.zeros([1])
         self.stefan_frost_number_Geo = np.zeros([1])
 
-        self._nc_time = datetime.date(1900, 1, 1)
-        self._nc_reference_time = datetime.date(1900, 1, 1)
+        self._nc_time = datetime.date(1900, self.month, self.day)
+        self._nc_reference_time = datetime.date(1900, self.month, self.day)
         self._nc_last_time_index = 0
         self._nc_x = np.zeros([1])
         self._nc_y = np.zeros([1])
@@ -106,7 +113,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         self._timestep_first = -1
         self._timestep_last = -1
         self._timestep_current = -1
-        self._date_current = datetime.date(1900, 1, 1)
+        self._date_current = datetime.date(1900, self.month, self.day)
 
         self._temperature_dataset = np.zeros([1])
 
@@ -411,7 +418,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
     def initialize_datacube(self, gridname, config):
         # Determine the number of lines for this grid
         ngridlines = 0
-        thisdate = datetime.date(1900, 1, 1)  # This is a dummy init value
+        thisdate = datetime.date(1900, self.month, self.day)  # This is a dummy init value
         exec("ngridlines = config['n_%s_grid_fields']" % gridname)
 
         # Create the datelist for this grid
@@ -553,7 +560,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         outfilename = outfilename.replace('STARTDATE', str(self._start_date))
         outfilename = outfilename.replace('ENDDATE', str(self._end_date))
         outfilename = outfilename.replace('TIMESTEP',
-                                          str(self._timestep_duration.days))
+                                          str(self._timestep_duration))
 
         self.output_filename = os.path.join(outdirname, outfilename)
 
@@ -677,19 +684,22 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         self.add_to_output()
 
     def update(self, frac=None):
-        # Increment the model one time step
-        if frac is None:
-            self._date_current += self._timestep_duration
-        else:
-            self._date_current += frac * self._timestep_duration
-
-        self._timestep_current = \
-                self.get_timestep_from_date(self._date_current)
-
+        """ Compute the values for the current time, then update the time """
         self.get_input_vars()
         self.compute_degree_days()
         self.calculate_frost_numbers_Geo()
         self.add_to_output()
+
+        # Because WMT requires model to run once, we are updating the timestep
+        # after updating the variables
+        if frac is None:
+            self._date_current += relativedelta(years=self._timestep_duration)
+        else:
+            self._date_current += \
+                relativedelta(years=(frac * self._timestep_duration))
+
+        self._timestep_current = \
+                self.get_timestep_from_date(self._date_current)
 
     def update_frac(self, frac):
         self.update(frac=frac)
@@ -716,14 +726,27 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                 self.get_date_from_timestep(self._timestep_current)
 
     def get_date_from_timestep(self, timestep):
-        return self._reference_date + timestep*self._timestep_duration
+        #print("reference_date: %s" % str(self._reference_date))
+        #print("reference_date + %d years: %s" % (
+        #    timestep, self._reference_date + \
+        #    relativedelta(years=timestep*self._timestep_duration)))
+        return self._reference_date + \
+            relativedelta(years=timestep*self._timestep_duration)
 
     def get_timestep_from_date(self, this_date):
         # If the timestep is an integer number of days, this would be fine:
         #return (this_date-self._reference_date).days /\
         #    self._timestep_duration.days
-        return int((this_date-self._reference_date).total_seconds() / \
-                   (self._timestep_duration.total_seconds()) + 0.5)
+        # Compute from seconds:
+        #return int((this_date-self._reference_date).total_seconds() / \
+        #           (self._timestep_duration.total_seconds()) + 0.5)
+        if this_date.month != self.month:
+            raise RuntimeWarning("Current month (%d) is not model month(%d)" %
+                                 (this_date.month, self.month))
+        if this_date.day != self.day:
+            raise RuntimeWarning("Current day (%d) is not model day(%d)" %
+                                 (this_date.day, self.day))
+        return this_date.year - self._reference_date.year
 
     def initialize_input_vars_from_files(self):
         # If the model does not have its input variables set by an
@@ -877,18 +900,18 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                         # Process the variables based on variable name
                         if var_name[-4:] == 'date':
                             # date variables end with "_date"
-                            cfg_struct[var_name] = \
-                                datetime.datetime.strptime(
-                                    value, "%Y-%m-%d").date()
-                                #datetime.datetime.strptime(value, "%Y-%m-%d")
+                            # Note: these should be years
+                            assert_less_equal(int(value), 2100)
+                            assert_greater_equal(int(value), 1800)
+                            cfg_struct[var_name] = datetime.date(
+                                int(value), self.month, self.day)
                         elif var_name[0:4] == 'grid':
                             # grid variables are processed after cfg file read
                             grid_struct[var_name] = value
                         elif var_name == 'timestep' \
                                 or var_name == 'model_timestep':
-                            # timestep is a timedelta object
-                            cfg_struct[var_name] = \
-                                datetime.timedelta(days=int(value))
+                            # timestep is a number of years
+                            cfg_struct[var_name] = int(value)
                         elif var_type == 'int':
                             # Convert integers to int
                             cfg_struct[var_name] = int(value)

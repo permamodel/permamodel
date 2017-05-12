@@ -237,14 +237,12 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
 
     def get_current_time(self):
         """ Am assuming current time is number of timesteps since start """
-        return((self._model._date_current - \
-               self._model._start_date).total_seconds()/ \
-               self._model._timestep_duration.total_seconds())
+        return self._model._date_current.year - \
+               self._model._start_date.year
 
     def get_end_time(self):
-        return((self._model._end_date - \
-               self._model._start_date).total_seconds()/ \
-               self._model._timestep_duration.total_seconds())
+        return self._model._end_date.year - \
+               self._model._start_date.year
 
     # ----------------------------------
     # Functions added to pass bmi-tester
@@ -253,8 +251,7 @@ class BmiFrostnumberGeoMethod( perma_base.PermafrostComponent ):
         return self._grid_type[grid_number]
 
     def get_time_step(self):
-        return self._model._timestep_duration.total_seconds() / \
-               datetime.timedelta(days=1).total_seconds()
+        return self._model._timestep_duration
 
     def get_value_ref(self, var_name):
         """Reference to values.
