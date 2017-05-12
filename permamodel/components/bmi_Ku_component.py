@@ -26,6 +26,9 @@ SOFTWARE.
 
 """
 
+import warnings
+warnings.filterwarnings("ignore",category =RuntimeWarning) 
+
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
@@ -33,6 +36,7 @@ from permamodel.components import Ku_method
 #from permamodel.components.perma_base import *
 #from permamodel.tests import examples_directory
 import os
+
 
 """
 class BmiKuMethod( perma_base.PermafrostComponent ):
@@ -253,6 +257,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     def update(self):
         self._model.update(self._model.dt)
         self._values['soil__active_layer_thickness'] = self._model.Zal
+        self._values['soil__temperature'] = self._model.Tps
 
     def update_frac(self, time_fraction):
         time_step = self.get_time_step()

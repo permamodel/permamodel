@@ -76,6 +76,7 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 from .. import data_directory
+# from permamodel.tests import examples_directory
 
 
 class Ku_method( perma_base.PermafrostComponent ):
@@ -513,7 +514,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         if n_grid >1 :               
         
             K_star = self.Kf
-            K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
+            
+            if np.size(self.Kf)>1:
+            	K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
             
         else:
             if Tps_numerator<=0.0:
@@ -547,9 +550,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         
             K = self.Kt
             C = self.Ct       
-                    
-            K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
-            C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
+            if np.size(self.Kf)>1:        
+            	K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
+            	C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
             
         else:
             
@@ -956,8 +959,11 @@ class Ku_method( perma_base.PermafrostComponent ):
             
         elif (var_type.lower() == 'grid'):
             
-            lat = self.ncread(file_name, 'lat')
-            lon = self.ncread(file_name, 'lon')
+            lat = self.ncread(file_name, 'latitude')
+            lon = self.ncread(file_name, 'longitude')
+            
+            if (np.min(lon) > 0.):
+            	lon = np.mod((lon+180.),360.) -180.
             
 #            lat = np.float(lat)
 #            lon = np.float(lon)
