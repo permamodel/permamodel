@@ -26,6 +26,9 @@ SOFTWARE.
 
 """
 
+import warnings
+warnings.filterwarnings("ignore",category =RuntimeWarning) 
+
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
@@ -33,6 +36,7 @@ from permamodel.components import Ku_method
 #from permamodel.components.perma_base import *
 #from permamodel.tests import examples_directory
 import os
+
 
 """
 class BmiKuMethod( perma_base.PermafrostComponent ):
@@ -161,6 +165,10 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         
         self._name = "Permamodel Ku Component"
         self._model.initialize(cfg_file=cfg_file)
+        
+        # make 2 vars to store each results and used for write out.
+        self.output_alt = [];
+        self.output_tps = [];
 
         # Verify that all input and output variable names are in the
         # variable name and the units map
@@ -203,7 +211,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             'vegetation__Dvt':  self._model.Dvt,
             'soil__temperature': self._model.Tps,
             'soil__active_layer_thickness': self._model.Zal}
-            
+        
         # Set the cfg file if it exists, otherwise, a default
 #        if cfg_file==None:  
 #        
@@ -251,9 +259,26 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
 
     def update(self):
-        self._model.update(self._model.dt)
-        self._values['soil__active_layer_thickness'] = self._model.Zal
+#        self._model.update(self._model.dt)
+            # Ensure that we've already initialized the run
+        assert(self._model.status == 'initialized')
 
+        # Calculate the new frost number values
+        self._model.update_ground_temperatures()
+        self._model.update_ALT()
+        
+        self._values['soil__active_layer_thickness'] = self._model.Zal
+        self._values['soil__temperature'] = self._model.Tps
+        
+        # Update the time
+        self._model.year += self._model.dt
+        
+        self.output_alt = np.append(self.output_alt, self._model.Zal)
+        self.output_tps = np.append(self.output_tps, self._model.Tps)
+        
+        # Get new input values
+        self._model.read_input_files()
+        
     def update_frac(self, time_fraction):
         time_step = self.get_time_step()
         self._model.dt = time_fraction * time_step
@@ -273,20 +298,19 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         self._model.status = 'finalizing'  # (OpenMI)
 
         # Close the input files
-        self._model.finalize()   # Close any input files
+        self._model.close_input_files()   # Close any input files
 
         # Write output last output
+        self.save_grids()
         
-
         # Done finalizing  
         self._model.status = 'finalized'  # (OpenMI)
-
-
+        
     def get_start_time(self):
         return 0.0
 
     def get_current_time(self):
-        return self._model.time.item()
+        return float(self._model.year - self._model.start_year)
 
     def get_end_time(self):
         return self._model.end_year - self._model.start_year + 1.0
@@ -437,3 +461,22 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             Rank of grid.
         """
         return len(self.get_grid_shape(var_id))
+
+    def save_grids(self):
+        # Saves the grid values based on the prescribed ones in cfg file
+
+        #if (self.SAVE_MR_GRIDS):
+        #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
+#        self.ALT_file  = self.out_directory + self.ALT_file
+        
+        if (self._model.SAVE_ALT_GRIDS):
+            self._model.write_out_ncfile(self._model.ALT_file, self.output_alt)
+            
+#        self.TPS_file  = self.out_directory + self.TPS_file
+        
+        if (self._model.SAVE_TPS_GRIDS):
+            self._model.write_out_ncfile(self._model.TPS_file,self.output_tps)
+        
+        print "***"
+        print "Writing output finished!"
+        print "Please look at"+self._model.ALT_file+'.nc and '+self._model.TPS_file+'.nc'
