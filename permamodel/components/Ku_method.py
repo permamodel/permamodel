@@ -123,7 +123,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         self.Dvt_file         = self.in_directory + self.Dvt_file
 #        self.lat_file         = self.in_directory + self.lat_file
 #        self.lon_file         = self.in_directory + self.lon_file
-
+        self.ALT_file  = self.out_directory + self.ALT_file
+        self.TPS_file  = self.out_directory + self.TPS_file
+         
         self.T_air_unit       = model_input.open_file(self.T_air_type,  self.T_air_file)
         self.A_air_unit       = model_input.open_file(self.A_air_type,  self.A_air_file)
         self.h_snow_unit      = model_input.open_file(self.h_snow_type,  self.h_snow_file)
@@ -158,50 +160,58 @@ class Ku_method( perma_base.PermafrostComponent ):
             if Lon_list is not None:
                 self.lon = Lon_list 
             if (Lat_list is not None): 
-                self.lat = Lat_list                
-            
-             
-        T_air = self.read_next_modified_KU(self.T_air_file, self.T_air_type)
-        if (T_air is not None): 
+                self.lat = Lat_list    
+                
+        rti = 'FLOAT';
+        
+        T_air = model_input.read_next_modified(self.T_air_unit,self.T_air_type)
+#        
+        if (T_air is not None):
             self.T_air = T_air
+        #        
+#        print self.T_air
+             
+#        T_air = self.read_next_modified_KU(self.T_air_file, self.T_air_type)
+#        if (T_air is not None): 
+#            self.T_air = T_air
 #            n_T_air = len(T_air)
             
-        A_air = self.read_next_modified_KU(self.A_air_file, self.A_air_type)
+        A_air = model_input.read_next_modified(self.A_air_unit, self.A_air_type)
         if (A_air is not None): 
             self.A_air = A_air
 #            n_A_air = len(A_air)
             
-        h_snow = self.read_next_modified_KU(self.h_snow_file, self.h_snow_type)
+        h_snow = model_input.read_next_modified(self.h_snow_unit, self.h_snow_type)
         if (h_snow is not None): 
             self.h_snow = h_snow
 #            n_h_snow = len(h_snow) 
             
-        rho_snow = self.read_next_modified_KU(self.rho_snow_file, self.rho_snow_type)
+        rho_snow = model_input.read_next_modified(self.rho_snow_unit, self.rho_snow_type)
         if (rho_snow is not None): 
             self.rho_snow = rho_snow
 #            n_rho_snow = len(rho_snow)
         
-        vwc_H2O = self.read_next_modified_KU(self.vwc_H2O_file, self.vwc_H2O_type)
+        vwc_H2O = model_input.read_next_modified(self.vwc_H2O_unit, self.vwc_H2O_type)
         if (vwc_H2O is not None): 
             self.vwc_H2O = vwc_H2O
 #            n_vwc_H2O = len(vwc_H2O)
             
-        Hvgf = self.read_next_modified_KU(self.Hvgf_file, self.Hvgf_type)
+        Hvgf = model_input.read_next_modified(self.Hvgf_unit, self.Hvgf_type)
         if (Hvgf is not None): 
             self.Hvgf = Hvgf
 #            n_Hvgf = len(Hvgf)
             
-        Hvgt = self.read_next_modified_KU(self.Hvgt_file, self.Hvgt_type)
+        Hvgt = model_input.read_next_modified(self.Hvgt_unit, self.Hvgt_type)
         if (Hvgt is not None): 
             self.Hvgt = Hvgt
 #            n_Hvgt = len(Hvgt)
             
-        Dvt = self.read_next_modified_KU(self.Dvt_file, self.Dvt_type)
+        Dvt = model_input.read_next_modified(self.Dvt_unit, self.Dvt_type)
         if (Dvt is not None): 
             self.Dvt = Dvt
 #            n_Dvt = len(Dvt)
             
-        Dvf = self.read_next_modified_KU(self.Dvf_file, self.Dvf_type)
+        Dvf = model_input.read_next_modified(self.Dvf_unit, self.Dvf_type)
         if (Dvf is not None): 
             self.Dvf = Dvf
 #            n_Dvf = len(Dvf)
@@ -1007,6 +1017,7 @@ class Ku_method( perma_base.PermafrostComponent ):
             #----------------------------------------------
             data = np.loadtxt(file_name)
             data = data[0:(self.end_year-self.start_year+1.0)];
+            data = f1.readline()
             
         elif (var_type.lower() == 'grid'):
             #----------------------------------------------
@@ -1133,20 +1144,22 @@ class Ku_method( perma_base.PermafrostComponent ):
     # finalize()
 
    
-    def save_grids(self):
-        # Saves the grid values based on the prescribed ones in cfg file
-
-        #if (self.SAVE_MR_GRIDS):
-        #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
-        self.ALT_file  = self.out_directory + self.ALT_file
-        
-        if (self.SAVE_ALT_GRIDS):
-            self.write_out_ncfile(self.ALT_file,self.Zal)
-            
-        self.TPS_file  = self.out_directory + self.TPS_file
-        
-        if (self.SAVE_TPS_GRIDS):
-            self.write_out_ncfile(self.TPS_file,self.Tps)
+#    def save_grids(self):
+#        # Saves the grid values based on the prescribed ones in cfg file
+#
+#        #if (self.SAVE_MR_GRIDS):
+#        #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
+#        self.ALT_file  = self.out_directory + self.ALT_file
+#        
+#        if (self.SAVE_ALT_GRIDS):
+#            self.write_out_ncfile(self.ALT_file,self.output_alt)
+##            self.write_out_ncfile(self.ALT_file,self.Zal)
+#            
+#        self.TPS_file  = self.out_directory + self.TPS_file
+#        
+#        if (self.SAVE_TPS_GRIDS):
+#            self.write_out_ncfile(self.TPS_file,self.output_tps)
+#            self.write_out_ncfile(self.TPS_file,self.Tps)
             
         #if (self.SAVE_SW_GRIDS):
         #    model_output.add_grid( self, self.Tps, 'Tps', self.time_min )
