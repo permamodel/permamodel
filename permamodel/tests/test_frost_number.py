@@ -88,12 +88,6 @@ def test_frostnumber_method_calculates_exact_fn():
     fn.calculate_air_frost_number()
     assert_almost_equal(fn.air_frost_number, 1.0, places=3)
 
-def test_frostnumber_method_cant_update_scalar():
-    """ Test fn update() fails with scalar """
-    fn = frost_number.FrostnumberMethod()
-    fn.initialize()
-    assert_raises(ValueError, fn.update)
-
 def test_frostnumber_method_updates():
     """ Test fn update() """
     fn = frost_number.FrostnumberMethod()

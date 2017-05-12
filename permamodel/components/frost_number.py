@@ -330,13 +330,22 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
         return cfg_struct
 
-    def update(self):
+    def update(self, frac=None):
         """ Move to the next timestep and update calculations """
-        self.year += self.dt
-        if self.year <= self.end_year:
-            self.calculate_frost_numbers()
+        if frac is not None:
+            print("Fractional times not yet permitted, rounding to nearest int")
+            time_change = self.dt * int(frac + 0.5)
         else:
-            raise ValueError("Year is past last year")
+            time_change = self.dt
+
+        if (self.year + time_change) > self.end_year:
+            print("Update would have incremented past last year")
+            print("So setting to end year")
+            self.year = self.end_year
+        else:
+            self.year += time_change
+
+        self.calculate_frost_numbers()
 
 if __name__ == "__main__":
     # Run the code
