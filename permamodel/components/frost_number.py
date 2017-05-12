@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""  Frost Number by Nelson and Outcalt 1983. DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363
+"""  Frost Number by Nelson and Outcalt 1983.
+DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363
 
 *The MIT License (MIT)*
 Copyright (c) 2016 permamodel
@@ -22,93 +23,137 @@ SOFTWARE.
 
 """
 
+import os
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
-#from permamodel.components.perma_base import *
-#from permamodel.components import bmi_frost_number
-from .. import examples_directory
-import os
-#import gdal
-#from gdalconst import *  # Import standard constants, such as GA_ReadOnly
-#import osr
-#from pyproj import Proj, transform
-
-#class FrostnumberMethod( bmi_frost_number.BmiFrostnumberMethod ):
-class FrostnumberMethod( perma_base.PermafrostComponent ):
-    def open_input_files(self):
-        self.T_air_min_file   = os.path.join(examples_directory,
-                                             'fn_t_air_min.dat')
-        self.T_air_min_unit = open(self.T_air_min_file, "r")
-
-        self.T_air_max_file   = os.path.join(examples_directory,
-                                             'fn_t_air_max.dat')
-        self.T_air_max_unit = open(self.T_air_max_file, "r")
-
-        # lat and lon not implemented yet
+from permamodel import examples_directory
+from nose.tools import assert_greater_equal, assert_true, assert_equal
 
 
-    def read_input_files(self):
-        #-------------------------------------------------------
-        # All grids are assumed to have a data type of Float32.
-        #-------------------------------------------------------
-        T_air_min = model_input.read_next_modified(self.T_air_min_unit,
-                                                   self.T_air_min_type)
-        if (T_air_min != None):
-            self.T_air_min = T_air_min
+class FrostnumberMethod(perma_base.PermafrostComponent):
+    """ Provides 1D Frostnumber component """
+    def __init__(self):
+        self.air_frost_number = -99.0
+        self.surface_frost_number = -99.0
+        self.stefan_frost_number = -99.0
+        self.T_air_min = -99.0
+        self.T_air_min_file = ""
+        self.T_air_min_unit = self.dummy_file()
+        self.T_air_max = -99.0
+        self.T_air_max_file = ""
+        self.T_air_max_unit = self.dummy_file()
+        self.year = -1
+        self.start_year = -1
+        self.end_year = -1
+        self.dt = 1
+        self.output = {}
+        self.T_average = -99.0
+        self.T_amplitude = -99.0
+        self.ddt = []
+        self.ddf = []
+        self.h_snow = -99.0
+        self.c_snow = -99.0
+        self.Fplus = -99.0
+        self.Twplus = -99.0
+        self.Zfplus = -99.0
+        self.Z_tot = -99.0
+        self.stefan_number = -99.0
+        self.fn_out_filename = ""
 
-        T_air_max = model_input.read_next_modified(self.T_air_max_unit,
-                                                   self.T_air_max_type)
-        if (T_air_max != None):
-            self.T_air_max = T_air_max
+        # Not sure why these aren't set elsewhere
+        self.DEBUG = True
+        self.SILENT = True
+        self.cfg_prefix = ""
+        self.T_air = -1.0
+        self.A_air = -1.0
+        self.lat = -999
+        self.lon = -999
+        self.rho_snow = 0.0
+        self.vwc_H2O = 0.0
+        self.Hvgf = 0.0
+        self.Hvgt = 0.0
+        self.Dvf = 0.0
+        self.Dvt = 0.0
+
+    def dummy_file(self, instring=""):
+        """ dummy file class, so can declare empty variable in __init__()
+            but not receive "no close() member error by pylint
+        """
+        self.description = "this is a dummy class"
+
+        def close():
+            """ This is the method we need for a dummy_file to pass pylint
+            """
+            pass
+
+        if instring == "":
+            close()
+
+    def initialize(self, cfg_file=None):
+        """ Set starting values for frost number """
+        if cfg_file is not None:
+            self.initialize_from_config_file(cfg_file)
+        else:
+            # Default configuration (one value)
+            self.start_year = 2000
+            self.end_year = 2000
+            self.T_air_min_type = 'scalar'
+            self.T_air_max_type = 'scalar'
+            self.T_air_min = np.array([-20.0], dtype=np.float32)
+            self.T_air_max = np.array([10.0], dtype=np.float32)
+            self.fn_out_filename = "default_fn_config_outfile.dat"
+
+        self.initialize_frostnumber_component()
+
+    def initialize_from_config_file(self, cfg_file):
+        """ Use oldstyle configuration file format """
+        self._configuration = self.get_config_from_oldstyle_file(cfg_file)
+
+        # Easy configuration values, simply passed
+        self.start_year = self._configuration['start_year']
+        self.end_year = self._configuration['end_year']
+        self.fn_out_filename = self._configuration['fn_out_filename']
+
+        # These don't need to be used after this routine
+        T_air_min_type = self._configuration['T_air_min_type']
+        T_air_max_type = self._configuration['T_air_max_type']
+
+        if self.start_year == self.end_year:
+            # Only one year specified, so inputs should be scalar
+            assert_equal(T_air_min_type.lower(), 'scalar')
+            assert_equal(T_air_max_type.lower(), 'scalar')
+            self.T_air_min = np.array([self._configuration['T_air_min']],
+                                 dtype=np.float32)
+            self.T_air_max = np.array([self._configuration['T_air_max']],
+                                 dtype=np.float32)
+        else:
+            # Several years specified, should be timesteps
+            in_dir = os.path.realpath(self._configuration['in_directory'])
+
+            fname = os.path.join(in_dir,
+                                 self._configuration['T_air_min'])
+            assert_true(os.path.isfile(fname))
+            Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
+            self.T_air_min = np.array(Tvalues, dtype=np.float32)
+
+            fname = os.path.join(in_dir,
+                                 self._configuration['T_air_max'])
+            assert_true(os.path.isfile(fname))
+            Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
+            self.T_air_max = np.array(Tvalues, dtype=np.float32)
 
     def initialize_frostnumber_component(self):
-        SILENT = True
-
-        # Note: Initialized from initialize() in perma_base.py
-        if not SILENT:
-            print("Initializing for FrostnumberMethod")
-
-        self._model = 'FrostNumber'
-
-        # Here, initialize the variables which are unique to the
-        # frost_number component
-
-        # Set the initial values, units, grids and grid_types of
-        # input and output variables
-        # Note: these names should match the list of _input_var_names
-        # and _output_var_names defined at the top of this class definition
-
-        """
-        _input_var_names = ('land_surface_air__temperature',
-                        'land_surface__latitude',
-                        'land_surface__longitude',
-        _output_var_names = ('frost_number_air',
-                         'frost_number_surface',
-                         'frost_number_stefan',
-        """
-
-        # Initialize the output variables (internal names)
+        """ Set the starting values for the frostnumber component """
         self.air_frost_number = np.float32(-1.0)
         self.surface_frost_number = np.float32(-1.0)
         self.stefan_frost_number = np.float32(-1.0)
 
-        # Initialize the year to the start year
-        #  or to zero if it doesn't exist
-        try:
-            self.year = self.start_year
-        except AttributeError:
-            self.year = 0
-            self.start_year = 0
-            self.end_year = 0
+        self.year = self.start_year
 
-        # Ensure that the end_year is not before the start_year
-        # If no end_year is given,
-        #   it is assumed that this will run for one year
-        #   so the end_year is the same as the start_year
         try:
-            assert(self.end_year >= self.start_year)
-        except AttributeError:
+            assert_greater_equal(self.end_year, self.start_year)
+        except AssertionError:
             self.end_year = self.start_year
 
         # Create a dictionary to hold the output values
@@ -119,6 +164,7 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
         self.calculate_frost_numbers()
 
     def calculate_frost_numbers(self):
+        """ Calculate frost numbers at the current timestep """
         # Calculate all the frost numbers using the current data
         self.calculate_air_frost_number()
         self.calculate_surface_frost_number()
@@ -129,52 +175,50 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
                                   "%5.3f" % self.surface_frost_number,
                                   "%5.3f" % self.stefan_frost_number)
 
-        #self.print_frost_numbers(self.year)
-
     def print_frost_numbers(self, year=-1):
+        """ Print output to screen """
         # if year is -1, then use the current year of self
         # otherwise, use the specified year
         if year > 0:
             print("Year: %d  F_air=%5.3f  F_surface=%5.3f  F_stefan=%5.3f" %
-              (self.year, self.air_frost_number, self.surface_frost_number,
-               self.stefan_frost_number))
+                  (self.year,
+                   self.air_frost_number, self.surface_frost_number,
+                   self.stefan_frost_number))
         else:
             for year in sorted(self.output.keys()):
                 print("Year: %d  output=%s" % (year, self.output[year]))
 
     def calculate_air_frost_number(self):
+        """ Air frost number requires degree days before calculation """
         self.compute_degree_days()
         self.compute_air_frost_number()
 
     def calculate_surface_frost_number(self):
+        """ Dummy value for surface frost number """
         # For now, a dummy value
         self.surface_frost_number = np.float32(-1.0)
 
     def calculate_stefan_frost_number(self):
+        """ Dummy value for Stefan frost number """
         self.stefan_frost_number = np.float32(-1.0)
 
     def compute_degree_days(self):
+        """
+        From the min and max temperatures, compute degree freezing
+        and thawing days as per Outcalt paper
 
-        # Input: T_hot (avg temp of warmest month)
-        #        T_cold (avg temp of coldest month)
+        Input: T_hot (avg temp of warmest month)
+               T_cold (avg temp of coldest month)
 
-        # Output: ddf (degree freezing days)
-        #         ddt (degree thawing days)
-
-        # In the first test case, we used T_air_max and T_air_min
-        T_cold=self.T_air_min
-        T_hot=self.T_air_max
-
-        """  this section is for later when reading temp values from CRU data
-        # Now, we use the values from the temperature CRU tiff files
-        # Assume that warmest month is July and coldest is the following Jan
-        print("Lon: %f" % self.lon)
-        print("Lat: %f" % self.lat)
-        T_hot = self.get_temperature_from_cru(self.lon, self.lat, 7, self.year)
-        T_cold = self.get_temperature_from_cru(self.lon, self.lat, 1, self.year+1)
+        Output: ddf (degree freezing days)
+                ddt (degree thawing days)
         """
 
-        assert(T_hot > T_cold)
+        # In the first test case, we used T_air_max and T_air_min
+        T_cold = self.T_air_min[int(self.year - self.start_year)]
+        T_hot = self.T_air_max[int(self.year - self.start_year)]
+
+        assert_greater_equal(T_hot, T_cold)
         T_avg = (T_hot + T_cold) / 2.0
 
         # Note that these conditions should cover T_hot == T_cold
@@ -183,41 +227,18 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
             # Negative sign because ddf is + and T_avg (here) is -
             ddf = -365.0 * T_avg
             ddt = 0
-            L_winter=365.0
-            L_summer=0.0
-            T_average=(Th + Tc) / 2.0
-            T_amplitude=(Th - Tc) / 2.0
-        elif T_cold>0:
+            L_winter = 365.0
+            L_summer = 0.0
+            T_average = (T_hot + T_cold) / 2.0
+            T_amplitude = (T_hot - T_cold) / 2.0
+        elif T_cold > 0:
             # Never freezing
             ddf = 0
             ddt = 365.0 * T_avg
-            L_winter=0.0
-            L_summer=365.0
-            T_average=(Th + Tc) / 2.0
-            T_amplitude=(Th - Tc) / 2.0
-
-            """ this section shows how to read a series of temperatures
-        elif (self.T_air_type != 'Scalar'):
-            #wk = np.loadtxt('examples/temp_copy.txt', skiprows=1,unpack=False)
-            temperature_filename = self.permafrost_dir +\
-                "permamodel/examples/temp_copy.txt"
-            wk = np.loadtxt(temperature_filename, skiprows=1,unpack=False)
-            t_month = wk[:,0]
-            T_month = wk[:,1]
-            Th=max(T_month)
-            Tc=min(T_month)
-            T=(Th+Tc)/2                                             #(eqn. 2.1)
-            A=(Th-Tc)/2                                             #(eqn. 2.2)
-            Beta=np.arccos(-T/A)                                    #(eqn. 2.3)
-            Ts=T+A*np.sin(Beta/Beta)                                #(eqn. 2.4)
-            Tw=T-A*np.sin(Beta/(np.pi-Beta))                        #(eqn. 2.5)
-            L_summer=365*(Beta/np.pi)                               #(eqn. 2.6)
-            L_winter = 365-L_summer                                 #(eqn. 2.7)
-            print('winter length:',Lw,'summer length:',Ls)
-            ddt = Ts*L_summer                                             #(eqn. 2.8)
-            ddf = -Tw*L_winter                                            #(eqn. 2.9)
-            print Th,Tc
-        """
+            L_winter = 0.0
+            L_summer = 365.0
+            T_average = (T_hot + T_cold) / 2.0
+            T_amplitude = (T_hot - T_cold) / 2.0
         else:
             # Assume cosine fit for temp series
             T_average = (T_hot + T_cold) / 2.0
@@ -229,219 +250,99 @@ class FrostnumberMethod( perma_base.PermafrostComponent ):
             L_winter = 365.0 - L_summer
             ddt = T_summer * L_summer
             ddf = -T_winter * L_winter
-        self.T_average=T_average
-        self.T_amplitude=T_amplitude
-        self.ddt=ddt
-        self.ddf=ddf
-    #   compute_degree_days()
-    #-------------------------------------------------------------------
+        self.T_average = T_average
+        self.T_amplitude = T_amplitude
+        self.ddt = ddt
+        self.ddf = ddf
+
     def compute_air_frost_number(self):
-        # Calculating Reduced Air Frost Number (pages 280-281).
-        # The reduced frost number is close 0 for long summers and close to 1 for long winters.
-        self.air_frost_number = np.sqrt(self.ddf) / ( np.sqrt( self.ddf) + np.sqrt( self.ddt) )
-
-    #   update_air_frost_number()
-    #-------------------------------------------------------------------
-
-    def update_snow_prop(self):
-        # find indexes for which temp > 0 and make precip = 0
-        if (self.T_air_type != 'Scalar'): # if not should stop
-            #wk = np.loadtxt('examples/prec.txt', skiprows=1,unpack=False)
-            precipitation_filename = self.permafrost_dir +\
-                "permamodel/examples/prec.txt"
-            wk = np.loadtxt(precipitation_filename, skiprows=1,unpack=False)
-            t_month = wk[:,0]
-            prec_month = wk[:,1]
-
-        pos_temp_ind=np.array(np.where(self.ta_month>0))
-        prec_month[pos_temp_ind]=0
-        neg_temp_ind=np.array(np.where(self.ta_month<=0))
-
-        if not pos_temp_ind.any():
-        # monthly temp is always below zero
-        # i.e. it constantly snows over whole year
-        # the point associated with glaciaer and needs to excluded
-            print 'snows constatly: stop!'
-
-        m=np.size(neg_temp_ind)
-        pp=0.5; # assume only 50% of precip change to at the beg and end of the snow season
-
-        # this is portions of the code assumes a perfect winter season
-        # needs to be used with care when there is a warm month during snow season
-        if (m==1):
-            s_idx=neg_temp_ind[:,0]
-            e_idx=neg_temp_ind[:,m-1]
-            prec_month[s_idx]=prec_month[s_idx]*pp
-        else:
-            s_idx=neg_temp_ind[:,0]
-            e_idx=neg_temp_ind[:,m-1]
-            prec_month[s_idx]=prec_month[s_idx]*pp
-            prec_month[e_idx]=prec_month[e_idx]*pp
-
-        # sum up precip to get SWE
-        j=0; s=0; swe=np.zeros(m);
-        for i in range(s_idx,e_idx+1):
-            s=s+prec_month[i]
-            swe[j]=s
-            j=j+1
-
-        #calculating snow density, depth and thermal counductivity
-        r_snow=np.zeros(m); # snow density in kg/m3
-        h_snow=np.zeros(m); # snow depth in m
-        c_snow=np.zeros(m); # snow depth in W/mK
-
-        rho_sn_min=200; rho_sn_max=300 # allowed min and max snow density
-        tauf=0.24 # e-folding value (see Verseghy, 1991)
-
-        s=rho_sn_min
-        s=((s - rho_sn_max)*np.exp(-tauf)) + rho_sn_max
-        r_snow[0] = s
-        for i in range(1,m):
-        # starting from month 2 tauf should be multpled by the 30 days
-        # otherwise snow thermal conductivity can be low and insulate ground well enough over the season
-        # usually we assume constant max snow thermal conductivity over snow season
-            s=((s - rho_sn_max)*np.exp(-tauf)) + rho_sn_max
-            r_snow[i] = s
-
-        h_snow  = (swe/(r_snow*0.001))
-        # snow thermal conductivity according to M. Sturm, 1997.
-        c_snow = (0.138-1.01*r_snow + 3.233*(r_snow**2))*1e-6
-
-        self.r_snow=r_snow
-        self.h_snow=h_snow
-        self.c_snow=c_snow
-
-    #   update_snow_prop()
-    #-------------------------------------------------------------------
-    def update_surface_frost_number(self):
-        # phi [scalar]: sites latitude
-        # Zs [scalar]: an average winter snow thickness
-        # Zss [scalar]: a damping depth in snow
-        # P [scalar]: length of an annual temperature cycle
-        # k [scalar]: number of winter months
-        # rho_s [scalar]: density of snow [kg m-3]
-        # lambda_s [scalar]: snow thermal conductivity [W m-1 C-1]
-        # c_s [scalar]: snow specific heat capacity [J kg-1 C-1]
-        # alpha_s [scalar]: thermal diffusivity of snow
-        # Uw [scalar]: mean winter wind speed [m s-1]
-        # Aplus [scalar]: temperature amplitude at the surface with snow
-        # Twplus [scalar]: the mean winter surface temperature
-        # DDFplus [scalar]: freezing index at the surface
-        # Tplus [scalar]: mean annual tempratures at the surface
-        # Fplus [scalar] : surface frost number
-
-        rho_s=np.mean(self.r_snow)
-        lambda_s=np.mean(self.c_snow)
-        Zs=np.mean(self.h_snow)
-        # i am not sure what they mean by length of the annual temprature cycle
-        # Something worthwhile discussing
-        P=2*np.pi/365;
-
-        c_s=7.79*self.Tw+2115                 #(eqn. 7)
-        alpha_s=lambda_s/(c_s*rho_s)          #(eqn. 8)
-        Zss=np.sqrt(alpha_s*P/np.pi)          #(eqn. 10)
-        Aplus=self.A_air*np.exp(-Zs/Zss)      #(eqn. 9)
-        Twplus=self.T_air-Aplus*np.sin(self.beta/(np.pi-self.beta)) #(eqn. 11)
-        # Twplus is a mean winter surface temprature, I think, should be warmer than air temperature?
-        # Here is another problem. DDFplus degree days winter should be positive.
-        # The way it is written in the paper is wrong. I added a minus sign to fix it (see eqn. 2.9)
-        DDFplus=-Twplus*self.Lw                                             #(eqn. 12)
-        Tplus=(self.ddt-DDFplus)/365                                        #(eqn. 13)
-        #Nevertheless the surface frost number is smaller than air which looks resonable to me.
-        self.Fplus=np.sqrt(DDFplus)/(np.sqrt(self.ddt)+np.sqrt(DDFplus))    #(eqn. 14)
-        self.Twplus=Twplus
-
-    #   update_surface_frost_number()
-    #-------------------------------------------------------------------
-    def update_stefan_frost_number(self):
-        # Zfplus [scalar]: the depth [m] to which forst extends
-        # lambda_f [scalar]: frozen soil thermal conductivity [W m-1 C-1]
-        # S [scalar]: is a const scalar factor [s d-1]
-        # rho_d [scalar]: dry density of soil [kg m-3]
-        # wf [scalar] : soil water content (proportion of dry weight)
-        # L [scalar] : is a latent heat of fusion of water [J kg-1]
-
-        lambda_f=1.67 # some dummy thermal conductivity
-        # https://shop.bgs.ac.uk/GeoReports/examples/modules/C012.pdf
-        sec_per_day=86400
-        rho_d=2.798  # dry density of silt
-        wf=0.4       # tipical for silty soils
-        denominator=rho_d*wf*self.Lf
-        self.Zfplus=np.sqrt(2*lambda_f*sec_per_day*np.abs(self.Twplus)*self.Lw/denominator)               #(eqn. 15)
-        print 'Zfplus=',self.Zfplus
-
-        # assuming 3 soil layers with thickness 0.25, 0.5 and 1.75 m
-        # and thermal conductivities 0.08, 1.5, and 2.1
-        soil_thick=np.array([0.25, 0.5 , 1.75])
-        lambda_b=np.array([0.08, 1.5, 2.1])
-        # resistivity R
-        R=soil_thick/lambda_b
-        QL=self.Lf/1000 # volumetric latent heat, 1000 s a density of water
-        #partial freezing thawing index DD
-        DD=np.zeros(3)
-        Z=np.zeros(3)
-        DD[0]=0.5*QL*soil_thick[0]*R[0]/sec_per_day
-        S=0;
-        for i in range(1,3):
-            S=R[i]+S
-            DD[i]=(S+0.5*R[i-1])*QL*soil_thick[i]/sec_per_day
-            #The depth of the frost thaw penetration
-        S=0; Z_tot=0
-        for i in range(0,3):
-            #The depth of the frost thaw penetration
-            Z[i]=np.sqrt(2*lambda_b[i]*sec_per_day*DD[i]/QL + lambda_b[i]**2*S**2) \
-                - lambda_b[i]*S
-            S=R[i]+S
-            Z_tot=Z_tot + Z[i]
-
-        self.Z_tot=Z_tot
-        self.stefan_number = np.sqrt(self.Fplus) / ( np.sqrt( self.Fplus) + np.sqrt( self.Z_tot) )
-
-    #   update_stefan_frost_number()
-    #-------------------------------------------------------------------
+        """
+        Calculating Reduced Air Frost Number (pages 280-281).
+        The reduced frost number is close 0 for long summers
+        and close to 1 for long winters.
+        """
+        self.air_frost_number = \
+            np.sqrt(self.ddf) / \
+            (np.sqrt(self.ddf) + np.sqrt(self.ddt))
 
     def close_input_files(self):
+        """ As per topoflow, close the input files to finalize() """
+        if self.T_air_min_type != 'Scalar':
+            self.T_air_min_unit.close()
+        if self.T_air_max_type != 'Scalar':
+            self.T_air_max_unit.close()
 
-        if (self.T_air_min_type     != 'Scalar'): self.T_air_min_unit.close()
-        if (self.T_air_max_type     != 'Scalar'): self.T_air_max_unit.close()
-
-    #   close_input_files()
-    #-------------------------------------------------------------------
-
-    def check_input_types(self):
-        """
-        this functionality is not used for frostnumber_method
-        """
-        return
-
-        #--------------------------------------------------
-        # Notes: rho_H2O, Cp_snow, rho_air and Cp_air are
-        #        currently always scalars.
-        #--------------------------------------------------
-        """
-        are_scalars = np.array([
-                          self.is_scalar('lat'),
-                          self.is_scalar('lon'),
-                          self.is_scalar('T_air_min'),
-                          self.is_scalar('T_air_max'),
-                          self.is_scalar('start_year'),
-                          self.is_scalar('end_year') ])
-
-        self.ALL_SCALARS = np.all(are_scalars)
-        """
-
-    #   check_input_types()
-    #-------------------------------------------------------------------
-
-
-    def write_output_to_file(self, SILENT=True):
-        # Write the output to the screen unless we're silent
-        if not SILENT:
-            self.print_frost_numbers(self.year)
-
+    def write_output_to_file(self):
+        """ Part of finalize, write the output to file(s) """
         # Write the output to a file
         with open(self.fn_out_filename, 'w') as f_out:
             for year in sorted(self.output.keys()):
-                f_out.write("Year: %d  output=%s\n" % (year,self.output[year]))
+                f_out.write("Year: %d  output=%s\n" %
+                            (year, self.output[year]))
 
+    def get_config_from_oldstyle_file(self, cfg_filename):
+        """ Modified from that in _Geo code """
+        cfg_struct = {}
+        try:
+            with open(cfg_filename, 'r') as cfg_file:
+                # this was originally modeled after read_config_file()
+                # in BMI_base.py as modified for cruAKtemp.py
+                while True:
+                    # Read lines from config file until no more remain
+                    line = cfg_file.readline()
+                    if line == "":
+                        break
 
+                    # Comments start with '#'
+                    COMMENT = (line[0] == '#')
+
+                    words = line.split('|')
+                    if (len(words) ==4) and (not COMMENT):
+                        var_name = words[0].strip()
+                        value = words[1].strip()
+                        var_type = words[2].strip()
+
+                        # Process the variables based on variable name
+                        if var_name[-4:] == 'date':
+                            # date variables end with "_date"
+                            cfg_struct[var_name] = \
+                                datetime.datetime.strptime(
+                                    value, "%Y-%m-%d").date()
+                                #datetime.datetime.strptime(value, "%Y-%m-%d")
+                        elif var_type == 'int':
+                            # Convert integers to int
+                            cfg_struct[var_name] = int(value)
+                        elif var_type == 'long':
+                            # Convert longs to int
+                            cfg_struct[var_name] = int(value)
+                        elif var_type == 'float':
+                            # Convert integers to float
+                            cfg_struct[var_name] = float(value)
+                        else:
+                            # Everything else is just passed as a string
+                            assert_equal(var_type, 'string')
+                            cfg_struct[var_name] = value
+
+        except:
+            print("\nError opening configuration file in\
+                  get_config_from_oldstyle_file()")
+            raise
+
+        return cfg_struct
+
+    def update(self):
+        """ Move to the next timestep and update calculations """
+        self.year += self.dt
+        if self.year <= self.end_year:
+            self.calculate_frost_numbers()
+        else:
+            raise ValueError("Year is past last year")
+
+if __name__ == "__main__":
+    # Run the code
+    fn = FrostnumberMethod()
+    fn.initialize(cfg_file='../examples/Frostnumber_example_timeseries.cfg')
+    fn.update()
+    fn.update()
+    fn.update()
+    fn.write_output_to_file()
