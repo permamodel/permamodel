@@ -994,7 +994,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                 # Can't have min temp > max temp!
                 self.ddf[j, i] = np.nan
                 self.ddt[j, i] = np.nan
-            elif minvalue > 0.0:
+            elif minvalue >= 0.0:
                 # Never freezes
                 self.ddf[j, i] = 0.0
                 self.ddt[j, i] = 365.0 * (minvalue+maxvalue)/2.0
@@ -1013,13 +1013,28 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                 L_winter = 365.0 - L_summer
                 self.ddt[j, i] = T_summer * L_summer
                 self.ddf[j, i] = -T_winter * L_winter
+
+            if (self.ddt[j, i] == 0.0) and (self.ddf[j, i] == 0.0):
+                # This shouldn't happen with real values
+                self.ddf[j, i] = np.nan
+                self.ddt[j, i] = np.nan
     #   compute_degree_days()
     #-------------------------------------------------------------------
     def compute_air_frost_number_Geo(self):
         # Calculating Reduced Air Frost Number (pages 280-281).
-        # The reduced frost number is close 0 for long summers and close to 1 for long winters.
-        self.air_frost_number_Geo = np.sqrt(self.ddf) / \
-            (np.sqrt(self.ddf) + np.sqrt(self.ddt))
+        # The reduced frost number is close 0 for long summers
+        #   and close to 1 for long winters.
+        #self.air_frost_number_Geo = np.sqrt(self.ddf) / \
+        #    (np.sqrt(self.ddf) + np.sqrt(self.ddt))
+        where_nan = np.isnan(self.ddf + self.ddt)
+        where_notnan = np.logical_not(np.isnan(self.ddf + self.ddt))
+
+        #print(self.ddf[where_notnan] + self.ddt[where_notnan])
+        self.air_frost_number_Geo[where_nan] = np.nan
+
+        self.air_frost_number_Geo[where_notnan] = \
+            np.sqrt(self.ddf[where_notnan]) / \
+            (np.sqrt(self.ddf[where_notnan]) + np.sqrt(self.ddt[where_notnan]))
 
     #   update_air_frost_number_Geo()
     #-------------------------------------------------------------------
