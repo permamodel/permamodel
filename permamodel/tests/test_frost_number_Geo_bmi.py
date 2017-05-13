@@ -33,9 +33,11 @@ def setup_module():
 
 def teardown_module():
     """ Standard fixture called after all tests in this file are performed """
-    for f in files_to_remove:
-        if os.path.exists(f):
-            os.remove(f)
+    # If need to remove files that are created:
+    #for f in files_to_remove:
+    #    if os.path.exists(f):
+    #        os.remove(f)
+    pass
 
 # ---------------------------------------------------
 # Tests that ensure we have bmi functionality
