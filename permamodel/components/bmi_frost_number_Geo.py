@@ -9,7 +9,7 @@ from __future__ import print_function
 import numpy as np
 from permamodel.components import perma_base
 from permamodel.components import frost_number_Geo
-from nose.tools import (assert_in)
+from nose.tools import (assert_in, assert_true)
 
 class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
     """ Implement the Nelson-Outcalt Frost numbers
@@ -28,6 +28,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         self._var_units = {}
         self._grids = {}
         self._grid_type = {}
+        self.ngrids = 0
         # Set up the name of this permafrost module
         self._name = 'Frost number module, Geo version'
 
@@ -74,7 +75,6 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
     def initialize(self, cfg_file=None):
         self._model = frost_number_Geo.FrostnumberGeoMethod()
 
-        self._model.status = 'initializing'
         self._model.initialize_frostnumberGeo_component()
 
         # Set the name of this component
@@ -133,9 +133,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             self._grids[gridnumber] = varname
             self._grid_type[gridnumber] = 'uniform_rectilinear'
             gridnumber += 1
-
-        # initialize() tasks complete.  Update status.
-        self._model.status = 'initialized'
+        self.ngrids = gridnumber
 
     def get_attribute(self, att_name):
 
@@ -179,9 +177,6 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
     #-------------------------------------------------------------------
 
     def update(self):
-        # Ensure that we've already initialized the run
-        assert self._model.status == 'initialized'
-
         self._model.update()
 
     def update_frac(self, time_fraction):
@@ -206,21 +201,8 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             self.update()
 
     def finalize(self):
-        SILENT = True
-
-        # Finish with the run
-        self._model.status = 'finalizing'  # (OpenMI)
-
         # frost_number_Geo has a finalize() method
         self._model.finalize()   # Close any input files
-
-        # Done finalizing
-        self._model.status = 'finalized'  # (OpenMI)
-
-        # Print final report, as desired
-        if not SILENT:
-            self._model.print_final_report(\
-                    comp_name='Permamodel FrostNumberGeo component')
 
     def get_start_time(self):
         return 0.0
@@ -379,6 +361,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             The grid spacing.
 
         """
+        assert_true(grid_id < self.ngrids)
         return np.array([1, 1], dtype='float32')
 
     def get_grid_rank(self, var_id):

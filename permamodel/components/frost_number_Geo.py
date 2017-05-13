@@ -124,7 +124,6 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                              default_frostnumberGeo_config_filename)
         else:
             self._config_filename = cfgfile
-        self.status = 'defined'
 
     def initialize_frostnumberGeo_component(self):
         # Read in the overall configuration from the configuration file
