@@ -37,13 +37,13 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             'model_name':         'PermaModel_frostnumber_Geo_method',
             'version':            '0.1',
             'author_name':        'J. Scott Stewart',
-            'grid_type':          'none',
+            'grid_type':          'rectilinear',
             'time_step_type':     'fixed',
             'step_method':        'explicit',
             #-------------------------------------------------------------
             'comp_name':          'frostnumberGeo',
             'model_family':       'PermaModel',
-            'time_units':         'days'}
+            'time_units':         'years'}
 
         self._input_var_names = (
             'atmosphere_bottom_air__temperature',
@@ -140,49 +140,29 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         try:
             return self._att_map[att_name.lower()]
         except KeyError:
-            print('###################################################')
-            print(' ERROR: Could not find attribute: %s' % att_name)
-            print('###################################################')
-            print(' ')
+            raise KeyError("No attribute %s" % str(att_name))
 
-    #   get_attribute()
-    #-------------------------------------------------------------------
     def get_input_var_names(self):
-
-        #--------------------------------------------------------
-        # Note: These are currently variables needed from other
-        #       components vs. those read from files or GUI.
-        #--------------------------------------------------------
         return self._input_var_names
 
-    #   get_input_var_names()
-    #-------------------------------------------------------------------
     def get_output_var_names(self):
-
         return self._output_var_names
 
-    #   get_output_var_names()
-    #-------------------------------------------------------------------
     def get_var_name(self, long_var_name):
-
         return self._var_name_map[long_var_name]
 
-    #   get_var_name()
-    #-------------------------------------------------------------------
     def get_var_units(self, long_var_name):
-
         return self._var_units_map[long_var_name]
-
-    #   get_var_units()
-    #-------------------------------------------------------------------
 
     def update(self):
         self._model.update()
+        self._values['frostnumber__air'] = self._model.air_frost_number_Geo
 
     def update_frac(self, time_fraction):
         # Only increment the time by a partial time step
-        # Ensure that we've already initialized the run
-        self._model.update_frac(frac=time_fraction)
+        # Currently, only integer times are permitted
+        self._model.update(frac=time_fraction)
+        self._values['frostnumber__air'] = self._model.air_frost_number_Geo
 
     def update_until(self, stop_date):
         # Ensure that stop_year is at least the current year
@@ -226,24 +206,12 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return self._model._timestep_duration
 
     def get_value_ref(self, var_name):
-        """Reference to values.
-
-        Parameters
-        ----------
-        var_name : str
-            Name of variable as CSDMS Standard Name.
-
-        Returns
-        -------
-        array_like
-            Value array.
-        """
+        """Reference to values."""
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
         self._values[var_name] = new_var_values
 
-    #def set_value_at_indices(self, var_name, new_var_values, indices):
     def set_value_at_indices(self, var_name, indices, new_var_values):
         self.get_value_ref(var_name).flat[indices] = new_var_values
 
@@ -257,18 +225,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
     def get_value(self, var_name):
-        """Copy of values.
-
-        Parameters
-        ----------
-        var_name : str
-            Name of variable as CSDMS Standard Name.
-
-        Returns
-        -------
-        array_like
-            Copy of values.
-        """
+        """Copy of values."""
         # Original version: from bmi_heat.py
         #return self.get_value_ref(var_name).copy()
 
@@ -287,36 +244,14 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
 
     def get_var_type(self, var_name):
-        """Data type of variable.
-
-        Parameters
-        ----------
-        var_name : str
-            Name of variable as CSDMS Standard Name.
-
-        Returns
-        -------
-        str
-            Data type.
-        """
+        """Data type of variable."""
         return str(self.get_value_ref(var_name).dtype)
 
     def get_component_name(self):
         return self._name
 
     def get_var_grid(self, var_name):
-        """Grid id for a variable.
-
-        Parameters
-        ----------
-        var_name : str
-            Name of variable as CSDMS Standard Name.
-
-        Returns
-        -------
-        int
-            Grid id.
-        """
+        """Grid id for a variable."""
         for grid_id, var_name_list in self._grids.items():
             if var_name in var_name_list:
                 return grid_id
@@ -328,19 +263,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return value
 
     def get_grid_size(self, grid_id):
-        """Size of grid.
-
-        Parameters
-        ----------
-        grid_id : int
-            Identifier of a grid.
-
-        Returns
-        -------
-        int
-            Size of grid.
-
-        """
+        """Size of grid."""
         grid_size = self.get_grid_shape(grid_id)
         if grid_size == ():
             return 1
@@ -348,33 +271,10 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             return int(np.prod(grid_size))
 
     def get_grid_spacing(self, grid_id):
-        """Distance between nodes of grid.
-
-        Parameters
-        ----------
-        grid_id : int
-            Identifier of a grid.
-
-        Returns
-        -------
-        array_like
-            The grid spacing.
-
-        """
+        """Distance between nodes of grid."""
         assert_true(grid_id < self.ngrids)
         return np.array([1, 1], dtype='float32')
 
     def get_grid_rank(self, var_id):
-        """Rank of grid.
-
-        Parameters
-        ----------
-        grid_id : int
-            Identifier of a grid.
-
-        Returns
-        -------
-        int
-            Rank of grid.
-        """
+        """Rank of grid."""
         return len(self.get_grid_shape(var_id))

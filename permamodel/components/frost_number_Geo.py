@@ -684,28 +684,22 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     def update(self, frac=None):
         """ Compute the values for the current time, then update the time """
-        self.get_input_vars()
-        self.compute_degree_days()
-        self.calculate_frost_numbers_Geo()
-        self.add_to_output()
-
-        # Because WMT requires model to run once, we are updating the timestep
-        # after updating the variables
-        if frac is None:
-            self._date_current += relativedelta(years=self._timestep_duration)
+        years_change = 0
+        if frac is not None:
+            print("Fractional times not yet permitted, rounding to nearest int")
+            years_change = self._timestep_duration * int(frac + 0.5)
         else:
-            self._date_current += \
-                relativedelta(years=(frac * self._timestep_duration))
+            years_change = self._timestep_duration
+
+        self._date_current += relativedelta(years=years_change)
 
         self._timestep_current = \
                 self.get_timestep_from_date(self._date_current)
 
-    def update_frac(self, frac):
-        self.update(frac=frac)
-
-    def update_until_timestep(self, stop_timestep):
-        while self._timestep_current < stop_timestep:
-            self.update()
+        self.get_input_vars()
+        self.compute_degree_days()
+        self.calculate_frost_numbers_Geo()
+        self.add_to_output()
 
     def initialize_model_time(self):
         # The model run duration configuration file has information
