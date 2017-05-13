@@ -701,6 +701,10 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         self.calculate_frost_numbers_Geo()
         self.add_to_output()
 
+    def update_until_timestep(self, stop_timestep):
+        while self._timestep_current < stop_timestep:
+            self.update()
+
     def initialize_model_time(self):
         # The model run duration configuration file has information
         # about the reference time, the start and end times, and

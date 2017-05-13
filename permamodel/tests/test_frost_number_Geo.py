@@ -29,13 +29,6 @@ def teardown_module():
         if os.path.exists(f):
             os.remove(f)
 
-# ---------------------------------------------------
-# Tests that ensure we are reaching this testing file
-# ---------------------------------------------------
-def test_testing_Geo():
-    # This should pass as long as this routine is getting called
-    assert(True)
-
 def test_can_initialize_Geo_frostnumber_module():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod()
 
@@ -251,12 +244,10 @@ def test_Geo_frostnumber_output_a_netcdf_file():
         fn_geo.update()
     fn_geo.finalize()
 
-# This test is long, so doesn't need to run too often
-# It is the default operation of calling the routine without arguments
-#def test_Geo_frostnumber_runs_the_test_config_file():
-#    fn_geo = frost_number_Geo.FrostnumberGeoMethod()
-#    fn_geo.initialize_frostnumberGeo_component()
-#    fn_geo.initial_update()
-#    fn_geo.update_until_timestep(fn_geo._timestep_last)
-#    fn_geo.finalize()
+def test_Geo_frostnumber_update_until_timestep():
+    fn_geo = frost_number_Geo.FrostnumberGeoMethod()
+    fn_geo.initialize_frostnumberGeo_component()
+    fn_geo.initial_update()
+    fn_geo.update_until_timestep(fn_geo._timestep_last)
+    fn_geo.finalize()
 
