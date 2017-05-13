@@ -391,7 +391,7 @@ Dvt_file:
 
 
 SAVE_ALT_GRIDS:
-  description: option to save result or not
+  description: Option to save grids of active layer thickness
   value:
     type: choice
     default: No
@@ -399,7 +399,20 @@ SAVE_ALT_GRIDS:
     - Yes
     - No
 ALT_file:
-  description: Name of output file
+  description: Name of ALT output file
   value:
     type: string
     default: ALT.nc
+SAVE_TPS_GRIDS:
+  description: Option to save grids of temperature at permafrost surface
+  value:
+    type: choice
+    default: No
+    choices:
+    - Yes
+    - No
+TPS_file:
+  description: Name of TPS output file
+  value:
+    type: string
+    default: TPS.nc
