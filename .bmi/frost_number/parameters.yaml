@@ -104,7 +104,7 @@ T_air_max_file:
     default: 'off'
     files:
       - 'off'
-      - 'fn_t_air_min.dat'
+      - 'fn_t_air_max.dat'
 start_year:
   description: Simulation start time
   value:
