@@ -113,6 +113,7 @@ T_air_file:
     default: 'off'
     files:
       - 'off'
+      - 'T_air.txt'
 A_air_ptype:
   description: Surface air temperature amplitude (annual mean)
   value:
@@ -147,6 +148,7 @@ A_air_file:
     default: 'off'
     files:
       - 'off'
+      - 'A_air.txt'
 
 h_snow_ptype:
   description: Depth of snow (average through winter)
@@ -182,6 +184,7 @@ h_snow_file:
     default: 'off'
     files:
       - 'off'
+      - 'h_snow.txt'
 rho_snow_ptype:
   description: Density of snow (average through winter)
   value:
@@ -216,6 +219,7 @@ rho_snow_file:
     default: 'off'
     files:
       - 'off'
+      - 'rho_snow.txt'
 
 vwc_H2O_ptype:
   description: Soil volumetric water content (thaw season; e.g., August)
@@ -251,6 +255,7 @@ vwc_H2O_file:
     default: 'off'
     files:
       - 'off'
+      - 'vwc.txt'
 
 Hvgf_ptype:
   description: Height of vegetation in frozen period
@@ -286,6 +291,7 @@ Hvgf_file:
     default: 'off'
     files:
       - 'off'
+      - 'hvgf.txt'
 Hvgt_ptype:
   description: Height of vegetation in thawed period
   value:
@@ -320,6 +326,7 @@ Hvgt_file:
     default: 'off'
     files:
       - 'off'
+      - 'hvgt.txt'
 Dvf_ptype:
   description: Thermal diffusivity of vegetation in frozen period
   value:
@@ -354,6 +361,7 @@ Dvf_file:
     default: 'off'
     files:
       - 'off'
+      - 'dvf.txt'
 Dvt_ptype:
   description: Thermal diffusivity of vegetation in thawed period
   value:
@@ -388,10 +396,10 @@ Dvt_file:
     default: 'off'
     files:
       - 'off'
-
+      - 'dvt.txt'
 
 SAVE_ALT_GRIDS:
-  description: option to save result or not
+  description: Option to save grids of active layer thickness
   value:
     type: choice
     default: No
@@ -399,7 +407,20 @@ SAVE_ALT_GRIDS:
     - Yes
     - No
 ALT_file:
-  description: Name of output file
+  description: Name of ALT output file
   value:
     type: string
     default: ALT.nc
+SAVE_TPS_GRIDS:
+  description: Option to save grids of temperature at permafrost surface
+  value:
+    type: choice
+    default: No
+    choices:
+    - Yes
+    - No
+TPS_file:
+  description: Name of TPS output file
+  value:
+    type: string
+    default: TPS.nc
