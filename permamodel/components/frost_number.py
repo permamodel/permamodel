@@ -332,11 +332,11 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
     def update(self):
         """ Move to the next timestep and update calculations """
-        self.year += self.dt
         if self.year <= self.end_year:
             self.calculate_frost_numbers()
         else:
             raise ValueError("Year is past last year")
+        self.year += self.dt
 
 if __name__ == "__main__":
     # Run the code
