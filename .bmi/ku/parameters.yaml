@@ -112,8 +112,8 @@ T_air_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'T_air.txt'
+      - 'off'
 A_air_ptype:
   description: Surface air temperature amplitude (annual mean)
   value:
@@ -147,8 +147,8 @@ A_air_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'A_air.txt'
+      - 'off'
 
 h_snow_ptype:
   description: Depth of snow (average through winter)
@@ -183,8 +183,8 @@ h_snow_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'h_snow.txt'
+      - 'off'
 rho_snow_ptype:
   description: Density of snow (average through winter)
   value:
@@ -218,8 +218,8 @@ rho_snow_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'rho_snow.txt'
+      - 'off'
 
 vwc_H2O_ptype:
   description: Soil volumetric water content (thaw season; e.g., August)
@@ -254,8 +254,8 @@ vwc_H2O_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'vwc.txt'
+      - 'off'
 
 Hvgf_ptype:
   description: Height of vegetation in frozen period
@@ -290,8 +290,8 @@ Hvgf_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'hvgf.txt'
+      - 'off'
 Hvgt_ptype:
   description: Height of vegetation in thawed period
   value:
@@ -325,8 +325,8 @@ Hvgt_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'hvgt.txt'
+      - 'off'
 Dvf_ptype:
   description: Thermal diffusivity of vegetation in frozen period
   value:
@@ -360,8 +360,8 @@ Dvf_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'dvf.txt'
+      - 'off'
 Dvt_ptype:
   description: Thermal diffusivity of vegetation in thawed period
   value:
@@ -395,8 +395,8 @@ Dvt_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'dvt.txt'
+      - 'off'
 
 SAVE_ALT_GRIDS:
   description: Option to save grids of active layer thickness
@@ -410,7 +410,7 @@ ALT_file:
   description: Name of ALT output file
   value:
     type: string
-    default: ALT.nc
+    default: ALT
 SAVE_TPS_GRIDS:
   description: Option to save grids of temperature at permafrost surface
   value:
@@ -423,4 +423,4 @@ TPS_file:
   description: Name of TPS output file
   value:
     type: string
-    default: TPS.nc
+    default: TPS

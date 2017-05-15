@@ -66,8 +66,8 @@ T_air_min_file:
     type: file
     default: 'off'
     files:
-      - 'off'
       - 'fn_t_air_min.dat'
+      - 'off'
 T_air_max_ptype:
   description: Mean temperature of warmest month per modeled year
   value:
@@ -103,8 +103,8 @@ T_air_max_file:
     type: file
     default: 'off'
     files:
+      - 'fn_t_air_max.dat'
       - 'off'
-      - 'fn_t_air_min.dat'
 start_year:
   description: Simulation start time
   value:
