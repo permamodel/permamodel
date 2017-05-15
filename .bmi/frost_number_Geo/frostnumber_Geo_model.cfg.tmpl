@@ -31,10 +31,10 @@ grid_rows                | {grid_rows}                        | int    | number 
 grid_columns             | {grid_columns}                     | int    | number of columns in model grid (xdim)
 # Dates are converted to datetime.date objects
 model_reference_date     | {model_reference_date}             | string | model dates are relative to this date
-model_start_date         | {model_start_date}                 | string | first day of model run
-model_end_date           | {model_end_date}                   | string | last day of model run
+model_start_date         | {model_start_date}                 | string | first date of model run
+model_end_date           | {model_end_date}                   | string | last date of model run
 # timestep is converted to datetime.timedelta object
-model_timestep           | {model_timestep}                   | int    | model timestep (days)
+model_timestep           | {model_timestep}                   | int    | model timestep (years)
 # the input grids must be specified by hand
 # Each line contains a complete field valid from the specified date until the next grid is given
 # the first grid_date is the first valid model date

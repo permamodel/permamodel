@@ -86,26 +86,26 @@ model_reference_date:
   description: Model time is relative to this date
   value:
     type: string
-    default: '1900-01-01'
-    units: '-'
+    default: '1900'
+    units: 'yr'
 model_start_date:
-  description: First day of model run
+  description: First date of model run
   value:
     type: string
-    default: '1901-01-01'
-    units: '-'
+    default: '1901'
+    units: 'yr'
 model_end_date:
-  description: Last day of model run
+  description: Last date of model run
   value:
     type: string
-    default: '1905-12-31'
-    units: '-'
+    default: '1905'
+    units: 'yr'
 model_timestep:
   description: Model time step
   value:
     type: int
     default: 1
-    units: 'days'
+    units: 'yr'
 n_temperature_grid_fields:
   description: Number of full grids provided
   value:
