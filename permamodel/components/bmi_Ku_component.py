@@ -167,8 +167,11 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         self._model.initialize(cfg_file=cfg_file)
         
         # make 2 vars to store each results and used for write out.
-        self.output_alt = [];
-        self.output_tps = [];
+        n_lat = np.size(self._model.lat)
+        n_lon = np.size(self._model.lon)  
+        n_time = self._model.end_year-self._model.start_year+1.0
+        self.output_alt = np.zeros((n_time,n_lat,n_lon))*np.nan;
+        self.output_tps = np.zeros((n_time,n_lat,n_lon))*np.nan;
 
         # Verify that all input and output variable names are in the
         # variable name and the units map
@@ -180,6 +183,8 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         for varname in self._output_var_names:
             assert(varname in self._var_name_map)
             assert(varname in self._var_units_map)
+            
+        self._model.cont = -1.0
 
         gridnumber = 0
         for varname in self._input_var_names:
@@ -273,8 +278,12 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         # Update the time
         self._model.year += self._model.dt
         
-        self.output_alt = np.append(self.output_alt, self._model.Zal)
-        self.output_tps = np.append(self.output_tps, self._model.Tps)
+        self._model.cont = self._model.cont + 1.0
+        
+#        self.output_alt = np.append(self.output_alt, self._model.Zal)
+#        self.output_tps = np.append(self.output_tps, self._model.Tps)
+        self.output_alt[self._model.cont,:,:] = self._model.Zal
+        self.output_tps[self._model.cont,:,:] = self._model.Tps
         
         # Get new input values
         self._model.read_input_files()
@@ -468,8 +477,17 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         #if (self.SAVE_MR_GRIDS):
         #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
 #        self.ALT_file  = self.out_directory + self.ALT_file
-        
+        try:        
+            assert self._model.SAVE_ALT_GRIDS
+        except:
+            print 'NO OUTPUT of ALT'
+        try:
+            assert self._model.SAVE_TPS_GRIDS
+        except:
+            print 'NO OUTPUT of TPS'
+            
         if (self._model.SAVE_ALT_GRIDS):
+            
             self._model.write_out_ncfile(self._model.ALT_file, self.output_alt)
             
 #        self.TPS_file  = self.out_directory + self.TPS_file

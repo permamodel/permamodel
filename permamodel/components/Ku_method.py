@@ -347,6 +347,12 @@ class Ku_method( perma_base.PermafrostComponent ):
         percent_silt = self.p_silt / tot_percent
         percent_peat = self.p_peat / tot_percent
         
+        self.mask = tot_percent;
+        self.mask[np.where(tot_percent<=0.9)] = np.nan
+        self.mask[np.where(tot_percent>0.9)] = 1.0
+        
+        self.tot_percent = tot_percent
+        
         # Estimate thermal conductivity for composed soil
         
         method_option = 3
@@ -533,11 +539,22 @@ class Ku_method( perma_base.PermafrostComponent ):
                 K_star = self.Kt
             
 
+                
         self.Tgs=Tgs
         self.Ags=Ags
         self.Tps_numerator=Tps_numerator
 
         self.Tps = self.Tps_numerator/K_star
+        
+        if n_grid > 1:        
+        
+            self.Tps[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
+            
+        else:
+            
+            if self.Tps_numerator>0.0:
+                self.Tps = np.nan
+
 
     #   update_TOP_temperatures()
     #-------------------------------------------------------------------
@@ -584,18 +601,19 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         if n_grid > 1:        
         
-            Zal[np.where(Zal<=0.)] = np.nan
+            Zal[np.where(Zal<=0.01)] = np.nan
             Zal[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
             Zal[np.where(np.isnan(Zal))] = np.nan
             
         else:
             
-            if self.Tps_numerator>0.0 or Zal<=0.0 or np.isnan(Zal):
+            if self.Tps_numerator>0.0 or Zal<=0.01 or np.isnan(Zal):
                 Zal = np.nan
 
         self.Aps = Aps;
-        self.Zc  = Zc;
+        self.Zc  = Zc;  
         self.Zal = Zal;
+                
         
     #   update_ALT()
     #-------------------------------------------------------------------
@@ -872,6 +890,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         # Initialize the output variables (internal names)
         self.Tps = np.float32(-999.99)
         self.Zal = np.float32(-999.99)
+        self.cont = 0.0
 
         #-----------------------------------------------
         # Load component parameters from a config file
@@ -1021,10 +1040,11 @@ class Ku_method( perma_base.PermafrostComponent ):
             # File is ASCII text with one value per line.
             #----------------------------------------------
 #            data = np.loadtxt(file_name)
+            print self.cont
             from netCDF4 import Dataset
             for var in file_unit.variables.keys():
                 if (var != 'time' and var[0:3] !='lat' and var[0:3] != 'lon'):
-                    data  = file_unit.variables[var][:]
+                    data  = file_unit.variables[var][self.cont,:,:]
                                    
         else:
             raise RuntimeError('No match found for "var_type".')
@@ -1186,7 +1206,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         n_lat = np.size(self.lat)
         n_lon = np.size(self.lon)
         
-        ALT = varname+0.;
+        print np.shape(varname)
+        
+        ALT = varname + 0.0 #self.mask;
         idx = np.where(np.isnan(ALT))
         ALT[idx] = -999.99;
         
@@ -1235,7 +1257,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         # ==== Data ====
         temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('lat','lon','time'))
         temp.units = units
-        temp.missing_value = '-999.99'
+        temp.missing_value = -999.99
         temp.long_name = long_name
         temp[:] = ALT;
 #        
