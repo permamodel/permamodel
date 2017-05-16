@@ -275,6 +275,10 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         assert_true(grid_id < self.ngrids)
         return np.array([1, 1], dtype='float32')
 
+    # Todo: Revise once we can work with georeferenced data in the CMF.
+    def get_grid_origin(self, grid_id):
+        return np.array([0.0, 0.0], dtype='float32')
+
     def get_grid_rank(self, var_id):
         """Rank of grid."""
         return len(self.get_grid_shape(var_id))
