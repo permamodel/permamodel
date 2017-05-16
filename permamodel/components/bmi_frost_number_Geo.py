@@ -73,7 +73,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             'frostnumber__stefan':                                '1'}
 
     def initialize(self, cfg_file=None):
-        self._model = frost_number_Geo.FrostnumberGeoMethod()
+        self._model = frost_number_Geo.FrostnumberGeoMethod(cfg_file)
 
         self._model.initialize_frostnumberGeo_component()
 
