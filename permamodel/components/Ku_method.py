@@ -155,7 +155,7 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         if self.T_air_type.lower() == 'grid': # these lines just available for GRID inputs
 
-            [Lat_list, Lon_list] = self.read_nc_lat_lon(self.T_air_file, self.T_air_type)
+            [Lat_list, Lon_list] = self.read_nc_lat_lon(self.T_air_unit, self.T_air_type)
                         
             if Lon_list is not None:
                 self.lon = Lon_list 
@@ -967,7 +967,7 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         self.status = 'initialized'
     
-    def read_nc_lat_lon(self, file_name, var_type):
+    def read_nc_lat_lon(self, file_unit, var_type):
         
         if (var_type.lower() == 'scalar'):
             #-------------------------------------------
@@ -985,9 +985,12 @@ class Ku_method( perma_base.PermafrostComponent ):
             lon = None
             
         elif (var_type.lower() == 'grid'):
-            
-            lat = self.ncread(file_name, 'latitude')
-            lon = self.ncread(file_name, 'longitude')
+            for var in file_unit.variables.keys():
+                if var[0:3] =='lat':
+                    lat = file_unit.variables[var][:]
+                if var[0:3] =='lon':
+                    lon = file_unit.variables[var][:]
+#            lon = self.ncread(file_unit, 'longitude')
             
             if (np.min(lon) > 0.):
             	lon = np.mod((lon+180.),360.) -180.
@@ -1040,7 +1043,7 @@ class Ku_method( perma_base.PermafrostComponent ):
             # File is ASCII text with one value per line.
             #----------------------------------------------
 #            data = np.loadtxt(file_name)
-            print self.cont
+#            print self.cont
             from netCDF4 import Dataset
             for var in file_unit.variables.keys():
                 if (var != 'time' and var[0:3] !='lat' and var[0:3] != 'lon'):
@@ -1206,7 +1209,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         n_lat = np.size(self.lat)
         n_lon = np.size(self.lon)
         
-        print np.shape(varname)
+#        print np.shape(varname)
         
         ALT = varname + 0.0 #self.mask;
         idx = np.where(np.isnan(ALT))
