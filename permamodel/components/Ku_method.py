@@ -1255,7 +1255,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
                
         # ==== Data ====
-        temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('lat','lon','time'))
+        temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('time','lat','lon'))
         temp.units = units
         temp.missing_value = -999.99
         temp.long_name = long_name
