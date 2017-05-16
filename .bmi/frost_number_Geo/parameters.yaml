@@ -61,8 +61,11 @@ degree_days_method:
 input_var_source:
   description: 'Source of input variables: WMT or Default'
   value:
-    type: string
+    type: choice
     default: Default
+    choices:
+      - Default
+      - WMT
     units: '-'
 grid_type:
   description: Form of the grid
@@ -89,19 +92,25 @@ model_reference_date:
     default: '1900'
     units: 'yr'
 model_start_date:
-  description: First date of model run
+  description: Simulation start time
   value:
     type: string
     default: '1901'
+    range:
+      min: '1901'
+      max: '2009'
     units: 'yr'
 model_end_date:
-  description: Last date of model run
+  description: Simulation end time
   value:
     type: string
     default: '1905'
+    range:
+      min: '1901'
+      max: '2009'
     units: 'yr'
 model_timestep:
-  description: Model time step
+  description: Simulation time step
   value:
     type: int
     default: 1
