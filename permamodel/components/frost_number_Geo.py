@@ -362,11 +362,11 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                                              dtype=np.float32)
         self._temperature_current.fill(np.nan)
 
-        # Initialize the temperature 'months' array, of last 12 months
-        months_grid_shape = (12, self._grid_shape[0], self._grid_shape[1])
-        self._temperature_months = np.zeros(months_grid_shape,
-                                             dtype=np.float32)
-        self._temperature_months.fill(np.nan)
+        # Initialize the Jan and Jul arrays
+        self._temperature_jan = np.zeros(self._grid_shape, dtype=np.float32)
+        self._temperature_jan.fill(np.nan)
+        self._temperature_jul = np.zeros(self._grid_shape, dtype=np.float32)
+        self._temperature_jul.fill(np.nan)
 
         # Initialize the Precip and SoilProperites arrays if needed
         if self._calc_surface_fn:
@@ -771,11 +771,11 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         if self._using_WMT:
             # With WMT, the input variables will be set externally via BMI
             # Here, we assume the values of the preceding year will be in
-            # the self._temperature_months arrays.  And we will interpret
+            # the self._temperature_[jan|jul] arrays.  And we will interpret
             # January (index 0) as coldest, and July (index 6) as warmest
             if self._dd_method == 'MinJanMaxJul':
-                self.T_air_min = self._temperature_months[0]
-                self.T_air_max = self._temperature_months[6]
+                self.T_air_min = self._temperature_jan
+                self.T_air_max = self._temperature_jul
             else:
                 raise ValueError("Degree days method %s not recognized"
                                  % self._dd_method)

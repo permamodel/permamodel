@@ -207,33 +207,23 @@ def test_FNGeo_get_grid_spacing():
 
     fng.finalize()  # Must have this or get IOError later
 
-def test_FNGeo_monthly_temperature_is_grid():
-    """ Test that FNGeo BMI has input variable for monthly data """
+def test_FNGeo_jan_and_jul_temperatures_are_grids():
+    """ Test that FNGeo BMI has input variables for jan and jul data """
     fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
     fng.initialize()
 
     airtemp_gridid = fng.get_var_grid('atmosphere_bottom_air__temperature')
-    monthlyairtemp_gridid = \
-            fng.get_var_grid('atmosphere_bottom_air__temperature_months')
-    assert_true(monthlyairtemp_gridid is not None)
+    jan_airtemp_gridid = \
+            fng.get_var_grid('atmosphere_bottom_air__temperature_mean_jan')
+    assert_true(jan_airtemp_gridid is not None)
+    jul_airtemp_gridid = \
+            fng.get_var_grid('atmosphere_bottom_air__temperature_mean_jul')
+    assert_true(jul_airtemp_gridid is not None)
 
     fng.finalize()  # Must have this or get IOError later
 
-def test_FNGeo_monthly_temperature_shape_of_12_currents():
-    """ Test that FNGeo BMI has input variable with latest 12 months temp """
-    fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
-    fng.initialize()
-
-    airtemp_values = fng.get_value('atmosphere_bottom_air__temperature')
-    monthly_airtemp_values = \
-        fng.get_value('atmosphere_bottom_air__temperature_months')
-    assert_equal(monthly_airtemp_values.shape[0], 12)
-    assert_equal(monthly_airtemp_values.shape[1:], airtemp_values.shape)
-
-    fng.finalize()  # Must have this or get IOError later
-
-def test_FNGeo_can_set_monthly_temperatures():
-    """ Test that FNGeo BMI has input variable with latest 12 months temp """
+def test_FNGeo_can_set_current_and_jan_temperatures():
+    """ Test that FNGeo BMI can set jan temperature field """
     fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
     fng.initialize()
 
@@ -241,16 +231,14 @@ def test_FNGeo_can_set_monthly_temperatures():
     airtemp_values = np.ones_like(airtemp_values)
     fng.set_value('atmosphere_bottom_air__temperature', airtemp_values)
 
-    monthly_airtemp_values = \
-        fng.get_value('atmosphere_bottom_air__temperature_months')
-    monthly_airtemp_values = np.ones_like(monthly_airtemp_values)
-    for n in np.arange(12):
-        monthly_airtemp_values[n] *= n
-    fng.set_value('atmosphere_bottom_air__temperature_months',
-                  monthly_airtemp_values)
+    jan_airtemp_values = \
+        fng.get_value('atmosphere_bottom_air__temperature_mean_jan')
+    jan_airtemp_values = np.ones_like(jan_airtemp_values)
+    fng.set_value('atmosphere_bottom_air__temperature_mean_jan',
+                  jan_airtemp_values)
     assert_array_equal(
         fng.get_value('atmosphere_bottom_air__temperature'),
-        fng.get_value('atmosphere_bottom_air__temperature_months')[1])
+        fng.get_value('atmosphere_bottom_air__temperature_mean_jan'))
 
     fng.finalize()  # Must have this or get IOError later
 
@@ -277,18 +265,22 @@ def test_FNGeo_simulate_WMT_run():
 
     # Until set, e.g. by WMT with cru values, all vals are NaN
     airtemp_values = fng.get_value('atmosphere_bottom_air__temperature')
-    mon_airtemp_values = \
-        fng.get_value('atmosphere_bottom_air__temperature_months')
+    jan_airtemp_values = \
+        fng.get_value('atmosphere_bottom_air__temperature_mean_jan')
+    jul_airtemp_values = \
+        fng.get_value('atmosphere_bottom_air__temperature_mean_jul')
 
     # In WMT mode, must set monthly temperature values, then run update_frac(0)
     #   to get valid values in frost number array
-    # month "0" is January [use as 'coldest']
-    # month "6" is July    [use as 'warmest']
+    # use January as 'coldest'
+    # use July as 'warmest'
     airtemps_of_one = np.ones_like(airtemp_values)
-    mon_airtemp_values[0, :, :] = -10.0 * airtemps_of_one[:, :]
-    mon_airtemp_values[6, :, :] = 10.0 * airtemps_of_one[:, :]
-    fng.set_value('atmosphere_bottom_air__temperature_months',
-                  mon_airtemp_values)
+    jan_airtemp_values[:, :] = -10.0 * airtemps_of_one[:, :]
+    jul_airtemp_values[:, :] = 10.0 * airtemps_of_one[:, :]
+    fng.set_value('atmosphere_bottom_air__temperature_mean_jan',
+                  jan_airtemp_values)
+    fng.set_value('atmosphere_bottom_air__temperature_mean_jul',
+                  jul_airtemp_values)
     fng.update_frac(0)
     airfn_values = fng.get_value('frostnumber__air')
 

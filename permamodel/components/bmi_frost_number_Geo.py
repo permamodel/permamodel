@@ -47,7 +47,8 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
         self._input_var_names = (
             'atmosphere_bottom_air__temperature',
-            'atmosphere_bottom_air__temperature_months',
+            'atmosphere_bottom_air__temperature_mean_jan',
+            'atmosphere_bottom_air__temperature_mean_jul',
             )
 
         self._output_var_names = (
@@ -59,7 +60,8 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             # These are the corresponding CSDMS standard names
             # NOTE: we need to look up for the corresponding standard names
             'atmosphere_bottom_air__temperature': '_temperature_current',
-            'atmosphere_bottom_air__temperature_months': '_temperature_months',
+            'atmosphere_bottom_air__temperature_mean_jan': '_temperature_jan',
+            'atmosphere_bottom_air__temperature_mean_jul': '_temperature_jul',
             'datetime__start':                    '_start_date',
             'datetime__end':                      '_end_date',
             'frostnumber__air':                   'air_frost_number_Geo',
@@ -70,7 +72,8 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         self._var_units_map = {
             # These are the links to the model's variables' units
             'atmosphere_bottom_air__temperature':                 'deg_C',
-            'atmosphere_bottom_air__temperature_months':          'deg_C',
+            'atmosphere_bottom_air__temperature_mean_jan':          'deg_C',
+            'atmosphere_bottom_air__temperature_mean_jul':          'deg_C',
             'frostnumber__air':                                   '1',
             'frostnumber__surface':                               '1',
             'frostnumber__stefan':                                '1'}
@@ -91,8 +94,10 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             # should be consistent with _var_name_map
             'atmosphere_bottom_air__temperature':
             self._model._temperature_current,
-            'atmosphere_bottom_air__temperature_months':
-            self._model._temperature_months,
+            'atmosphere_bottom_air__temperature_mean_jan':
+            self._model._temperature_jan,
+            'atmosphere_bottom_air__temperature_mean_jul':
+            self._model._temperature_jul,
             'datetime__start':          self._model._start_date,
             'datetime__end':            self._model._end_date,
             'frostnumber__air':         self._model.air_frost_number_Geo,
