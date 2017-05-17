@@ -3,4 +3,4 @@ language: python
 
 package: permamodel.components.bmi_Ku_component
 class: BmiKuMethod
-initialize_args: "ku_model_2D.cfg"
+initialize_args: "ku_geo_model.cfg"
