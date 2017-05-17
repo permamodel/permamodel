@@ -131,12 +131,14 @@ def test_frost_number_get_end_time_returns_scalar_float():
 def test_frostnumber_get_attribute():
     fn = bmi_frost_number.BmiFrostnumberMethod()
     fn.initialize(cfg_file=onesite_multiyear_filename)
+    # Check an attribute that exists
     this_att = fn.get_attribute('time_units')
     assert_equal(this_att, 'years')
-    this_att = fn.get_attribute('not_an_attribute')
-    assert_raises(KeyError, this_att, 'years')
 
-def test_frostnumber_update_frac():
+    # Check an attribute that doesn't exist
+    assert_raises(KeyError, fn.get_attribute, 'not_an_attribute')
+
+def test_frostnumber_update():
     fn = bmi_frost_number.BmiFrostnumberMethod()
     fn.initialize(cfg_file=onesite_multiyear_filename)
     fn.update()

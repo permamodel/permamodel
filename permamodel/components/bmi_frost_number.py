@@ -122,10 +122,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         try:
             return self._att_map[att_name.lower()]
         except KeyError:
-            print('###################################################')
-            print(' ERROR: Could not find attribute: %s' % att_name)
-            print('###################################################')
-            print(' ')
+            raise KeyError("No attribute %s" % str(att_name))
 
     def get_input_var_names(self):
         #--------------------------------------------------------
@@ -156,24 +153,10 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
     def update_frac(self, time_fraction):
         """ This is for BMI compliance """
         # Only increment the time by a partial time step
-
-        # Determine which year the model is currently in
-        current_model_year = int(self._model.year)
-
-        # Update the time with a partial time step
-        self._model.year += time_fraction * self._model.dt
-
-        # Determine if the model year is now different
-        new_model_year = int(self._model.year)
-
-        # If the year has changed, change the values
-        if new_model_year > current_model_year:
-            # Get new input values
-            self._model.read_input_files()
-
-            # Calculate the new frost number values
-            self._model.calculate_frost_numbers()
-            self._values['frostnumber__air'] = self._model.air_frost_number
+        # Currently, only non-fractions are allowed, but this could be
+        #  0, 1, 2, ...
+        self._model.update(frac=time_fraction)
+        self._values['frostnumber__air'] = self._model.air_frost_number
 
     def update_until(self, stop_year):
         """ BMI-required, run until a specified time """
