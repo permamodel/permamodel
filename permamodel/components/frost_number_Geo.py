@@ -603,8 +603,6 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         ### For now, the X and Y dimensions are just the indexes
         # X dimension
         self._output_fid.createDimension("x", self._grid_xdim)
-        print('Mark, delete this line and the next if no err on prev line (600)')
-        # self._output_fid.createDimension("x", self._configuration['grid_shape'][1])
         self._nc_x = \
             self._output_fid.createVariable('x', 'f', ('x',), zlib=True)
         setattr(self._nc_x, 'x_long_name', 'projected x direction')
@@ -617,8 +615,6 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
 
         # Y dimension
         self._output_fid.createDimension("y", self._grid_ydim)
-        print('Mark, delete this line and the next if no err on prev line (614)')
-        # self._output_fid.createDimension("y", self._configuration['grid_shape'][0])
         self._nc_y = \
             self._output_fid.createVariable('y', 'f', ('y',), zlib=True)
         setattr(self._nc_y, 'y_long_name', 'projected y direction')
