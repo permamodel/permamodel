@@ -112,6 +112,7 @@ T_air_file:
     type: file
     default: 'off'
     files:
+      - 'T_air.txt'
       - 'off'
 A_air_ptype:
   description: Surface air temperature amplitude (annual mean)
@@ -146,6 +147,7 @@ A_air_file:
     type: file
     default: 'off'
     files:
+      - 'A_air.txt'
       - 'off'
 
 h_snow_ptype:
@@ -181,6 +183,7 @@ h_snow_file:
     type: file
     default: 'off'
     files:
+      - 'h_snow.txt'
       - 'off'
 rho_snow_ptype:
   description: Density of snow (average through winter)
@@ -215,6 +218,7 @@ rho_snow_file:
     type: file
     default: 'off'
     files:
+      - 'rho_snow.txt'
       - 'off'
 
 vwc_H2O_ptype:
@@ -250,6 +254,7 @@ vwc_H2O_file:
     type: file
     default: 'off'
     files:
+      - 'vwc.txt'
       - 'off'
 
 Hvgf_ptype:
@@ -285,6 +290,7 @@ Hvgf_file:
     type: file
     default: 'off'
     files:
+      - 'hvgf.txt'
       - 'off'
 Hvgt_ptype:
   description: Height of vegetation in thawed period
@@ -319,6 +325,7 @@ Hvgt_file:
     type: file
     default: 'off'
     files:
+      - 'hvgt.txt'
       - 'off'
 Dvf_ptype:
   description: Thermal diffusivity of vegetation in frozen period
@@ -353,6 +360,7 @@ Dvf_file:
     type: file
     default: 'off'
     files:
+      - 'dvf.txt'
       - 'off'
 Dvt_ptype:
   description: Thermal diffusivity of vegetation in thawed period
@@ -387,11 +395,11 @@ Dvt_file:
     type: file
     default: 'off'
     files:
+      - 'dvt.txt'
       - 'off'
 
-
 SAVE_ALT_GRIDS:
-  description: option to save result or not
+  description: Option to save grids of active layer thickness
   value:
     type: choice
     default: No
@@ -399,7 +407,20 @@ SAVE_ALT_GRIDS:
     - Yes
     - No
 ALT_file:
-  description: Name of output file
+  description: Name of ALT output file
   value:
     type: string
-    default: ALT.nc
+    default: ALT
+SAVE_TPS_GRIDS:
+  description: Option to save grids of temperature at permafrost surface
+  value:
+    type: choice
+    default: No
+    choices:
+    - Yes
+    - No
+TPS_file:
+  description: Name of TPS output file
+  value:
+    type: string
+    default: TPS

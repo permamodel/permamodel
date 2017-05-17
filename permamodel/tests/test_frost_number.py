@@ -96,7 +96,7 @@ def test_frostnumber_method_updates():
     fn.initialize(cfg_file=cfg_file)
     fn.update()
     assert_equal(fn.year, 2001)
-    assert_almost_equal(fn.air_frost_number, 0.5, places=3)
+    assert_almost_equal(fn.air_frost_number, 0.63267, places=3)
 
 def test_frostnumber_generates_output():
     """ Test fn generates output file """
