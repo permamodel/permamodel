@@ -47,6 +47,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
         self._input_var_names = (
             'atmosphere_bottom_air__temperature',
+            'atmosphere_bottom_air__temperature_months',
             )
 
         self._output_var_names = (
@@ -58,6 +59,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             # These are the corresponding CSDMS standard names
             # NOTE: we need to look up for the corresponding standard names
             'atmosphere_bottom_air__temperature': '_temperature_current',
+            'atmosphere_bottom_air__temperature_months': '_temperature_months',
             'datetime__start':                    '_start_date',
             'datetime__end':                      '_end_date',
             'frostnumber__air':                   'air_frost_number_Geo',
@@ -68,6 +70,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         self._var_units_map = {
             # These are the links to the model's variables' units
             'atmosphere_bottom_air__temperature':                 'deg_C',
+            'atmosphere_bottom_air__temperature_months':          'deg_C',
             'frostnumber__air':                                   '1',
             'frostnumber__surface':                               '1',
             'frostnumber__stefan':                                '1'}
@@ -88,6 +91,8 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             # should be consistent with _var_name_map
             'atmosphere_bottom_air__temperature':
             self._model._temperature_current,
+            'atmosphere_bottom_air__temperature_months':
+            self._model._temperature_months,
             'datetime__start':          self._model._start_date,
             'datetime__end':            self._model._end_date,
             'frostnumber__air':         self._model.air_frost_number_Geo,
@@ -207,6 +212,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     def get_value_ref(self, var_name):
         """Reference to values."""
+        print("var_name: %s" % str(var_name))
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
@@ -240,6 +246,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         # This version is simpler than above, but it may break when
         #   using scalars because the resulting variable doesn't
         #   have a shape
+        print("in get_value, var_name: %s" % str(var_name))
         return np.asarray(self.get_value_ref(var_name))
 
 

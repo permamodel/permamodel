@@ -362,6 +362,12 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                                              dtype=np.float32)
         self._temperature_current.fill(np.nan)
 
+        # Initialize the temperature 'months' array, of last 12 months
+        months_grid_shape = (12, self._grid_shape[0], self._grid_shape[1])
+        self._temperature_months = np.zeros(months_grid_shape,
+                                             dtype=np.float32)
+        self._temperature_months.fill(np.nan)
+
         # Initialize the Precip and SoilProperites arrays if needed
         if self._calc_surface_fn:
             self.Precip = np.zeros(self._grid_shape, dtype=np.float32)

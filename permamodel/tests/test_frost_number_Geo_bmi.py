@@ -170,7 +170,6 @@ def test_FNGeo_get_set_value():
     fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
     fng.initialize()
 
-    airtempref = fng.get_value_ref('atmosphere_bottom_air__temperature')
     airtempval = fng.get_value('atmosphere_bottom_air__temperature')
     airtempnew = 123 * np.ones_like(airtempval)
     fng.set_value('atmosphere_bottom_air__temperature', airtempnew)
@@ -207,3 +206,49 @@ def test_FNGeo_get_grid_spacing():
 
     fng.finalize()  # Must have this or get IOError later
 
+def test_FNGeo_monthly_temperature_is_grid():
+    """ Test that FNGeo BMI has input variable for monthly data """
+    fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
+    fng.initialize()
+
+    airtemp_gridid = fng.get_var_grid('atmosphere_bottom_air__temperature')
+    monthlyairtemp_gridid = \
+            fng.get_var_grid('atmosphere_bottom_air__temperature_months')
+    assert_true(monthlyairtemp_gridid is not None)
+
+    fng.finalize()  # Must have this or get IOError later
+
+def test_FNGeo_monthly_temperature_shape_of_12_currents():
+    """ Test that FNGeo BMI has input variable with latest 12 months temp """
+    fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
+    fng.initialize()
+
+    airtemp_values = fng.get_value('atmosphere_bottom_air__temperature')
+    monthly_airtemp_values = \
+        fng.get_value('atmosphere_bottom_air__temperature_months')
+    assert_equal(monthly_airtemp_values.shape[0], 12)
+    assert_equal(monthly_airtemp_values.shape[1:], airtemp_values.shape)
+
+    fng.finalize()  # Must have this or get IOError later
+
+def test_FNGeo_can_set_monthly_temperatures():
+    """ Test that FNGeo BMI has input variable with latest 12 months temp """
+    fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
+    fng.initialize()
+
+    airtemp_values = fng.get_value('atmosphere_bottom_air__temperature')
+    airtemp_values = np.ones_like(airtemp_values)
+    fng.set_value('atmosphere_bottom_air__temperature', airtemp_values)
+
+    monthly_airtemp_values = \
+        fng.get_value('atmosphere_bottom_air__temperature_months')
+    monthly_airtemp_values = np.ones_like(monthly_airtemp_values)
+    for n in np.arange(12):
+        monthly_airtemp_values[n] *= n
+    fng.set_value('atmosphere_bottom_air__temperature_months',
+                  monthly_airtemp_values)
+    assert_array_equal(
+        fng.get_value('atmosphere_bottom_air__temperature'),
+        fng.get_value('atmosphere_bottom_air__temperature_months')[1])
+
+    fng.finalize()  # Must have this or get IOError later
