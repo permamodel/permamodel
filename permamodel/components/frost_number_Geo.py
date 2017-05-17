@@ -774,15 +774,15 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
     def get_input_vars(self):
         if self._using_WMT:
             # With WMT, the input variables will be set externally via BMI
+            # Here, we assume the values of the preceding year will be in
+            # the self._temperature_months arrays.  And we will interpret
+            # January (index 0) as coldest, and July (index 6) as warmest
             if self._dd_method == 'MinJanMaxJul':
-                if self._date_current.month == 7:
-                    self.T_air_min = self._temperature_current
-                else:
-                    self.T_air_max = self._temperature_current
+                self.T_air_min = self._temperature_months[0]
+                self.T_air_max = self._temperature_months[6]
             else:
                 raise ValueError("Degree days method %s not recognized"
                                  % self._dd_method)
-
             return
         elif self._using_Files or self._using_ConfigVals:
             # In standalone mode, variables must be set locally

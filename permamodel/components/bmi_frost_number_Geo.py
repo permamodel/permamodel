@@ -212,7 +212,6 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     def get_value_ref(self, var_name):
         """Reference to values."""
-        print("var_name: %s" % str(var_name))
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
@@ -246,7 +245,6 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         # This version is simpler than above, but it may break when
         #   using scalars because the resulting variable doesn't
         #   have a shape
-        print("in get_value, var_name: %s" % str(var_name))
         return np.asarray(self.get_value_ref(var_name))
 
 

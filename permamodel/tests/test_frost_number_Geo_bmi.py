@@ -13,7 +13,8 @@ from .. import examples_directory
 from nose.tools import (assert_is_instance, assert_greater_equal,
                         assert_less_equal, assert_almost_equal,
                         assert_greater, assert_in, assert_true,
-                        assert_false, assert_equal, assert_raises)
+                        assert_false, assert_equal, assert_raises,
+                        assert_not_equal)
 from numpy.testing import assert_array_equal
 import datetime
 
@@ -250,5 +251,47 @@ def test_FNGeo_can_set_monthly_temperatures():
     assert_array_equal(
         fng.get_value('atmosphere_bottom_air__temperature'),
         fng.get_value('atmosphere_bottom_air__temperature_months')[1])
+
+    fng.finalize()  # Must have this or get IOError later
+
+def test_FNGeo_update_zero_fraction_does_not_change_time():
+    """ Test that running update_frac(0) does not change the time """
+    fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
+    fng.initialize()
+    init_time = fng.get_current_time()
+    fng.update_frac(0)
+    plus_zero_time = fng.get_current_time()
+    assert_equal(init_time, plus_zero_time)
+    fng.update()
+    one_update_time = fng.get_current_time()
+    assert_not_equal(init_time, one_update_time)
+
+    fng.finalize()  # Must have this or get IOError later
+
+def test_FNGeo_simulate_WMT_run():
+    """ Test that we can set values as if running in WMT """
+    fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
+    wmt_cfg_file = os.path.join(examples_directory, "FNGeo_WMT_testing.cfg")
+    fng.initialize(wmt_cfg_file)
+    assert_equal(fng._name, "Permamodel FrostnumberGeo Component")
+
+    # Until set, e.g. by WMT with cru values, all vals are NaN
+    airtemp_values = fng.get_value('atmosphere_bottom_air__temperature')
+    mon_airtemp_values = \
+        fng.get_value('atmosphere_bottom_air__temperature_months')
+
+    # In WMT mode, must set monthly temperature values, then run update_frac(0)
+    #   to get valid values in frost number array
+    # month "0" is January [use as 'coldest']
+    # month "6" is July    [use as 'warmest']
+    airtemps_of_one = np.ones_like(airtemp_values)
+    mon_airtemp_values[0, :, :] = -10.0 * airtemps_of_one[:, :]
+    mon_airtemp_values[6, :, :] = 10.0 * airtemps_of_one[:, :]
+    fng.set_value('atmosphere_bottom_air__temperature_months',
+                  mon_airtemp_values)
+    fng.update_frac(0)
+    airfn_values = fng.get_value('frostnumber__air')
+
+    assert_array_equal(0.5 * airtemps_of_one, airfn_values)
 
     fng.finalize()  # Must have this or get IOError later
