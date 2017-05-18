@@ -35,7 +35,7 @@ start_year:
   description: Simulation start time
   value:
     type: long
-    default: 2009
+    default: 2000
     range:
       min: 0
       max: 100000000
@@ -44,7 +44,7 @@ end_year:
   description: Simulation end time
   value:
     type: long
-    default: 2009
+    default: 2000
     range:
       min: 0
       max: 100000000
@@ -67,6 +67,8 @@ T_air_ptype:
     choices:
       - Scalar
       - Time_Series
+      - Grid
+      - Grid_Sequence
     units: degC
 T_air_dtype:
   description: T_air data type
@@ -87,12 +89,11 @@ T_air:
       max: 100.0
     units: degC
 T_air_file:
-  description: Time series file
+  description: Time series or grid file
   value:
     type: file
     default: 'off'
     files:
-      - 'T_air.txt'
       - 'off'
 A_air_ptype:
   description: Surface air temperature amplitude (annual mean)
@@ -102,6 +103,8 @@ A_air_ptype:
     choices:
       - Scalar
       - Time_Series
+      - Grid
+      - Grid_Sequence
     units: degC
 A_air_dtype:
   description: A_air data type
@@ -122,12 +125,11 @@ A_air:
       max: 100.0
     units: degC
 A_air_file:
-  description: Time series file
+  description: Time series or grid file
   value:
     type: file
     default: 'off'
     files:
-      - 'A_air.txt'
       - 'off'
 
 h_snow_ptype:
@@ -138,6 +140,8 @@ h_snow_ptype:
     choices:
       - Scalar
       - Time_Series
+      - Grid
+      - Grid_Sequence
     units: m
 h_snow_dtype:
   description: h_snow data type
@@ -158,12 +162,11 @@ h_snow:
       max: 5.0
     units: m
 h_snow_file:
-  description: Time series file
+  description: Time series or grid file
   value:
     type: file
     default: 'off'
     files:
-      - 'h_snow.txt'
       - 'off'
 rho_snow_ptype:
   description: Density of snow (average through winter)
@@ -173,6 +176,8 @@ rho_snow_ptype:
     choices:
       - Scalar
       - Time_Series
+      - Grid
+      - Grid_Sequence
     units: kg m-3
 rho_snow_dtype:
   description: rho_snow data type
@@ -193,12 +198,11 @@ rho_snow:
       max: 1.0e3
     units: kg m-3
 rho_snow_file:
-  description: Time series file
+  description: Time series or grid file
   value:
     type: file
     default: 'off'
     files:
-      - 'rho_snow.txt'
       - 'off'
 
 vwc_H2O_ptype:
@@ -209,6 +213,8 @@ vwc_H2O_ptype:
     choices:
       - Scalar
       - Time_Series
+      - Grid
+      - Grid_Sequence
     units: '-'
 vwc_H2O_dtype:
   description: vwc_H2O data type
@@ -229,12 +235,11 @@ vwc_H2O:
       max: 1.0
     units: '-'
 vwc_H2O_file:
-  description: Time series file
+  description: Time series or grid file
   value:
     type: file
     default: 'off'
     files:
-      - 'vwc.txt'
       - 'off'
 
 Hvgf_ptype:
@@ -245,6 +250,8 @@ Hvgf_ptype:
     choices:
       - Scalar
       - Time_Series
+      - Grid
+      - Grid_Sequence
     units: m
 Hvgf_dtype:
   description: Hvgf data type
@@ -265,12 +272,11 @@ Hvgf:
       max: 1.0
     units: m
 Hvgf_file:
-  description: Time series file
+  description: Time series or grid file
   value:
     type: file
     default: 'off'
     files:
-      - 'hvgf.txt'
       - 'off'
 Hvgt_ptype:
   description: Height of vegetation in thawed period
@@ -280,6 +286,8 @@ Hvgt_ptype:
     choices:
       - Scalar
       - Time_Series
+      - Grid
+      - Grid_Sequence
     units: m
 Hvgt_dtype:
   description: Hvgt data type
@@ -300,12 +308,11 @@ Hvgt:
       max: 1.0
     units: m
 Hvgt_file:
-  description: Time series file
+  description: Time series or grid file
   value:
     type: file
     default: 'off'
     files:
-      - 'hvgt.txt'
       - 'off'
 Dvf_ptype:
   description: Thermal diffusivity of vegetation in frozen period
@@ -315,6 +322,8 @@ Dvf_ptype:
     choices:
       - Scalar
       - Time_Series
+      - Grid
+      - Grid_Sequence
     units: 'm2 s-1'
 Dvf_dtype:
   description: Dvf data type
@@ -335,12 +344,11 @@ Dvf:
       max: 5.0E-6
     units: 'm2 s-1'
 Dvf_file:
-  description: Time series file
+  description: Time series or grid file
   value:
     type: file
     default: 'off'
     files:
-      - 'dvf.txt'
       - 'off'
 Dvt_ptype:
   description: Thermal diffusivity of vegetation in thawed period
@@ -350,6 +358,8 @@ Dvt_ptype:
     choices:
       - Scalar
       - Time_Series
+      - Grid
+      - Grid_Sequence
     units: 'm2 s-1'
 Dvt_dtype:
   description: Dvt data type
@@ -370,12 +380,11 @@ Dvt:
       max: 1.0E-6
     units: 'm2 s-1'
 Dvt_file:
-  description: Time series file
+  description: Time series or grid file
   value:
     type: file
     default: 'off'
     files:
-      - 'dvt.txt'
       - 'off'
 
 SAVE_ALT_GRIDS:
