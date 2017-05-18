@@ -291,6 +291,11 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
             # Grid shape
             self._grid_type = self._configuration['grid_type']
             self._grid_shape = self._configuration['grid_shape']
+            if len(self._grid_shape) == 2:
+                (self._grid_ydim, self._grid_xdim) = self._grid_shape
+            else:
+                raise ValueError("cannot handle grid of shape %s" %
+                                 str(self._grid_shape))
 
             # WMT provides an array called self._temperature_current[]
             # which will be set elsewhere and used in get_
@@ -356,6 +361,12 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         self._temperature_current = np.zeros(self._grid_shape,
                                              dtype=np.float32)
         self._temperature_current.fill(np.nan)
+
+        # Initialize the Jan and Jul arrays
+        self._temperature_jan = np.zeros(self._grid_shape, dtype=np.float32)
+        self._temperature_jan.fill(np.nan)
+        self._temperature_jul = np.zeros(self._grid_shape, dtype=np.float32)
+        self._temperature_jul.fill(np.nan)
 
         # Initialize the Precip and SoilProperites arrays if needed
         if self._calc_surface_fn:
@@ -591,8 +602,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
 
         ### For now, the X and Y dimensions are just the indexes
         # X dimension
-        # self._output_fid.createDimension("x", self._grid_xdim)
-        self._output_fid.createDimension("x", self._configuration['grid_shape'][1])
+        self._output_fid.createDimension("x", self._grid_xdim)
         self._nc_x = \
             self._output_fid.createVariable('x', 'f', ('x',), zlib=True)
         setattr(self._nc_x, 'x_long_name', 'projected x direction')
@@ -604,8 +614,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
             self._nc_x[x] = x
 
         # Y dimension
-        # self._output_fid.createDimension("y", self._grid_ydim)
-        self._output_fid.createDimension("y", self._configuration['grid_shape'][0])
+        self._output_fid.createDimension("y", self._grid_ydim)
         self._nc_y = \
             self._output_fid.createVariable('y', 'f', ('y',), zlib=True)
         setattr(self._nc_y, 'y_long_name', 'projected y direction')
@@ -688,7 +697,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         """ Compute the values for the current time, then update the time """
         years_change = 0
         if frac is not None:
-            print("Fractional times not yet permitted, rounding to nearest int")
+            #print("Fractional times not yet permitted, rounding to nearest int")
             years_change = self._timestep_duration * int(frac + 0.5)
         else:
             years_change = self._timestep_duration
@@ -725,10 +734,6 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                 self.get_date_from_timestep(self._timestep_current)
 
     def get_date_from_timestep(self, timestep):
-        #print("reference_date: %s" % str(self._reference_date))
-        #print("reference_date + %d years: %s" % (
-        #    timestep, self._reference_date + \
-        #    relativedelta(years=timestep*self._timestep_duration)))
         return self._reference_date + \
             relativedelta(years=timestep*self._timestep_duration)
 
@@ -761,15 +766,15 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
     def get_input_vars(self):
         if self._using_WMT:
             # With WMT, the input variables will be set externally via BMI
+            # Here, we assume the values of the preceding year will be in
+            # the self._temperature_[jan|jul] arrays.  And we will interpret
+            # January (index 0) as coldest, and July (index 6) as warmest
             if self._dd_method == 'MinJanMaxJul':
-                if self._date_current.month == 7:
-                    self.T_air_min = self._temperature_current
-                else:
-                    self.T_air_max = self._temperature_current
+                self.T_air_min = self._temperature_jan
+                self.T_air_max = self._temperature_jul
             else:
                 raise ValueError("Degree days method %s not recognized"
                                  % self._dd_method)
-
             return
         elif self._using_Files or self._using_ConfigVals:
             # In standalone mode, variables must be set locally
@@ -795,8 +800,6 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
 
         if t_date >= self._temperature_first_date and \
            t_date <= self._temperature_last_date:
-
-            #print("Getting temperature field for: %s" % str(t_date))
 
             t_index = self.get_temperature_month_index(t_date)
 
@@ -1038,7 +1041,6 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         where_nan = np.isnan(self.ddf + self.ddt)
         where_notnan = np.logical_not(np.isnan(self.ddf + self.ddt))
 
-        #print(self.ddf[where_notnan] + self.ddt[where_notnan])
         self.air_frost_number_Geo[where_nan] = np.nan
 
         self.air_frost_number_Geo[where_notnan] = \

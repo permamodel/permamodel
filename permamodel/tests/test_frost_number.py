@@ -37,8 +37,6 @@ def test_end_year_before_start_year_error():
     """ Test end_year before start_year """
     fn = frost_number.FrostnumberMethod()
     fn.initialize()
-    print("fn.start_year: %s" % str(fn.start_year))
-    print("fn.end_year: %s" % str(fn.end_year))
     fn.start_year = 2000
     fn.end_year = 1990
     fn.initialize_frostnumber_component()

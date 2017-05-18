@@ -4,6 +4,7 @@
 
 # Ignore standalone FrostnumberGeo output file
 FrostnumberGeo_output.nc
+FrostnumberGeo_WMT_output.nc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
