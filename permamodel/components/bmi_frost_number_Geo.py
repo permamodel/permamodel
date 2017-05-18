@@ -220,7 +220,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     def set_value(self, var_name, new_var_values):
         val = self.get_value_ref(var_name)
-        val[:] = new_var_values
+        val.flat = new_var_values
 
     def set_value_at_indices(self, var_name, indices, new_var_values):
         self.get_value_ref(var_name).flat[indices] = new_var_values
