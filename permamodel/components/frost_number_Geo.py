@@ -697,7 +697,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         """ Compute the values for the current time, then update the time """
         years_change = 0
         if frac is not None:
-            print("Fractional times not yet permitted, rounding to nearest int")
+            #print("Fractional times not yet permitted, rounding to nearest int")
             years_change = self._timestep_duration * int(frac + 0.5)
         else:
             years_change = self._timestep_duration
@@ -734,10 +734,6 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                 self.get_date_from_timestep(self._timestep_current)
 
     def get_date_from_timestep(self, timestep):
-        #print("reference_date: %s" % str(self._reference_date))
-        #print("reference_date + %d years: %s" % (
-        #    timestep, self._reference_date + \
-        #    relativedelta(years=timestep*self._timestep_duration)))
         return self._reference_date + \
             relativedelta(years=timestep*self._timestep_duration)
 
@@ -804,8 +800,6 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
 
         if t_date >= self._temperature_first_date and \
            t_date <= self._temperature_last_date:
-
-            #print("Getting temperature field for: %s" % str(t_date))
 
             t_index = self.get_temperature_month_index(t_date)
 
@@ -1047,7 +1041,6 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         where_nan = np.isnan(self.ddf + self.ddt)
         where_notnan = np.logical_not(np.isnan(self.ddf + self.ddt))
 
-        #print(self.ddf[where_notnan] + self.ddt[where_notnan])
         self.air_frost_number_Geo[where_nan] = np.nan
 
         self.air_frost_number_Geo[where_notnan] = \

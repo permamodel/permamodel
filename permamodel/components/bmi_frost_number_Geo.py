@@ -216,11 +216,11 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return self._model._timestep_duration
 
     def get_value_ref(self, var_name):
-        """Reference to values."""
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
-        self._values[var_name] = new_var_values
+        val = self.get_value_ref(var_name)
+        val[:] = new_var_values
 
     def set_value_at_indices(self, var_name, indices, new_var_values):
         self.get_value_ref(var_name).flat[indices] = new_var_values
@@ -235,45 +235,25 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
     def get_value(self, var_name):
-        """Copy of values."""
-        # Original version: from bmi_heat.py
-        #return self.get_value_ref(var_name).copy()
-
-        # Version to convert to numpy array for bmi-tester compliance
-        # Note: converting to np arrays on the fly here
-        # Note: float values don't have a copy() function
-        #try:
-        #    return np.array(self.get_value_ref(var_name).copy())
-        #except AttributeError:
-        #    return np.array(self.get_value_ref(var_name))
-
-        # This version is simpler than above, but it may break when
-        #   using scalars because the resulting variable doesn't
-        #   have a shape
-        return np.asarray(self.get_value_ref(var_name))
-
+        return self.get_value_ref(var_name).copy()
 
     def get_var_type(self, var_name):
-        """Data type of variable."""
         return str(self.get_value_ref(var_name).dtype)
 
     def get_component_name(self):
         return self._name
 
     def get_var_grid(self, var_name):
-        """Grid id for a variable."""
         for grid_id, var_name_list in self._grids.items():
             if var_name in var_name_list:
                 return grid_id
 
     def get_grid_shape(self, grid_id):
-        """Number of rows and columns of uniform rectilinear grid."""
         var_name = self._grids[grid_id]
         value = np.array(self.get_value_ref(var_name)).shape
         return value
 
     def get_grid_size(self, grid_id):
-        """Size of grid."""
         grid_size = self.get_grid_shape(grid_id)
         if grid_size == ():
             return 1
@@ -281,7 +261,6 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             return int(np.prod(grid_size))
 
     def get_grid_spacing(self, grid_id):
-        """Distance between nodes of grid."""
         assert_true(grid_id < self.ngrids)
         return np.array([1, 1], dtype='float32')
 
@@ -290,5 +269,4 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return np.array([0.0, 0.0], dtype='float32')
 
     def get_grid_rank(self, var_id):
-        """Rank of grid."""
         return len(self.get_grid_shape(var_id))

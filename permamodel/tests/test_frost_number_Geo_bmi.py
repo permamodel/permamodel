@@ -264,6 +264,8 @@ def test_FNGeo_simulate_WMT_run():
     assert_equal(fng._name, "Permamodel FrostnumberGeo Component")
 
     # Until set, e.g. by WMT with cru values, all vals are NaN
+    # Note: these are actually setting references to the underlying
+    #       model arrays!
     airtemp_values = fng.get_value('atmosphere_bottom_air__temperature')
     jan_airtemp_values = \
         fng.get_value('atmosphere_bottom_air__temperature_mean_jan')
