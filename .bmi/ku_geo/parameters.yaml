@@ -1,0 +1,415 @@
+comp_status:
+  description: Component status
+  value:
+    type: choice
+    default: Enabled
+    choices:
+    - Enabled
+    - Disabled
+in_directory:
+  description: Input directory
+  value:
+    type: string
+    default: permamodel/examples
+out_directory:
+  description: Output directory
+  value:
+    type: string
+    default: .
+permafrost_dir:
+  description: permafrost directory
+  value:
+    type: string
+    default: .
+site_prefix:
+  description: File prefix for the study site
+  value:
+    type: string
+    default: Test
+case_prefix:
+  description: File prefix for the model scenario
+  value:
+    type: string
+    default: Case_test
+start_year:
+  description: Simulation start time
+  value:
+    type: long
+    default: 2000
+    range:
+      min: 0
+      max: 100000000
+    units: yr
+end_year:
+  description: Simulation end time
+  value:
+    type: long
+    default: 2000
+    range:
+      min: 0
+      max: 100000000
+    units: yr
+dt:
+  description: Simulation time step
+  value:
+    type: float
+    default: 1.0
+    range:
+      min: 0.001
+      max: 1e3
+    units: yr
+
+T_air_ptype:
+  description: Surface air temperature (annual mean)
+  value:
+    type: choice
+    default: Scalar
+    choices:
+      - Scalar
+      - Time_Series
+      - Grid
+      - Grid_Sequence
+    units: degC
+T_air_dtype:
+  description: T_air data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - string
+    units: '-'
+T_air:
+  description: Scalar value
+  value:
+    type: float
+    default: -9.0
+    range:
+      min: -100.0
+      max: 100.0
+    units: degC
+T_air_file:
+  description: Time series or grid file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+A_air_ptype:
+  description: Surface air temperature amplitude (annual mean)
+  value:
+    type: choice
+    default: Scalar
+    choices:
+      - Scalar
+      - Time_Series
+      - Grid
+      - Grid_Sequence
+    units: degC
+A_air_dtype:
+  description: A_air data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - string
+    units: '-'
+A_air:
+  description: Scalar value
+  value:
+    type: float
+    default: 15.4
+    range:
+      min: -100.0
+      max: 100.0
+    units: degC
+A_air_file:
+  description: Time series or grid file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+
+h_snow_ptype:
+  description: Depth of snow (average through winter)
+  value:
+    type: choice
+    default: Scalar
+    choices:
+      - Scalar
+      - Time_Series
+      - Grid
+      - Grid_Sequence
+    units: m
+h_snow_dtype:
+  description: h_snow data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - string
+    units: '-'
+h_snow:
+  description: Scalar value
+  value:
+    type: float
+    default: 0.300
+    range:
+      min: 0.0
+      max: 5.0
+    units: m
+h_snow_file:
+  description: Time series or grid file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+rho_snow_ptype:
+  description: Density of snow (average through winter)
+  value:
+    type: choice
+    default: Scalar
+    choices:
+      - Scalar
+      - Time_Series
+      - Grid
+      - Grid_Sequence
+    units: kg m-3
+rho_snow_dtype:
+  description: rho_snow data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - string
+    units: '-'
+rho_snow:
+  description: Scalar value
+  value:
+    type: float
+    default: 240.000
+    range:
+      min: 0.0
+      max: 1.0e3
+    units: kg m-3
+rho_snow_file:
+  description: Time series or grid file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+
+vwc_H2O_ptype:
+  description: Soil volumetric water content (thaw season; e.g., August)
+  value:
+    type: choice
+    default: Scalar
+    choices:
+      - Scalar
+      - Time_Series
+      - Grid
+      - Grid_Sequence
+    units: '-'
+vwc_H2O_dtype:
+  description: vwc_H2O data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - string
+    units: '-'
+vwc_H2O:
+  description: Scalar value
+  value:
+    type: float
+    default: 0.4
+    range:
+      min: 0.0
+      max: 1.0
+    units: '-'
+vwc_H2O_file:
+  description: Time series or grid file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+
+Hvgf_ptype:
+  description: Height of vegetation in frozen period
+  value:
+    type: choice
+    default: Scalar
+    choices:
+      - Scalar
+      - Time_Series
+      - Grid
+      - Grid_Sequence
+    units: m
+Hvgf_dtype:
+  description: Hvgf data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - string
+    units: '-'
+Hvgf:
+  description: Scalar value
+  value:
+    type: float
+    default: 0.00
+    range:
+      min: 0.0
+      max: 1.0
+    units: m
+Hvgf_file:
+  description: Time series or grid file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+Hvgt_ptype:
+  description: Height of vegetation in thawed period
+  value:
+    type: choice
+    default: Scalar
+    choices:
+      - Scalar
+      - Time_Series
+      - Grid
+      - Grid_Sequence
+    units: m
+Hvgt_dtype:
+  description: Hvgt data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - string
+    units: '-'
+Hvgt:
+  description: Scalar value
+  value:
+    type: float
+    default: 0.00
+    range:
+      min: 0.0
+      max: 1.0
+    units: m
+Hvgt_file:
+  description: Time series or grid file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+Dvf_ptype:
+  description: Thermal diffusivity of vegetation in frozen period
+  value:
+    type: choice
+    default: Scalar
+    choices:
+      - Scalar
+      - Time_Series
+      - Grid
+      - Grid_Sequence
+    units: 'm2 s-1'
+Dvf_dtype:
+  description: Dvf data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - string
+    units: '-'
+Dvf:
+  description: Scalar value
+  value:
+    type: float
+    default: 1.39E-6
+    range:
+      min: 0.0
+      max: 5.0E-6
+    units: 'm2 s-1'
+Dvf_file:
+  description: Time series or grid file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+Dvt_ptype:
+  description: Thermal diffusivity of vegetation in thawed period
+  value:
+    type: choice
+    default: Scalar
+    choices:
+      - Scalar
+      - Time_Series
+      - Grid
+      - Grid_Sequence
+    units: 'm2 s-1'
+Dvt_dtype:
+  description: Dvt data type
+  value:
+    type: choice
+    default: float
+    choices:
+      - float
+      - string
+    units: '-'
+Dvt:
+  description: Scalar value
+  value:
+    type: float
+    default: 5.56E-8
+    range:
+      min: 0.0
+      max: 1.0E-6
+    units: 'm2 s-1'
+Dvt_file:
+  description: Time series or grid file
+  value:
+    type: file
+    default: 'off'
+    files:
+      - 'off'
+
+SAVE_ALT_GRIDS:
+  description: Option to save grids of active layer thickness
+  value:
+    type: choice
+    default: No
+    choices:
+    - Yes
+    - No
+ALT_file:
+  description: Name of ALT output file
+  value:
+    type: string
+    default: ALT
+SAVE_TPS_GRIDS:
+  description: Option to save grids of temperature at permafrost surface
+  value:
+    type: choice
+    default: No
+    choices:
+    - Yes
+    - No
+TPS_file:
+  description: Name of TPS output file
+  value:
+    type: string
+    default: TPS

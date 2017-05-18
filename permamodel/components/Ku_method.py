@@ -126,15 +126,15 @@ class Ku_method( perma_base.PermafrostComponent ):
         self.ALT_file  = self.out_directory + self.ALT_file
         self.TPS_file  = self.out_directory + self.TPS_file
          
-        self.T_air_unit       = model_input.open_file(self.T_air_type,  self.T_air_file)
-        self.A_air_unit       = model_input.open_file(self.A_air_type,  self.A_air_file)
-        self.h_snow_unit      = model_input.open_file(self.h_snow_type,  self.h_snow_file)
-        self.rho_snow_unit    = model_input.open_file(self.rho_snow_type,  self.rho_snow_file)
-        self.vwc_H2O_unit     = model_input.open_file(self.vwc_H2O_type,  self.vwc_H2O_file)
-        self.Hvgf_unit        = model_input.open_file(self.Hvgf_type,  self.Hvgf_file)
-        self.Hvgt_unit        = model_input.open_file(self.Hvgt_type,  self.Hvgt_file)
-        self.Dvf_unit         = model_input.open_file(self.Dvf_type,  self.Dvf_file)
-        self.Dvt_unit         = model_input.open_file(self.Dvt_type,  self.Dvt_file)
+        self.T_air_unit       = self.open_file_KU(self.T_air_type,  self.T_air_file)
+        self.A_air_unit       = self.open_file_KU(self.A_air_type,  self.A_air_file)
+        self.h_snow_unit      = self.open_file_KU(self.h_snow_type,  self.h_snow_file)
+        self.rho_snow_unit    = self.open_file_KU(self.rho_snow_type,  self.rho_snow_file)
+        self.vwc_H2O_unit     = self.open_file_KU(self.vwc_H2O_type,  self.vwc_H2O_file)
+        self.Hvgf_unit        = self.open_file_KU(self.Hvgf_type,  self.Hvgf_file)
+        self.Hvgt_unit        = self.open_file_KU(self.Hvgt_type,  self.Hvgt_file)
+        self.Dvf_unit         = self.open_file_KU(self.Dvf_type,  self.Dvf_file)
+        self.Dvt_unit         = self.open_file_KU(self.Dvt_type,  self.Dvt_file)
 #        self.lat_unit         = model_input.open_file(self.lat_type,  self.lat_file)
 #        self.lon_unit         = model_input.open_file(self.lon_type,  self.lon_file)
 
@@ -155,16 +155,14 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         if self.T_air_type.lower() == 'grid': # these lines just available for GRID inputs
 
-            [Lat_list, Lon_list] = self.read_nc_lat_lon(self.T_air_file, self.T_air_type)
+            [Lat_list, Lon_list] = self.read_nc_lat_lon(self.T_air_unit, self.T_air_type)
                         
             if Lon_list is not None:
                 self.lon = Lon_list 
             if (Lat_list is not None): 
                 self.lat = Lat_list    
-                
-        rti = 'FLOAT';
-        
-        T_air = model_input.read_next_modified(self.T_air_unit,self.T_air_type)
+                        
+        T_air = self.read_next_modified_KU(self.T_air_unit,self.T_air_type)
 #        
         if (T_air is not None):
             self.T_air = T_air
@@ -176,42 +174,42 @@ class Ku_method( perma_base.PermafrostComponent ):
 #            self.T_air = T_air
 #            n_T_air = len(T_air)
             
-        A_air = model_input.read_next_modified(self.A_air_unit, self.A_air_type)
+        A_air = self.read_next_modified_KU(self.A_air_unit, self.A_air_type)
         if (A_air is not None): 
             self.A_air = A_air
 #            n_A_air = len(A_air)
             
-        h_snow = model_input.read_next_modified(self.h_snow_unit, self.h_snow_type)
+        h_snow = self.read_next_modified_KU(self.h_snow_unit, self.h_snow_type)
         if (h_snow is not None): 
             self.h_snow = h_snow
 #            n_h_snow = len(h_snow) 
             
-        rho_snow = model_input.read_next_modified(self.rho_snow_unit, self.rho_snow_type)
+        rho_snow = self.read_next_modified_KU(self.rho_snow_unit, self.rho_snow_type)
         if (rho_snow is not None): 
             self.rho_snow = rho_snow
 #            n_rho_snow = len(rho_snow)
         
-        vwc_H2O = model_input.read_next_modified(self.vwc_H2O_unit, self.vwc_H2O_type)
+        vwc_H2O = self.read_next_modified_KU(self.vwc_H2O_unit, self.vwc_H2O_type)
         if (vwc_H2O is not None): 
             self.vwc_H2O = vwc_H2O
 #            n_vwc_H2O = len(vwc_H2O)
             
-        Hvgf = model_input.read_next_modified(self.Hvgf_unit, self.Hvgf_type)
+        Hvgf = self.read_next_modified_KU(self.Hvgf_unit, self.Hvgf_type)
         if (Hvgf is not None): 
             self.Hvgf = Hvgf
 #            n_Hvgf = len(Hvgf)
             
-        Hvgt = model_input.read_next_modified(self.Hvgt_unit, self.Hvgt_type)
+        Hvgt = self.read_next_modified_KU(self.Hvgt_unit, self.Hvgt_type)
         if (Hvgt is not None): 
             self.Hvgt = Hvgt
 #            n_Hvgt = len(Hvgt)
             
-        Dvt = model_input.read_next_modified(self.Dvt_unit, self.Dvt_type)
+        Dvt = self.read_next_modified_KU(self.Dvt_unit, self.Dvt_type)
         if (Dvt is not None): 
             self.Dvt = Dvt
 #            n_Dvt = len(Dvt)
             
-        Dvf = model_input.read_next_modified(self.Dvf_unit, self.Dvf_type)
+        Dvf = self.read_next_modified_KU(self.Dvf_unit, self.Dvf_type)
         if (Dvf is not None): 
             self.Dvf = Dvf
 #            n_Dvf = len(Dvf)
@@ -348,6 +346,12 @@ class Ku_method( perma_base.PermafrostComponent ):
         percent_clay = self.p_clay / tot_percent
         percent_silt = self.p_silt / tot_percent
         percent_peat = self.p_peat / tot_percent
+        
+        self.mask = tot_percent;
+        self.mask[np.where(tot_percent<=0.9)] = np.nan
+        self.mask[np.where(tot_percent>0.9)] = 1.0
+        
+        self.tot_percent = tot_percent
         
         # Estimate thermal conductivity for composed soil
         
@@ -535,11 +539,22 @@ class Ku_method( perma_base.PermafrostComponent ):
                 K_star = self.Kt
             
 
+                
         self.Tgs=Tgs
         self.Ags=Ags
         self.Tps_numerator=Tps_numerator
 
         self.Tps = self.Tps_numerator/K_star
+        
+        if n_grid > 1:        
+        
+            self.Tps[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
+            
+        else:
+            
+            if self.Tps_numerator>0.0:
+                self.Tps = np.nan
+
 
     #   update_TOP_temperatures()
     #-------------------------------------------------------------------
@@ -586,18 +601,19 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         if n_grid > 1:        
         
-            Zal[np.where(Zal<=0.)] = np.nan
+            Zal[np.where(Zal<=0.01)] = np.nan
             Zal[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
             Zal[np.where(np.isnan(Zal))] = np.nan
             
         else:
             
-            if self.Tps_numerator>0.0 or Zal<=0.0 or np.isnan(Zal):
+            if self.Tps_numerator>0.0 or Zal<=0.01 or np.isnan(Zal):
                 Zal = np.nan
 
         self.Aps = Aps;
-        self.Zc  = Zc;
+        self.Zc  = Zc;  
         self.Zal = Zal;
+                
         
     #   update_ALT()
     #-------------------------------------------------------------------
@@ -874,6 +890,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         # Initialize the output variables (internal names)
         self.Tps = np.float32(-999.99)
         self.Zal = np.float32(-999.99)
+        self.cont = 0.0
 
         #-----------------------------------------------
         # Load component parameters from a config file
@@ -950,7 +967,7 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         self.status = 'initialized'
     
-    def read_nc_lat_lon(self, file_name, var_type):
+    def read_nc_lat_lon(self, file_unit, var_type):
         
         if (var_type.lower() == 'scalar'):
             #-------------------------------------------
@@ -968,9 +985,12 @@ class Ku_method( perma_base.PermafrostComponent ):
             lon = None
             
         elif (var_type.lower() == 'grid'):
-            
-            lat = self.ncread(file_name, 'latitude')
-            lon = self.ncread(file_name, 'longitude')
+            for var in file_unit.variables.keys():
+                if var[0:3] =='lat':
+                    lat = file_unit.variables[var][:]
+                if var[0:3] =='lon':
+                    lon = file_unit.variables[var][:]
+#            lon = self.ncread(file_unit, 'longitude')
             
             if (np.min(lon) > 0.):
             	lon = np.mod((lon+180.),360.) -180.
@@ -987,7 +1007,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         else:
             return lat,lon
     
-    def read_next_modified_KU(self, file_name, var_type, \
+    def read_next_modified_KU(self, file_unit, var_type, \
                   dtype='Float32', factor=1.0):
     
         #-------------------------------------------------------
@@ -1015,9 +1035,7 @@ class Ku_method( perma_base.PermafrostComponent ):
             # Time series: Read scalar value from file.
             # File is ASCII text with one value per line.
             #----------------------------------------------
-            data = np.loadtxt(file_name)
-            data = data[0:(self.end_year-self.start_year+1.0)];
-            data = f1.readline()
+            data = model_input.read_scalar(file_unit, dtype)
             
         elif (var_type.lower() == 'grid'):
             #----------------------------------------------
@@ -1025,9 +1043,11 @@ class Ku_method( perma_base.PermafrostComponent ):
             # File is ASCII text with one value per line.
             #----------------------------------------------
 #            data = np.loadtxt(file_name)
-            
-            s = file_name.split('/');s = s[-1];s = s[:-3]
-            data = self.ncread(file_name, s)
+#            print self.cont
+            from netCDF4 import Dataset
+            for var in file_unit.variables.keys():
+                if (var != 'time' and var[0:3] !='lat' and var[0:3] != 'lon'):
+                    data  = file_unit.variables[var][self.cont,:,:]
                                    
         else:
             raise RuntimeError('No match found for "var_type".')
@@ -1189,7 +1209,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         n_lat = np.size(self.lat)
         n_lon = np.size(self.lon)
         
-        ALT = varname+0.;
+#        print np.shape(varname)
+        
+        ALT = varname + 0.0 #self.mask;
         idx = np.where(np.isnan(ALT))
         ALT[idx] = -999.99;
         
@@ -1236,9 +1258,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
                
         # ==== Data ====
-        temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('lat','lon','time'))
+        temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('time','lat','lon'))
         temp.units = units
-        temp.missing_value = '-999.99'
+        temp.missing_value = -999.99
         temp.long_name = long_name
         temp[:] = ALT;
 #        
@@ -1252,3 +1274,51 @@ class Ku_method( perma_base.PermafrostComponent ):
         
         # Open a file to save the final result
         np.savetxt(output_file+'.txt',self.lat);
+    
+    def open_file_KU(self, var_type, input_file):
+    
+        #-----------------------------------------------------
+        # Note:  This method's name cannot be "open" because
+        #        it calls Python's built-in "open()" method.
+        #-----------------------------------------------------
+        # print 'var_type   =', var_type
+        # print 'input_file =', input_file
+    
+        #--------------------------------------------
+        # A scalar input value was provided already
+        #--------------------------------------------
+        file_unit = None
+        if (var_type.lower() == 'scalar'):
+            return file_unit
+        if (input_file == ''):
+            print 'ERROR in model_input.open_file():'
+            print '    Input file is null string.'
+            # print '    variable type =' + var_type
+            return file_unit
+    
+        #----------------------------------
+        # Does input file exist locally ?
+        #----------------------------------
+        if not(os.path.exists(input_file)):
+            print 'ERROR in model_input.open_file():'
+            print '    Could not find input file ='
+            print '    ' + input_file
+            # print '   ' + input_file
+            return file_unit
+    
+        if (var_type.lower() == 'time_series'):
+            #-----------------------------------------
+            # Input file contains a time series and
+            # is ASCII text with one value per line.
+            #-----------------------------------------
+            file_unit = open(input_file, 'r')
+        else:
+            #--------------------------------------------
+            # Input file contains a grid or grid stack
+            # as row-major, binary file with no header.
+            #--------------------------------------------
+            from netCDF4 import Dataset
+            file_unit = Dataset(input_file, 'r')
+    
+        return file_unit
+
