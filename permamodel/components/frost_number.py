@@ -333,7 +333,8 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
     def update(self, frac=None):
         """ Move to the next timestep and update calculations """
         if frac is not None:
-            print("Fractional times not yet permitted, rounding to nearest int")
+            # print(
+            #     "Fractional times not yet permitted, rounding to nearest int")
             time_change = self.dt * int(frac + 0.5)
         else:
             time_change = self.dt

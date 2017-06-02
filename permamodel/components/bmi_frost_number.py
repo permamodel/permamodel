@@ -158,8 +158,14 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         self._model.update(frac=time_fraction)
         self._values['frostnumber__air'] = self._model.air_frost_number
 
-    def update_until(self, stop_year):
+    def get_year_from_timestep(self, this_timestep):
+        """ given the timestep, return the year """
+        return int(self.get_time_step() * this_timestep + self._model.start_year)
+
+    def update_until(self, stop_time):
         """ BMI-required, run until a specified time """
+        stop_year = self.get_year_from_timestep(stop_time)
+
         # Ensure that stop_year is at least the current year
         if stop_year < self._model.year:
             print("Warning: update_until year is less than current year")
@@ -172,10 +178,16 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             stop_year = self._model.end_year
 
         # Implement the loop to update until stop_year
-        year = self._model.year
-        while year < stop_year:
-            self.update()
+        # Note: running for the first timestep is a special case,
+        #       for which the timestep should not be updated
+        if stop_year == self.get_year_from_timestep(self.get_start_time()):
+            # print("This year is end_year, so update_frac(0)")
+            self.update_frac(0)
+        else:
             year = self._model.year
+            while year < stop_year:
+                self.update()
+                year = self._model.year
 
     def finalize(self):
         """ BMI-required, wrap up all things including writing output """
@@ -192,7 +204,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
 
     def get_end_time(self):
         """ Number of timestesp (years) so that last year is included """
-        return float(self._model.end_year - self._model.start_year) + 1.0
+        return float(self._model.end_year - self._model.start_year)
 
     def get_grid_type(self, grid_number):
         """ BMI: inquire about the type of this grid """
