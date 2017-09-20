@@ -1,0 +1,9 @@
+import setup
+
+from setup import setup
+
+setup(name='thalake',
+	version='0.1',
+	description = 'The Tha lake Model',
+	packages=['thalake.py'])
+	
