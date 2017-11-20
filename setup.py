@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='permamodel',
-      version='0.1.0',
+      version='0.1.1',
       author='Elchin Jafarov and Scott Stewart',
       author_email='james.stewart@colorado.edu',
       description='Permamodel',
