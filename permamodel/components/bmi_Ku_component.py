@@ -168,8 +168,9 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         
         # make 2 vars to store each results and used for write out.
         n_lat = np.size(self._model.lat)
-        n_lon = np.size(self._model.lon)  
-        n_time = self._model.end_year-self._model.start_year+1.0
+        n_lon = np.size(self._model.lon) 
+        n_time = self._model.end_year-self._model.start_year+1
+                
         self.output_alt = np.zeros((n_time,n_lat,n_lon))*np.nan;
         self.output_tps = np.zeros((n_time,n_lat,n_lon))*np.nan;
 
@@ -184,7 +185,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             assert(varname in self._var_name_map)
             assert(varname in self._var_units_map)
             
-        self._model.cont = -1.0
+        self._model.cont = -1
 
         gridnumber = 0
         for varname in self._input_var_names:
@@ -278,7 +279,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         # Update the time
         self._model.year += self._model.dt
         
-        self._model.cont = self._model.cont + 1.0
+        self._model.cont = self._model.cont + 1
         
 #        self.output_alt = np.append(self.output_alt, self._model.Zal)
 #        self.output_tps = np.append(self.output_tps, self._model.Tps)
