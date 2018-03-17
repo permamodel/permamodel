@@ -174,20 +174,30 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         self._model.update(frac=time_fraction)
         self._values['frostnumber__air'] = self._model.air_frost_number_Geo
 
-    def update_until(self, stop_date):
+    def update_until(self, time):
+        """Advance model state until the given time.
+
+        Parameters
+        ----------
+        time : float
+          A model time value.
+
+        """
+        stop_year = time + self._model._start_date.year
+
         # Ensure that stop_year is at least the current year
-        if stop_date < self._model._date_current:
+        if stop_year < self._model._date_current.year:
             print("Warning: update_until year is less than current year")
             print("  no update run")
             return
 
-        if stop_date > self._model._end_date:
+        if stop_year > self._model._end_date.year:
             print("Warning: update_until year was greater than end_year")
-            print("  setting stop_date to end_date")
-            stop_date = self._model._end_date
+            print("  setting stop_year to end_date")
+            stop_year = self._model._end_date.year
 
         # Implement the loop to update until stop_year
-        while self._model._date_current < stop_date:
+        while self._model._date_current.year < stop_year:
             self.update()
 
     def finalize(self):
