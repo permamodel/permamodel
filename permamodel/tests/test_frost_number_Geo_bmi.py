@@ -87,7 +87,7 @@ def test_frost_number_update_changes_air_frost_number():
 
     fng.update()
     afn0 = fng._model.air_frost_number_Geo
-    fng.update_until(fng._model._date_current + datetime.timedelta(days=370))
+    fng.update_until(1.0)
     afn1 = fng._model.air_frost_number_Geo
     try:
         # If this is none, then the first array was all NaNs
@@ -117,7 +117,7 @@ def test_frost_number_implements_update_until():
     fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
     fng.initialize()
 
-    fng.update_until(fng._model._end_date)
+    fng.update_until(fng.get_end_time())
     assert_true(fng._model._date_current, fng._model._end_date)
 
     fng.finalize()  # Must have this or get IOError later
