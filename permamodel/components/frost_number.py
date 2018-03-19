@@ -275,10 +275,19 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
     def write_output_to_file(self):
         """ Part of finalize, write the output to file(s) """
         # Write the output to a file
-        with open(self.fn_out_filename, 'w') as f_out:
-            for year in sorted(self.output.keys()):
-                f_out.write("Year: %d  output=%s\n" %
-                            (year, self.output[year]))
+        # If file is written, return value is True
+        # If permission is denied, return value is False
+        try:
+            with open(self.fn_out_filename, 'w') as f_out:
+                for year in sorted(self.output.keys()):
+                    f_out.write("Year: %d  output=%s\n" %
+                                (year, self.output[year]))
+        except IOError:
+            print('WARNING: Unable to write output to {}'.format(
+                self.fn_out_filename))
+            return False
+
+        return True
 
     def get_config_from_oldstyle_file(self, cfg_filename):
         """ Modified from that in _Geo code """

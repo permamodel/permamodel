@@ -577,90 +577,98 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         # Open the output netcdf file
         # Note: Be sure to close this, e.g. in self.finalize(), because
         # otherwise multiple openings, e.g. when testing, may fail
-        self._output_fid = Dataset(self.output_filename, 'w', format='NETCDF4')
+        try:
+            self._output_fid = Dataset(
+                self.output_filename, 'w', format='NETCDF4')
+        except IOError:
+            # Note: fid will have type integer if it fails to open
+            print('WARNING: Could not open file for output: {}'.format(
+                self.output_filename))
 
-        # Add attributes
-        #  including comments from config files
-        setattr(self._output_fid, 'company',
-                'Community Surface Dynamics Modeling System')
-        setattr(self._output_fid, 'Permafrost Component', 'FrostnumberGeo')
+        if self._output_fid != -1:
+            # Add attributes
+            #  including comments from config files
+            setattr(self._output_fid, 'company',
+                    'Community Surface Dynamics Modeling System')
+            setattr(self._output_fid, 'Permafrost Component', 'FrostnumberGeo')
 
-        ### Init dimensions
-        # Time dimension
-        tdim = 0
-        self._output_fid.createDimension("time", tdim)
-        self._nc_time = \
-            self._output_fid.createVariable('time', 'i', ('time',), zlib=True)
-        setattr(self._nc_time, 'time_long_name', 'time')
-        setattr(self._nc_time, 'time_standard_name', 'time')
-        setattr(self._nc_time, 'time_units', 'months since 1900-01-01 00:00:00')
-        self._nc_reference_time = datetime.date(1900, 1, 15)
-        setattr(self._nc_time, 'time_format', 'modified julian day (MJD)')
-        setattr(self._nc_time, 'time_time_zone', 'UTC')
-        setattr(self._nc_time, 'time__FillValue', '-9999')
-        self._nc_last_time_index = 0
+            ### Init dimensions
+            # Time dimension
+            tdim = 0
+            self._output_fid.createDimension("time", tdim)
+            self._nc_time = \
+                self._output_fid.createVariable('time', 'i', ('time',), zlib=True)
+            setattr(self._nc_time, 'time_long_name', 'time')
+            setattr(self._nc_time, 'time_standard_name', 'time')
+            setattr(self._nc_time, 'time_units', 'months since 1900-01-01 00:00:00')
+            self._nc_reference_time = datetime.date(1900, 1, 15)
+            setattr(self._nc_time, 'time_format', 'modified julian day (MJD)')
+            setattr(self._nc_time, 'time_time_zone', 'UTC')
+            setattr(self._nc_time, 'time__FillValue', '-9999')
+            self._nc_last_time_index = 0
 
-        ### For now, the X and Y dimensions are just the indexes
-        # X dimension
-        self._output_fid.createDimension("x", self._grid_xdim)
-        self._nc_x = \
-            self._output_fid.createVariable('x', 'f', ('x',), zlib=True)
-        setattr(self._nc_x, 'x_long_name', 'projected x direction')
-        setattr(self._nc_x, 'x_standard_name', 'x')
-        setattr(self._nc_x, 'x_units', 'meters')
-        setattr(self._nc_x, 'x__FillValue', 'NaN')
-        # fill the x- values
-        for x in range(self._grid_xdim):
-            self._nc_x[x] = x
+            ### For now, the X and Y dimensions are just the indexes
+            # X dimension
+            self._output_fid.createDimension("x", self._grid_xdim)
+            self._nc_x = \
+                self._output_fid.createVariable('x', 'f', ('x',), zlib=True)
+            setattr(self._nc_x, 'x_long_name', 'projected x direction')
+            setattr(self._nc_x, 'x_standard_name', 'x')
+            setattr(self._nc_x, 'x_units', 'meters')
+            setattr(self._nc_x, 'x__FillValue', 'NaN')
+            # fill the x- values
+            for x in range(self._grid_xdim):
+                self._nc_x[x] = x
 
-        # Y dimension
-        self._output_fid.createDimension("y", self._grid_ydim)
-        self._nc_y = \
-            self._output_fid.createVariable('y', 'f', ('y',), zlib=True)
-        setattr(self._nc_y, 'y_long_name', 'projected y direction')
-        setattr(self._nc_y, 'y_standard_name', 'y')
-        setattr(self._nc_y, 'y_units', 'meters')
-        setattr(self._nc_y, 'y__FillValue', 'NaN')
-        # fill the y- values
-        for y in range(self._grid_ydim):
-            self._nc_y[y] = y
+            # Y dimension
+            self._output_fid.createDimension("y", self._grid_ydim)
+            self._nc_y = \
+                self._output_fid.createVariable('y', 'f', ('y',), zlib=True)
+            setattr(self._nc_y, 'y_long_name', 'projected y direction')
+            setattr(self._nc_y, 'y_standard_name', 'y')
+            setattr(self._nc_y, 'y_units', 'meters')
+            setattr(self._nc_y, 'y__FillValue', 'NaN')
+            # fill the y- values
+            for y in range(self._grid_ydim):
+                self._nc_y[y] = y
 
-        ### Init grids with sizes
-        # Allocate air frost number field
-        self._nc_afn = \
-            self._output_fid.createVariable(
-                'air_fn', 'f', ('time', 'y', 'x'), zlib=True)
-        setattr(self._nc_afn, 'afn_long_name', 'Air Frost Number')
-        setattr(self._nc_afn, 'afn_standard_name', 'Frostnumber_air')
-        setattr(self._nc_afn, 'afn_units', 'none')
-        setattr(self._nc_afn, 'afn__FillValue', '-99')
-
-        # Allocate surface frost number field, if computing it
-        if self._calc_surface_fn:
-            self._nc_sfn = \
+            ### Init grids with sizes
+            # Allocate air frost number field
+            self._nc_afn = \
                 self._output_fid.createVariable(
-                    'surface_fn', 'f', ('time', 'y', 'x'), zlib=True)
-            setattr(self._nc_sfn, 'sfn_long_name', 'Surface Frost Number')
-            setattr(self._nc_sfn, 'sfn_standard_name', 'Frostnumber_surface')
-            setattr(self._nc_sfn, 'sfn_units', 'none')
-            setattr(self._nc_sfn, 'sfn__FillValue', '-99')
+                    'air_fn', 'f', ('time', 'y', 'x'), zlib=True)
+            setattr(self._nc_afn, 'afn_long_name', 'Air Frost Number')
+            setattr(self._nc_afn, 'afn_standard_name', 'Frostnumber_air')
+            setattr(self._nc_afn, 'afn_units', 'none')
+            setattr(self._nc_afn, 'afn__FillValue', '-99')
 
-        # Allocate Stefan frost number field, if computing it
-        if self._calc_stefan_fn:
-            self._nc_stfn = \
-                self._output_fid.createVariable(
-                    'stefan_fn', 'f', ('time', 'y', 'x'), zlib=True)
-            setattr(self._nc_stfn, 'stfn_long_name', 'Stefan Frost Number')
-            setattr(self._nc_stfn, 'stfn_standard_name', 'Frostnumber_stefan')
-            setattr(self._nc_stfn, 'stfn_units', 'none')
-            setattr(self._nc_stfn, 'stfn__FillValue', '-99')
+            # Allocate surface frost number field, if computing it
+            if self._calc_surface_fn:
+                self._nc_sfn = \
+                    self._output_fid.createVariable(
+                        'surface_fn', 'f', ('time', 'y', 'x'), zlib=True)
+                setattr(self._nc_sfn, 'sfn_long_name', 'Surface Frost Number')
+                setattr(self._nc_sfn, 'sfn_standard_name', 'Frostnumber_surface')
+                setattr(self._nc_sfn, 'sfn_units', 'none')
+                setattr(self._nc_sfn, 'sfn__FillValue', '-99')
+
+            # Allocate Stefan frost number field, if computing it
+            if self._calc_stefan_fn:
+                self._nc_stfn = \
+                    self._output_fid.createVariable(
+                        'stefan_fn', 'f', ('time', 'y', 'x'), zlib=True)
+                setattr(self._nc_stfn, 'stfn_long_name', 'Stefan Frost Number')
+                setattr(self._nc_stfn, 'stfn_standard_name', 'Frostnumber_stefan')
+                setattr(self._nc_stfn, 'stfn_units', 'none')
+                setattr(self._nc_stfn, 'stfn__FillValue', '-99')
 
     def finalize(self):
         # Define this so we don't call the permamodel base class version
         self.finalize_frostnumber_Geo()
 
     def finalize_frostnumber_Geo(self):
-        self._output_fid.close()
+        if self._output_fid != -1:
+            self._output_fid.close()
 
     def check_whether_output_timestep(self, this_timestep):
         # Only output on the 15th of each month
@@ -669,7 +677,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     def add_to_output(self):
         do_add = self.check_whether_output_timestep(self._timestep_current)
-        if do_add:
+        if do_add and self._output_fid != -1:
             # I think this assumes that the file has the same time reference as
             # the model run...
             this_date = self.get_date_from_timestep(self._timestep_current)
