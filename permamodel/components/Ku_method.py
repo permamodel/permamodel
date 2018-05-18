@@ -958,7 +958,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         # according to locations
         #---------------------------------------------
         self.read_whole_soil_texture_from_GSD()  # import whole GSD      
-        self.Extract_Soil_Texture_Loops_New()        # Extract soil texture for each cell.
+#        self.Extract_Soil_Texture_Loops_New()        # Extract soil texture for each cell.
         
         #---------------------------
         # Initialize computed vars
