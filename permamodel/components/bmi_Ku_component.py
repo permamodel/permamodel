@@ -220,6 +220,13 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             'soil__temperature':                            self._model.Tps,
             'soil__active_layer_thickness':                 self._model.Zal}
         
+        print(self._values)
+#        print(self.T_air)
+        
+#        self._model.T_air = 8
+        
+#        print(self._values)
+        
         # Set the cfg file if it exists, otherwise, a default
 #        if cfg_file==None:  
 #        
@@ -357,12 +364,9 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
-        print(self._values[var_name])
-        self._values[var_name] = new_var_values + 0.
-#        val = self.get_value_ref(var_name)
-#        val.flat = new_var_values
-#        val = self.get_value_ref(var_name)
-#        val.flat = new_var_values
+
+        setattr(self._model, self._var_name_map[var_name], new_var_values)
+
 
     def set_value_at_indices(self, var_name, new_var_values, indices):
         self.get_value_ref(var_name).flat[indices] = new_var_values
@@ -390,7 +394,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             Copy of values.
         """
         # Original version: from bmi_heat.py
-        #return self.get_value_ref(var_name).copy()
+#        return self.get_value_ref(var_name).copy()
 
         # Version to convert to numpy array for bmi-tester compliance
         # Note: converting to np arrays on the fly here
@@ -403,7 +407,8 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         # This version is simpler than above, but it may break when
         #   using scalars because the resulting variable doesn't
         #   have a shape
-        return np.asarray(self.get_value_ref(var_name))
+#        return np.asarray(self.get_value_ref(var_name))
+        return getattr(self._model, self._var_name_map[var_name])
 
 
     def get_var_type(self, var_name):

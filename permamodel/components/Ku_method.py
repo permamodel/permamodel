@@ -165,7 +165,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         T_air = self.read_next_modified_KU(self.T_air_unit,self.T_air_type)
 #        
         if (T_air is not None):
-            self.T_air = T_air
+            self.T_air = T_air + 0.0
         #        
 #        print self.T_air
              
