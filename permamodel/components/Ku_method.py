@@ -771,14 +771,20 @@ class Ku_method( perma_base.PermafrostComponent ):
     
         min_lon = min(self.lon_grid) - lon_cell_size/2.0*0.
         min_lat = min(self.lat_grid) - lat_cell_size/2.0*0. 
-        
-        n_lat = np.size(self.lat)
-        n_lon = np.size(self.lon)
-    
+
         aff = Affine.from_gdal(min_lon, lon_cell_size, 0.0, min_lat, 0.0, lat_cell_size)
         
-        lon = np.reshape(np.repeat(self.lon,n_lat), (n_lon,n_lat));
-        lat = np.transpose(np.reshape(np.repeat(self.lat,n_lon), (n_lat,n_lon)));
+        if self.lat.ndim<=1 and self.lon.ndim<=1:
+            n_lat = np.size(self.lat)
+            n_lon = np.size(self.lon)
+            lon = np.reshape(np.repeat(self.lon,n_lat), (n_lon,n_lat));
+            lat = np.transpose(np.reshape(np.repeat(self.lat,n_lon), (n_lat,n_lon)));
+        else:
+            n_lat = self.lat.shape[0]
+            n_lon = self.lat.shape[1]
+            
+            lon = self.lon 
+            lat = self.lat
     
         x_coords, y_coords = ~aff * (lon, lat)
     
@@ -1206,63 +1212,90 @@ class Ku_method( perma_base.PermafrostComponent ):
         from netCDF4 import Dataset
         import numpy as np
         
-        n_lat = np.size(self.lat)
-        n_lon = np.size(self.lon)
-        
-#        print np.shape(varname)
-        
+        if (output_file[-1-2] == 'T'):
+            
+        	units = 'degree C';
+        	long_name = 'Temperature at top of permafrost';
+            
+        else:
+            
+        	units = 'm'; 
+        	long_name = 'Active Layer Thickness'
+            
         ALT = varname + 0.0 #self.mask;
         idx = np.where(np.isnan(ALT))
         ALT[idx] = -999.99;
         
-        #print output_file[-1-2]
-        
-        if (output_file[-1-2] == 'T'):
-        	units = 'degree C';
-        	long_name = 'Temperature at top of permafrost';
-        else:
-        	units = 'm'; 
-        	long_name = 'Active Layer Thickness'
-        
         # Open a file to save the final result
         w_nc_fid = Dataset(output_file+'.nc', 'w', format='NETCDF4');
         
-        # ==== Latitude ====
-
-        w_nc_fid.createDimension('lat', n_lat) # Create Dimension
-        lats = w_nc_fid.createVariable('lat',np.dtype('float32').char,('lat',))
-        lats.units = 'degrees_north'
-        lats.standard_name = 'latitude'
-        lats.long_name = 'latitude'
-        lats.axis = 'Y'
-        lats[:] = self.lat
+        if self.lat.ndim<=1 and self.lon.ndim<=1:
         
-        # ==== Longitude ====
+            n_lat = np.size(self.lat)
+            n_lon = np.size(self.lon)
+            
+            # ==== Latitude ====
 
-        w_nc_fid.createDimension('lon', n_lon) # Create Dimension
-        lons = w_nc_fid.createVariable('lon',np.dtype('float32').char,('lon',))
-        lons.units = 'degrees_east'
-        lons.standard_name = 'longitude'
-        lons.long_name = 'longitude'
-        lons.axis = 'X'
-        lons[:] = self.lon
-        
-        # ==== Time ====
+            w_nc_fid.createDimension('lat', n_lat) # Create Dimension
+            lats = w_nc_fid.createVariable('lat',np.dtype('float32').char,('lat',))
+            lats.units = 'degrees_north'
+            lats.standard_name = 'latitude'
+            lats.long_name = 'latitude'
+            lats.axis = 'Y'
+            lats[:] = self.lat
+            
+            # ==== Longitude ====
+    
+            w_nc_fid.createDimension('lon', n_lon) # Create Dimension
+            lons = w_nc_fid.createVariable('lon',np.dtype('float32').char,('lon',))
+            lons.units = 'degrees_east'
+            lons.standard_name = 'longitude'
+            lons.long_name = 'longitude'
+            lons.axis = 'X'
+            lons[:] = self.lon
+            
+            # ==== Time ====
+    
+            w_nc_fid.createDimension('time', self.end_year-self.start_year+1.0) # Create Dimension
+            time = w_nc_fid.createVariable('time',np.dtype('float32').char,('time',))
+            time.units = 'Year'
+    #         time.standard_name = 'longitude'
+    #         time.long_name = 'longitude'
+            time.axis = 'Z'
+            time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
+                   
+            # ==== Data ====
+            temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('time','lat','lon'))
+            temp.units = units
+            temp.missing_value = -999.99
+            temp.long_name = long_name
+            temp[:] = ALT;
 
-        w_nc_fid.createDimension('time', self.end_year-self.start_year+1.0) # Create Dimension
-        time = w_nc_fid.createVariable('time',np.dtype('float32').char,('time',))
-        time.units = 'Year'
-#         time.standard_name = 'longitude'
-#         time.long_name = 'longitude'
-        time.axis = 'Z'
-        time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
-               
-        # ==== Data ====
-        temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('time','lat','lon'))
-        temp.units = units
-        temp.missing_value = -999.99
-        temp.long_name = long_name
-        temp[:] = ALT;
+        else:
+            
+            n_x = np.shape(self.lat)[0]
+            n_y = np.shape(self.lon)[1]
+            
+            # ==== Latitude ====
+
+            w_nc_fid.createDimension('lat', (n_x, n_y)) # Create Dimension
+            lats = w_nc_fid.createVariable('lat',np.dtype('float32').char,('lat',))
+            lats.units = 'degrees_north'
+            lats.standard_name = 'latitude'
+            lats.long_name = 'latitude'
+            lats.axis = 'Y'
+            lats[:,:] = self.lat
+            
+            # ==== Longitude ====
+    
+            w_nc_fid.createDimension('lon', (n_x, n_y)) # Create Dimension
+            lons = w_nc_fid.createVariable('lon',np.dtype('float32').char,('lon',))
+            lons.units = 'degrees_east'
+            lons.standard_name = 'longitude'
+            lons.long_name = 'longitude'
+            lons.axis = 'X'
+            lons[:,:] = self.lon
+   
 #        
         w_nc_fid.close()  # close the new file
         
