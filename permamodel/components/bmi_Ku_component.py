@@ -159,16 +159,18 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         self._grids = {}
         self._grid_type = {}
 
-    def initialize(self, cfg_file=None):
+    def initialize(self, cfg_file=None, wmt_option=None):
         
         self._model = Ku_method.Ku_method()
         
         self._name = "Permamodel Ku Component"
+
         self._model.initialize(cfg_file=cfg_file)
         
         # make 2 vars to store each results and used for write out.
         n_lat = np.size(self._model.lat)
         n_lon = np.size(self._model.lon) 
+
         n_time = self._model.end_year-self._model.start_year+1
                 
         self.output_alt = np.zeros((n_time,n_lat,n_lon))*np.nan;
@@ -199,29 +201,36 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
 
-        self._values = _values = {
+        self._values = {
         # These are the links to the model's variables and
         # should be consistent with _var_name_map 
-            'latitude':                                 self._model.lat,
-            'longitude':                                self._model.lon,
-            'datetime__start':                          self._model.start_year,
+            'latitude':                                     self._model.lat,
+            'longitude':                                    self._model.lon,
+            'datetime__start':                              self._model.start_year,
             'datetime__end':                                self._model.end_year,
-            'atmosphere_bottom_air__temperature':       self._model.T_air,
+            'atmosphere_bottom_air__temperature':           self._model.T_air,
             'atmosphere_bottom_air__temperature_amplitude': self._model.A_air,
-            'snowpack__depth':                          self._model.h_snow,
-            'snowpack__density':                        self._model.rho_snow,
-            'water-liquid__volumetric-water-content-soil':    self._model.vwc_H2O,
-            'vegetation__Hvgf': self._model.Hvgf,
-            'vegetation__Hvgt': self._model.Hvgt,
-            'vegetation__Dvf':  self._model.Dvf,
-            'vegetation__Dvt':  self._model.Dvt,
-            'soil__temperature': self._model.Tps,
-            'soil__active_layer_thickness': self._model.Zal}
+            'snowpack__depth':                              self._model.h_snow,
+            'snowpack__density':                            self._model.rho_snow,
+            'water-liquid__volumetric-water-content-soil':  self._model.vwc_H2O,
+            'vegetation__Hvgf':                             self._model.Hvgf,
+            'vegetation__Hvgt':                             self._model.Hvgt,
+            'vegetation__Dvf':                              self._model.Dvf,
+            'vegetation__Dvt':                              self._model.Dvt,
+            'soil__temperature':                            self._model.Tps,
+            'soil__active_layer_thickness':                 self._model.Zal}
+        
+        print(self._values)
+#        print(self.T_air)
+        
+#        self._model.T_air = 8
+        
+#        print(self._values)
         
         # Set the cfg file if it exists, otherwise, a default
 #        if cfg_file==None:  
 #        
-#        print self.cfg_file
+#        print self.cfg_file            
         
     def get_attribute(self, att_name):
 
@@ -268,6 +277,10 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
 #        self._model.update(self._model.dt)
             # Ensure that we've already initialized the run
         assert(self._model.status == 'initialized')
+        
+        if self._model.cont == -1:
+        
+            self._model.Extract_Soil_Texture_Loops_New()        # Extract soil texture for each cell.
 
         # Calculate the new frost number values
         self._model.update_ground_temperatures()
@@ -351,7 +364,9 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
-        self._values[var_name] = new_var_values
+
+        setattr(self._model, self._var_name_map[var_name], new_var_values)
+
 
     def set_value_at_indices(self, var_name, new_var_values, indices):
         self.get_value_ref(var_name).flat[indices] = new_var_values
@@ -379,7 +394,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             Copy of values.
         """
         # Original version: from bmi_heat.py
-        #return self.get_value_ref(var_name).copy()
+#        return self.get_value_ref(var_name).copy()
 
         # Version to convert to numpy array for bmi-tester compliance
         # Note: converting to np arrays on the fly here
@@ -392,7 +407,8 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         # This version is simpler than above, but it may break when
         #   using scalars because the resulting variable doesn't
         #   have a shape
-        return np.asarray(self.get_value_ref(var_name))
+#        return np.asarray(self.get_value_ref(var_name))
+        return getattr(self._model, self._var_name_map[var_name])
 
 
     def get_var_type(self, var_name):
