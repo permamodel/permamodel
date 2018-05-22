@@ -23,30 +23,40 @@ kug = BmiKuMethod()
 cru.initialize(cru_config_file)
 kug.initialize(kug_config_file)
 
-#lat = cru._model._longitude
-
 lat = cru.get_value('latitude')
 lon = cru.get_value('longitude')
 
-#kug._model.lat = np.linspace(68,71,20)
-#kug._model.lon = np.linspace(-165,-150,30)
-kug._model.Zal = np.zeros((20,30)) -999.9
+nx = lat.shape[0]
+ny = lon.shape[1]
+
+onset = cru._model.first_date.year
+final = cru._model.last_date.year
+
+ntime = final-onset+1
 
 kug.set_value('latitude', lat)
 kug.set_value('longitude', lon)
+kug.set_value('datetime__start',onset)
+kug.set_value('datetime__end',final)
 
-kug.output_alt = np.zeros((kug._model.end_year-kug._model.start_year+1,20,30))* 0 -999.9
-kug.output_tps = np.zeros((kug._model.end_year-kug._model.start_year+1,20,30))* 0 -999.9
+# The following two variables are required only for writing netcdf outputs.
 
-cru.update()
-T_air = cru.get_value("atmosphere_bottom_air__temperature_year")
-kug.set_value('atmosphere_bottom_air__temperature', T_air)
-kug.update()
-#for i in np.arange(3):
-#    cru.update()
-#    T_air = cru.get_value("atmosphere_bottom_air__temperature_year")
-#    kug.set_value('atmosphere_bottom_air__temperature', T_air)
-#    kug.update()
+kug.output_alt = np.zeros((ntime,nx,ny))* 0 -999.9
+kug.output_tps = np.zeros((ntime,nx,ny))* 0 -999.9
+
+T_air = np.zeros((nx,ny))
+
+for i in np.arange(3*12):
+    
+    cru.update()
+    
+    T_air = cru.get_value("atmosphere_bottom_air__temperature_year") + T_air
+    
+    if np.mod(i+1,12) == 0: # When get the 12th monthly data, Ku component will be implemented.
+        
+        kug.set_value('atmosphere_bottom_air__temperature', T_air/12.)
+        kug.update()
+        T_air = np.zeros((nx,ny))
 #
 kug.finalize()
 #

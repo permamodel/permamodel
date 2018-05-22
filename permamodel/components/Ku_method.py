@@ -1229,6 +1229,16 @@ class Ku_method( perma_base.PermafrostComponent ):
         # Open a file to save the final result
         w_nc_fid = Dataset(output_file+'.nc', 'w', format='NETCDF4');
         
+        # ==== Time ====
+    
+        w_nc_fid.createDimension('time', self.end_year-self.start_year+1.0) # Create Dimension
+        time = w_nc_fid.createVariable('time',np.dtype('float32').char,('time',))
+        time.units = 'Year'
+    #         time.standard_name = 'longitude'
+    #         time.long_name = 'longitude'
+        time.axis = 'Z'
+        time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
+
         if self.lat.ndim<=1 and self.lon.ndim<=1:
         
             n_lat = np.size(self.lat)
@@ -1254,15 +1264,6 @@ class Ku_method( perma_base.PermafrostComponent ):
             lons.axis = 'X'
             lons[:] = self.lon
             
-            # ==== Time ====
-    
-            w_nc_fid.createDimension('time', self.end_year-self.start_year+1.0) # Create Dimension
-            time = w_nc_fid.createVariable('time',np.dtype('float32').char,('time',))
-            time.units = 'Year'
-    #         time.standard_name = 'longitude'
-    #         time.long_name = 'longitude'
-            time.axis = 'Z'
-            time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
                    
             # ==== Data ====
             temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('time','lat','lon'))
@@ -1273,13 +1274,14 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         else:
             
-            n_x = np.shape(self.lat)[0]
-            n_y = np.shape(self.lon)[1]
+            n_x = np.int(np.shape(self.lat)[0])
+            n_y = np.int(np.shape(self.lon)[1])
             
             # ==== Latitude ====
-
-            w_nc_fid.createDimension('lat', (n_x, n_y)) # Create Dimension
-            lats = w_nc_fid.createVariable('lat',np.dtype('float32').char,('lat',))
+            w_nc_fid.createDimension('x',n_x)
+            w_nc_fid.createDimension('y',n_y) # Create Dimension
+            
+            lats = w_nc_fid.createVariable('lat',np.dtype('float32').char,('x','y'))
             lats.units = 'degrees_north'
             lats.standard_name = 'latitude'
             lats.long_name = 'latitude'
@@ -1288,13 +1290,20 @@ class Ku_method( perma_base.PermafrostComponent ):
             
             # ==== Longitude ====
     
-            w_nc_fid.createDimension('lon', (n_x, n_y)) # Create Dimension
-            lons = w_nc_fid.createVariable('lon',np.dtype('float32').char,('lon',))
+            
+            lons = w_nc_fid.createVariable('lon',np.dtype('float32').char,('x','y'))
             lons.units = 'degrees_east'
             lons.standard_name = 'longitude'
             lons.long_name = 'longitude'
             lons.axis = 'X'
             lons[:,:] = self.lon
+            
+            # ==== Data ====
+            temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('time','x','y'))
+            temp.units = units
+            temp.missing_value = -999.99
+            temp.long_name = long_name
+            temp[:] = ALT;
    
 #        
         w_nc_fid.close()  # close the new file
