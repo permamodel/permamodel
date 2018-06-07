@@ -58,21 +58,27 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
 
         self._input_var_names = (
             'atmosphere_bottom_air__temperature',
+            'snowpack__depth',
+            'snowpack__density',
             )
 
         self._output_var_names = (
             'frostnumber__air',            # Air Frost number
             'frostnumber__surface',        # Surface Frost number
-            'frostnumber__stefan')        # Stefan Frost number
+            'frostnumber__stefan')         # Stefan Frost number
 
         self._var_name_map = {
             'atmosphere_bottom_air__temperature':  'T_air_min',
+            'snowpack__depth':                     'h_snow',
+            'snowpack__density':                   'rho_snow',
             'frostnumber__air':                    'air_frost_number',
             'frostnumber__surface':                'surface_frost_number',
             'frostnumber__stefan':                 'stefan_frost_number'}
 
         self._var_units_map = {
             'atmosphere_bottom_air__temperature':   'deg_C',
+            'snowpack__depth':                      'm',
+            'snowpack__density':                    'kg m-3',
             'frostnumber__air':                     '1',
             'frostnumber__surface':                 '1',
             'frostnumber__stefan':                  '1'}
@@ -114,6 +120,8 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             # These are the links to the model's variables and
             # should be consistent with _var_name_map
             'atmosphere_bottom_air__temperature':    self._model.T_air,
+            'snowpack__depth':                       self._model.h_snow,
+            'snowpack__density':                     self._model.rho_snow,  
             'frostnumber__air':         self._model.air_frost_number,
             'frostnumber__surface':     self._model.surface_frost_number,
             'frostnumber__stefan':      self._model.stefan_frost_number}

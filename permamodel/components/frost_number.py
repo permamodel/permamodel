@@ -114,7 +114,11 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.start_year = self._configuration['start_year']
         self.end_year = self._configuration['end_year']
         self.fn_out_filename = self._configuration['fn_out_filename']
-
+        
+        # Snow cover:
+        self.h_snow   = self._configuration['h_snow']
+        self.rho_snow = self._configuration['rho_snow']
+        
         # These don't need to be used after this routine
         T_air_min_type = self._configuration['T_air_min_type']
         T_air_max_type = self._configuration['T_air_max_type']
