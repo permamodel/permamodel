@@ -264,6 +264,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         assert_greater_equal(T_hot, T_cold)
         T_avg = (T_hot + T_cold) / 2.0
         T_winter = -99.
+        Beta     = -99.
 
         # Note that these conditions should cover T_hot == T_cold
         if T_hot <= 0:
