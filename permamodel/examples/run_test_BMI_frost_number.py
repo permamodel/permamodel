@@ -23,3 +23,4 @@ x.update()
 x.finalize()
 
 print x.get_value('frostnumber__air')
+print x.get_value('frostnumber__surface')

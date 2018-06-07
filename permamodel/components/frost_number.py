@@ -53,7 +53,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.ddt = []
         self.ddf = []
         self.h_snow = -99.0
-        self.c_snow = -99.0
+        self.Csn    = -99.0
         self.Fplus = -99.0
         self.Twplus = -99.0
         self.Zfplus = -99.0
@@ -69,12 +69,15 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.A_air = -1.0
         self.lat = -999
         self.lon = -999
-        self.rho_snow = 0.0
+        self.rho_snow = -99.0
         self.vwc_H2O = 0.0
         self.Hvgf = 0.0
         self.Hvgt = 0.0
         self.Dvf = 0.0
         self.Dvt = 0.0
+        
+        self.surface_frost_number_on = False
+        self.sec_per_year            = 365.0*24.0*3600.
 
     def dummy_file(self, instring=""):
         """ dummy file class, so can declare empty variable in __init__()
@@ -114,7 +117,15 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.start_year = self._configuration['start_year']
         self.end_year = self._configuration['end_year']
         self.fn_out_filename = self._configuration['fn_out_filename']
-
+        
+        # Snow cover:
+        try:
+            self.h_snow   = self._configuration['h_snow']
+            self.rho_snow = self._configuration['rho_snow']
+        except:
+            self.h_snow    = -99
+            self.rho_snow  = -99
+            
         # These don't need to be used after this routine
         T_air_min_type = self._configuration['T_air_min_type']
         T_air_max_type = self._configuration['T_air_max_type']
@@ -142,6 +153,10 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             assert_true(os.path.isfile(fname))
             Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
             self.T_air_max = np.array(Tvalues, dtype=np.float32)
+            
+        if ((self.h_snow > 0) & (self.rho_snow > 0)):
+            self.surface_frost_number_on = True
+
 
     def initialize_frostnumber_component(self):
         """ Set the starting values for the frostnumber component """
@@ -174,6 +189,28 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.output[self.year] = ("%5.3f" % self.air_frost_number,
                                   "%5.3f" % self.surface_frost_number,
                                   "%5.3f" % self.stefan_frost_number)
+        
+    def estimate_snow_damping(self):
+
+        #--------------------------------------------------
+        
+        rho_sn=self.rho_snow
+
+        self.Ksn = rho_sn**3 * 2.2E-9 + rho_sn * 4.2E-4 + 2.1E-2; # Unit: (W m-1 C-1)
+
+        self.Csn = 2115 + 7.79 * self.T_winter;
+        
+        self.alpha_sn = self.Ksn / (self.Csn * rho_sn)
+        
+        self.Z_sn_star = np.sqrt(self.alpha_sn * self.sec_per_year/np.pi ) 
+        
+        self.A_plus = self.T_amplitude * np.exp(-1.*self.h_snow / self.Z_sn_star)
+        
+        self.T_winter_plus = self.T_average - self.A_plus *  \
+                             np.sin(self.Beta) / (np.pi - self.Beta)
+        
+        self.ddf_plus = -self.T_winter_plus * self.L_winter
+        
 
     def print_frost_numbers(self, year=-1):
         """ Print output to screen """
@@ -196,7 +233,13 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
     def calculate_surface_frost_number(self):
         """ Dummy value for surface frost number """
         # For now, a dummy value
+        
         self.surface_frost_number = np.float32(-1.0)
+        
+        if (self.surface_frost_number_on == True):
+            self.estimate_snow_damping()
+            self.surface_frost_number = np.sqrt(self.ddf_plus) /\
+                          (np.sqrt(self.ddf_plus) + np.sqrt(self.ddt))
 
     def calculate_stefan_frost_number(self):
         """ Dummy value for Stefan frost number """
@@ -220,6 +263,8 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
         assert_greater_equal(T_hot, T_cold)
         T_avg = (T_hot + T_cold) / 2.0
+        T_winter = -99.
+        Beta     = -99.
 
         # Note that these conditions should cover T_hot == T_cold
         if T_hot <= 0:
@@ -250,10 +295,17 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             L_winter = 365.0 - L_summer
             ddt = T_summer * L_summer
             ddf = -T_winter * L_winter
+
+            
         self.T_average = T_average
         self.T_amplitude = T_amplitude
         self.ddt = ddt
         self.ddf = ddf
+        
+        self.T_winter = T_winter
+        self.Beta     = Beta
+        self.L_winter = L_winter
+        
 
     def compute_air_frost_number(self):
         """
