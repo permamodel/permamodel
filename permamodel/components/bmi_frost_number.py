@@ -60,6 +60,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             'atmosphere_bottom_air__temperature',
             'snowpack__depth',
             'snowpack__density',
+            'water-liquid__volumetric-water-content-soil',
             'latitude',
             'longitude',
             )
@@ -74,6 +75,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             'snowpack__depth':                     'h_snow',
             'snowpack__density':                   'rho_snow',
             'frostnumber__air':                    'air_frost_number',
+            'water-liquid__volumetric-water-content-soil':        'vwc_H2O',
             'frostnumber__surface':                'surface_frost_number',
             'frostnumber__stefan':                 'stefan_frost_number',
             'latitude':                            'lat',
@@ -85,6 +87,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             'atmosphere_bottom_air__temperature':   'deg_C',
             'snowpack__depth':                      'm',
             'snowpack__density':                    'kg m-3',
+            'water-liquid__volumetric-water-content-soil':        'm3 m-3',
             'frostnumber__air':                     '1',
             'frostnumber__surface':                 '1',
             'frostnumber__stefan':                  '1'}
@@ -132,7 +135,8 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             'frostnumber__surface':     self._model.surface_frost_number,
             'frostnumber__stefan':      self._model.stefan_frost_number,
             'latitude':                 self._model.lat,
-            'longitude':                self._model.lon}
+            'longitude':                self._model.lon,
+            'water-liquid__volumetric-water-content-soil': self._model.vwc_H2O}
 
     def get_attribute(self, att_name):
         try:

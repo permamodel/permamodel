@@ -77,6 +77,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.Dvt = 0.0
         
         self.surface_frost_number_on = False
+        self.stefan_frost_number_on  = False
         self.sec_per_year            = 365.0*24.0*3600.
 
     def dummy_file(self, instring=""):
@@ -132,9 +133,14 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             self.lon      = self._configuration['lon']
         except:
             self.lat    = -999
-            self.lon    = -999        
+            self.lon    = -999 
         
-            
+        # Soil water content:
+        try:
+            self.vwc_H2O      = self._configuration['vwc_H2O']
+        except:
+            self.vwc_H2O      = 0.0
+
         # These don't need to be used after this routine
         T_air_min_type = self._configuration['T_air_min_type']
         T_air_max_type = self._configuration['T_air_max_type']
@@ -163,9 +169,30 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
             self.T_air_max = np.array(Tvalues, dtype=np.float32)
             
+        # Launch surface FN when there are inputs of snow:    
         if ((self.h_snow > 0) & (self.rho_snow > 0)):
             self.surface_frost_number_on = True
-
+        
+        # Launch stefan FN when there are inputs of lat-lon:
+        if ((self.lat > -999) & (self.lon > -999) & (self.vwc_H2O > 0)):
+            
+            # if there are inputs of snow,
+            # launch both. 
+            if ((self.h_snow > 0) & (self.rho_snow > 0)):
+                self.surface_frost_number_on = True    
+                self.stefan_frost_number_on  = True
+            else:
+            # if there are no inputs of snow,
+            # launch both, but set snow depth to zero.
+                print ('No snow inputs, set snow to zero')
+                self.h_snow   = 0.
+                self.rho_snow = 240.
+                self.surface_frost_number_on = True    
+                self.stefan_frost_number_on  = True
+        else:
+            
+            print ('Warning: The model needs soil water content, latitude, and longitude for Stefan frost number')
+            print ('Otherwise, Stefan FN will be skipped!')
 
     def initialize_frostnumber_component(self):
         """ Set the starting values for the frostnumber component """
