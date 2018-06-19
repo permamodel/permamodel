@@ -24,3 +24,10 @@ x.finalize()
 
 print x.get_value('frostnumber__air')
 print x.get_value('frostnumber__surface')
+print x.get_value('frostnumber__stefan')
+
+#print x.get_value('latitude')
+#print x.get_value('water-liquid__volumetric-water-content-soil')
+
+print x._model.Z_Frost_Plus
+print x._model.Z_Thaw_Plus
