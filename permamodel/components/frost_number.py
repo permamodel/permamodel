@@ -126,6 +126,15 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             self.h_snow    = -99
             self.rho_snow  = -99
             
+        # Site location:
+        try:
+            self.lat      = self._configuration['lat']
+            self.lon      = self._configuration['lon']
+        except:
+            self.lat    = -999
+            self.lon    = -999        
+        
+            
         # These don't need to be used after this routine
         T_air_min_type = self._configuration['T_air_min_type']
         T_air_max_type = self._configuration['T_air_max_type']

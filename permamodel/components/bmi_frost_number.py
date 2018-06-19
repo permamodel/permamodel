@@ -60,6 +60,8 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             'atmosphere_bottom_air__temperature',
             'snowpack__depth',
             'snowpack__density',
+            'latitude',
+            'longitude',
             )
 
         self._output_var_names = (
@@ -73,9 +75,13 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             'snowpack__density':                   'rho_snow',
             'frostnumber__air':                    'air_frost_number',
             'frostnumber__surface':                'surface_frost_number',
-            'frostnumber__stefan':                 'stefan_frost_number'}
+            'frostnumber__stefan':                 'stefan_frost_number',
+            'latitude':                            'lat',
+            'longitude':                           'lon',}
 
         self._var_units_map = {
+            'latitude':                             'degree_north',
+            'longitude':                            'degree_east',
             'atmosphere_bottom_air__temperature':   'deg_C',
             'snowpack__depth':                      'm',
             'snowpack__density':                    'kg m-3',
@@ -124,7 +130,9 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             'snowpack__density':                     self._model.rho_snow,  
             'frostnumber__air':         self._model.air_frost_number,
             'frostnumber__surface':     self._model.surface_frost_number,
-            'frostnumber__stefan':      self._model.stefan_frost_number}
+            'frostnumber__stefan':      self._model.stefan_frost_number,
+            'latitude':                 self._model.lat,
+            'longitude':                self._model.lon}
 
     def get_attribute(self, att_name):
         try:
