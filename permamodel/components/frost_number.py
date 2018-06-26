@@ -56,6 +56,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.Csn    = -99.0
         self.Fplus = -99.0
         self.Twplus = -99.0
+        self.T_winter_plus = -99.0
         self.Zfplus = -99.0
         self.Z_tot = -99.0
         self.stefan_number = -99.0
