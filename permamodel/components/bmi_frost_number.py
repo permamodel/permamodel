@@ -58,21 +58,36 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
 
         self._input_var_names = (
             'atmosphere_bottom_air__temperature',
+            'snowpack__depth',
+            'snowpack__density',
+            'water-liquid__volumetric-water-content-soil',
+            'latitude',
+            'longitude',
             )
 
         self._output_var_names = (
             'frostnumber__air',            # Air Frost number
             'frostnumber__surface',        # Surface Frost number
-            'frostnumber__stefan')        # Stefan Frost number
+            'frostnumber__stefan')         # Stefan Frost number
 
         self._var_name_map = {
             'atmosphere_bottom_air__temperature':  'T_air_min',
+            'snowpack__depth':                     'h_snow',
+            'snowpack__density':                   'rho_snow',
             'frostnumber__air':                    'air_frost_number',
+            'water-liquid__volumetric-water-content-soil':        'vwc_H2O',
             'frostnumber__surface':                'surface_frost_number',
-            'frostnumber__stefan':                 'stefan_frost_number'}
+            'frostnumber__stefan':                 'stefan_frost_number',
+            'latitude':                            'lat',
+            'longitude':                           'lon',}
 
         self._var_units_map = {
+            'latitude':                             'degree_north',
+            'longitude':                            'degree_east',
             'atmosphere_bottom_air__temperature':   'deg_C',
+            'snowpack__depth':                      'm',
+            'snowpack__density':                    'kg m-3',
+            'water-liquid__volumetric-water-content-soil':        'm3 m-3',
             'frostnumber__air':                     '1',
             'frostnumber__surface':                 '1',
             'frostnumber__stefan':                  '1'}
@@ -114,9 +129,14 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             # These are the links to the model's variables and
             # should be consistent with _var_name_map
             'atmosphere_bottom_air__temperature':    self._model.T_air,
+            'snowpack__depth':                       self._model.h_snow,
+            'snowpack__density':                     self._model.rho_snow,  
             'frostnumber__air':         self._model.air_frost_number,
             'frostnumber__surface':     self._model.surface_frost_number,
-            'frostnumber__stefan':      self._model.stefan_frost_number}
+            'frostnumber__stefan':      self._model.stefan_frost_number,
+            'latitude':                 self._model.lat,
+            'longitude':                self._model.lon,
+            'water-liquid__volumetric-water-content-soil': self._model.vwc_H2O}
 
     def get_attribute(self, att_name):
         try:

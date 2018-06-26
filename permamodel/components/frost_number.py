@@ -29,7 +29,7 @@ from permamodel.utils import model_input
 from permamodel.components import perma_base
 from permamodel import examples_directory
 from nose.tools import assert_greater_equal, assert_true, assert_equal
-
+from .. import data_directory
 
 class FrostnumberMethod(perma_base.PermafrostComponent):
     """ Provides 1D Frostnumber component """
@@ -53,9 +53,10 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.ddt = []
         self.ddf = []
         self.h_snow = -99.0
-        self.c_snow = -99.0
+        self.Csn    = -99.0
         self.Fplus = -99.0
         self.Twplus = -99.0
+        self.T_winter_plus = -99.0
         self.Zfplus = -99.0
         self.Z_tot = -99.0
         self.stefan_number = -99.0
@@ -69,12 +70,16 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.A_air = -1.0
         self.lat = -999
         self.lon = -999
-        self.rho_snow = 0.0
+        self.rho_snow = -99.0
         self.vwc_H2O = 0.0
         self.Hvgf = 0.0
         self.Hvgt = 0.0
         self.Dvf = 0.0
         self.Dvt = 0.0
+        
+        self.surface_frost_number_on = False
+        self.stefan_frost_number_on  = False
+        self.sec_per_year            = 365.0*24.0*3600.
 
     def dummy_file(self, instring=""):
         """ dummy file class, so can declare empty variable in __init__()
@@ -114,6 +119,28 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.start_year = self._configuration['start_year']
         self.end_year = self._configuration['end_year']
         self.fn_out_filename = self._configuration['fn_out_filename']
+        
+        # Snow cover:
+        try:
+            self.h_snow   = self._configuration['h_snow']
+            self.rho_snow = self._configuration['rho_snow']
+        except:
+            self.h_snow    = -99
+            self.rho_snow  = -99
+            
+        # Site location:
+        try:
+            self.lat      = self._configuration['lat']
+            self.lon      = self._configuration['lon']
+        except:
+            self.lat    = -999
+            self.lon    = -999 
+        
+        # Soil water content:
+        try:
+            self.vwc_H2O      = self._configuration['vwc_H2O']
+        except:
+            self.vwc_H2O      = 0.0
 
         # These don't need to be used after this routine
         T_air_min_type = self._configuration['T_air_min_type']
@@ -142,6 +169,31 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             assert_true(os.path.isfile(fname))
             Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
             self.T_air_max = np.array(Tvalues, dtype=np.float32)
+            
+        # Launch surface FN when there are inputs of snow:    
+        if ((self.h_snow > 0) & (self.rho_snow > 0)):
+            self.surface_frost_number_on = True
+        
+        # Launch stefan FN when there are inputs of lat-lon:
+        if ((self.lat > -999) & (self.lon > -999) & (self.vwc_H2O > 0)):
+            
+            # if there are inputs of snow,
+            # launch both. 
+            if ((self.h_snow > 0) & (self.rho_snow > 0)):
+                self.surface_frost_number_on = True    
+                self.stefan_frost_number_on  = True
+            else:
+            # if there are no inputs of snow,
+            # launch both, but set snow depth to zero.
+                print ('No snow inputs, set snow to zero')
+                self.h_snow   = 0.
+                self.rho_snow = 240.
+                self.surface_frost_number_on = True    
+                self.stefan_frost_number_on  = True
+        else:
+            
+            print ('Warning: The model needs soil water content, latitude, and longitude for Stefan frost number')
+            print ('Otherwise, Stefan FN will be skipped!')
 
     def initialize_frostnumber_component(self):
         """ Set the starting values for the frostnumber component """
@@ -174,6 +226,35 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.output[self.year] = ("%5.3f" % self.air_frost_number,
                                   "%5.3f" % self.surface_frost_number,
                                   "%5.3f" % self.stefan_frost_number)
+        
+    def estimate_snow_damping(self):
+
+        #--------------------------------------------------
+        
+        rho_sn=self.rho_snow
+
+        self.Ksn = rho_sn**3 * 2.2E-9 + rho_sn * 4.2E-4 + 2.1E-2; # Unit: (W m-1 C-1)
+
+        self.Csn = 2115 + 7.79 * self.T_winter;
+        
+        self.alpha_sn = self.Ksn / (self.Csn * rho_sn)
+        
+        self.Z_sn_star = np.sqrt(self.alpha_sn * self.sec_per_year/np.pi ) 
+        
+        self.A_plus = self.T_amplitude * np.exp(-1.*self.h_snow / self.Z_sn_star)
+        
+        self.T_winter_plus = self.T_average - self.A_plus *  \
+                             np.sin(self.Beta) / (np.pi - self.Beta)
+        
+        self.ddf_plus = -self.T_winter_plus * self.L_winter
+        
+    def obtain_soil_parameters(self):
+        
+        self.read_whole_soil_texture_from_GSD() 
+        self.adjusting_soil_texture()
+        self.calculate_soil_bulk_density()
+        self.calculate_soil_thermal_conductivity()
+        
 
     def print_frost_numbers(self, year=-1):
         """ Print output to screen """
@@ -196,12 +277,34 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
     def calculate_surface_frost_number(self):
         """ Dummy value for surface frost number """
         # For now, a dummy value
+        
         self.surface_frost_number = np.float32(-1.0)
+        
+        if (self.surface_frost_number_on == True):
+            self.estimate_snow_damping()
+            self.surface_frost_number = np.sqrt(self.ddf_plus) /\
+                          (np.sqrt(self.ddf_plus) + np.sqrt(self.ddt))
 
     def calculate_stefan_frost_number(self):
+        
         """ Dummy value for Stefan frost number """
+        
         self.stefan_frost_number = np.float32(-1.0)
-
+        
+        self.obtain_soil_parameters()
+        
+        self.Lf = 333E3
+        
+        self.Z_Frost_Plus = np.sqrt(2.0 * self.Kf * self.sec_per_year * \
+                                    np.abs(self.T_winter_plus) * self.L_winter \
+                                    /((0.05) * 1000.* self.Bulk_Density * self.Lf)) 
+        
+        self.Z_Thaw_Plus = np.sqrt(2.0 * self.Kt * self.sec_per_year * \
+                                    np.abs(self.T_summer) * self.L_summer \
+                                    /(self.vwc_H2O * 1000. * self.Bulk_Density* self.Lf)) 
+        
+        self.stefan_frost_number = self.Z_Frost_Plus/ (self.Z_Frost_Plus + self.Z_Thaw_Plus)
+        
     def compute_degree_days(self):
         """
         From the min and max temperatures, compute degree freezing
@@ -216,10 +319,13 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
         # In the first test case, we used T_air_max and T_air_min
         T_cold = self.T_air_min[int(self.year - self.start_year)]
-        T_hot = self.T_air_max[int(self.year - self.start_year)]
+        T_hot  = self.T_air_max[int(self.year - self.start_year)]
 
         assert_greater_equal(T_hot, T_cold)
         T_avg = (T_hot + T_cold) / 2.0
+        T_winter = -99.
+        T_summer = -99.
+        Beta     = -99.
 
         # Note that these conditions should cover T_hot == T_cold
         if T_hot <= 0:
@@ -250,10 +356,19 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             L_winter = 365.0 - L_summer
             ddt = T_summer * L_summer
             ddf = -T_winter * L_winter
+
+            
         self.T_average = T_average
         self.T_amplitude = T_amplitude
         self.ddt = ddt
         self.ddf = ddf
+        
+        self.T_winter = T_winter
+        self.Beta     = Beta
+        self.L_winter = L_winter
+        
+        self.T_summer = T_summer
+        self.L_summer = L_summer
 
     def compute_air_frost_number(self):
         """
@@ -356,7 +471,254 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
             self.year += time_change
 
         self.calculate_frost_numbers()
+        
+# =============================================================================
+# ===============functions for soils===========================================
+#==============================================================================
 
+    def adjusting_soil_texture(self):
+        
+        self.Extract_Soil_Texture_Loops()
+        
+        # Adjusting percent of sand, silt, clay and peat ==
+        self.tot_percent = self.p_sand+self.p_clay+self.p_silt+self.p_peat
+
+        self.percent_sand = self.p_sand / self.tot_percent
+        self.percent_clay = self.p_clay / self.tot_percent
+        self.percent_silt = self.p_silt / self.tot_percent
+        self.percent_peat = self.p_peat / self.tot_percent
+        
+    def Extract_Soil_Texture_Loops(self):
+        
+        n_lat = np.size(self.lat)
+        n_lon = np.size(self.lon)
+        
+        n_grid = n_lat*n_lon     
+        
+        if n_grid > 1:
+            
+            p_clay_list = np.zeros((n_lat,n_lon));
+            p_sand_list = np.zeros((n_lat,n_lon));
+            p_silt_list = np.zeros((n_lat,n_lon));
+            p_peat_list = np.zeros((n_lat,n_lon));
+            
+#            lon = np.reshape(self.lon, (n_grid,1))
+#            lat = np.reshape(self.lat, (n_grid,1))
+                    
+            for i in range(n_lon):
+                for j in range(n_lat):
+                
+                    input_lat   = self.lat[j]
+                    input_lon   = self.lon[i]
+                    
+                    [p_clay0, p_sand0, p_silt0, p_peat0] = self.Extract_Soil_Texture(input_lat, input_lon);
+                
+                    p_clay_list[j,i] = p_clay0            
+                    p_sand_list[j,i] = p_sand0        
+                    p_silt_list[j,i] = p_silt0        
+                    p_peat_list[j,i] = p_peat0
+        else:
+            
+            input_lat   = self.lat
+            input_lon   = self.lon
+                
+            [p_clay0, p_sand0, p_silt0, p_peat0] = self.Extract_Soil_Texture(input_lat, input_lon);
+            
+            p_clay_list = p_clay0            
+            p_sand_list = p_sand0        
+            p_silt_list = p_silt0        
+            p_peat_list = p_peat0*0.
+                         
+                    
+        self.p_clay = p_clay_list
+        self.p_sand = p_sand_list
+        self.p_silt = p_silt_list
+        self.p_peat = p_peat_list
+        
+    def Extract_Soil_Texture(self, input_lat, input_lon): 
+    
+        """ 
+        The function is to extract the grid value from matrix,
+        according to input of latitude and longitude;
+        
+        INPUTs:
+                input_lat: Latitude;
+                input_lon: Longitude;
+                lon_grid : Array of longitude
+                lat_grid : Array of latitude
+                p_data   : Matrix of data (from NetCDF file)
+                
+        OUTPUTs:
+                q_data: grid value (SINGLE)   
+                        
+        DEPENDENTs:
+                None 
+        """
+            
+        import numpy as np
+        
+        lon_grid_scale = 0.05;
+        lat_grid_scale = 0.05;
+        
+        lon_grid_top = self.lon_soil_grid + lon_grid_scale / 2.0;
+        lat_grid_top = self.lat_soil_grid + lat_grid_scale / 2.0;
+        
+        lon_grid_bot = self.lon_soil_grid - lon_grid_scale / 2.0;
+        lat_grid_bot = self.lat_soil_grid - lat_grid_scale / 2.0;
+        
+        # Get the index of input location acccording to lat and lon inputed
+        
+        idx_lon = np.where((input_lon <= lon_grid_top) & (input_lon >= lon_grid_bot))          
+        idx_lat = np.where((input_lat <= lat_grid_top) & (input_lat >= lat_grid_bot))
+        
+        idx_lon = np.array(idx_lon)
+        idx_lat = np.array(idx_lat)
+        
+        if np.size(idx_lon) >= 1 and np.size(idx_lat) >= 1:
+            clay_perc  = self.Clay_percent[idx_lat[0,0], idx_lon[0,0]]
+            sand_perc  = self.Sand_percent[idx_lat[0,0], idx_lon[0,0]]
+            silt_perc  = self.Silt_percent[idx_lat[0,0], idx_lon[0,0]]
+            peat_perc  = self.Peat_percent[idx_lat[0,0], idx_lon[0,0]]
+        else:
+            clay_perc  = np.nan;
+            sand_perc  = np.nan;
+            silt_perc  = np.nan;
+            peat_perc  = np.nan;            
+    
+        return clay_perc, sand_perc, silt_perc, peat_perc        
+        
+    def import_ncfile(self, input_file, lonname,  latname,  varname): 
+                                           
+        from netCDF4 import Dataset
+        
+        # Read the nc file 
+        
+        fh = Dataset(input_file, mode='r')
+        
+        # Get the lat and lon
+        
+        lon_grid = fh.variables[lonname][:]; 
+        lat_grid = fh.variables[latname][:];
+        
+        p_data  = fh.variables[varname][:];
+        
+        return lat_grid,lon_grid,p_data   
+             
+    def read_whole_soil_texture_from_GSD(self):
+        
+        Clay_file = self.get_param_nc4_filename("T_CLAY")
+        Sand_file = self.get_param_nc4_filename("T_SAND")
+        Silt_file = self.get_param_nc4_filename("T_SILT")
+        Peat_file = self.get_param_nc4_filename("T_OC")
+
+        lonname    = 'lon';
+        latname    = 'lat';
+        
+        varname    = 'T_CLAY';                                        
+        [lat_grid, lon_grid, Clay_percent] = self.import_ncfile(Clay_file, 
+                                                lonname, latname, varname)
+        varname    = 'T_SAND';                                        
+        [lat_grid, lon_grid, Sand_percent] = self.import_ncfile(Sand_file, 
+                                                lonname, latname, varname)
+         
+        varname    = 'T_SILT';                                        
+        [lat_grid, lon_grid, Silt_percent] = self.import_ncfile(Silt_file, 
+                                                lonname, latname, varname)
+                                                
+        varname    = 'T_OC';                                        
+        [lat_grid, lon_grid, Peat_percent] = self.import_ncfile(Peat_file, 
+                                                lonname, latname, varname)
+        
+        self.Clay_percent      = Clay_percent;
+        self.Sand_percent      = Sand_percent;
+        self.Silt_percent      = Silt_percent;
+        self.Peat_percent      = Peat_percent;
+        self.lon_soil_grid     = lon_grid;
+        self.lat_soil_grid     = lat_grid;
+        
+        self.thermal_parameters_file = os.path.join(data_directory,
+                                                    'Typical_Thermal_Parameters.csv')        
+        self.thermal_data = np.genfromtxt(self.thermal_parameters_file,
+                                          names = True,
+                                          delimiter=',',
+                                          dtype=None)
+
+    def calculate_soil_bulk_density(self):
+        
+        Bulk_Density_Texture = self.thermal_data['Bulk_Density']
+        
+        self.Bulk_Density  =  Bulk_Density_Texture[2]*self.percent_clay + \
+                         Bulk_Density_Texture[1]*self.percent_sand + \
+                         Bulk_Density_Texture[0]*self.percent_silt + \
+                         Bulk_Density_Texture[3]*self.percent_peat        # Unit: kg m-3      
+        
+    def calculate_soil_thermal_conductivity(self):
+
+        #---------------------------------------------------------
+        # Notes: we need a better documentation of this subroutine here
+        #
+        #
+        #---------------------------------------------------------
+        # Note: need to update frozen and thawed (kf,kt)
+        #       thermal conductivities yearly
+        #       this methods overriddes the method in the perma_base
+        #
+        #
+        #--------------------------------------------------
+        #input_file = 'Parameters/Typical_Thermal_Parameters.csv'
+
+        vwc=self.vwc_H2O
+                
+        KT_DRY = self.thermal_data['KT_DRY'] # DRY soil thermal conductivity in THAWED states
+        KT_WET = self.thermal_data['KT_WET'] # WET soil thermal conductivity in THAWED states
+        KF_DRY = self.thermal_data['KF_DRY'] # DRY soil thermal conductivity in FROZEN states 
+        KF_WET = self.thermal_data['KF_WET'] # WET soil thermal conductivity in FROZEN states
+        
+        KT_DRY = KT_DRY * 1;
+        KT_WET = KT_WET * 1;
+        KF_DRY = KF_DRY * 1;
+        KF_WET = KF_WET * 1;
+        
+        kt_dry_silt = KT_DRY[0]        
+        kt_dry_sand = KT_DRY[1]
+        kt_dry_clay = KT_DRY[2]
+        kt_dry_peat = KT_DRY[3]
+        
+        #===
+        
+        kf_dry_silt = KF_DRY[0]        
+        kf_dry_sand = KF_DRY[1]
+        kf_dry_clay = KF_DRY[2]
+        kf_dry_peat = KF_DRY[3]
+
+        #=== Estimate soil thermal conductivity according to water content:           
+        # Estimate thermal conductivity for composed soil
+                     
+        Kt_Soil_dry = kt_dry_silt**self.percent_silt * \
+                   kt_dry_clay**self.percent_clay * \
+                   kt_dry_sand**self.percent_sand * \
+                   kt_dry_peat**self.percent_peat 
+                   
+        uwc = 0.05;
+
+        Kt_Soil = Kt_Soil_dry**(1.0-vwc)*0.54**vwc;
+
+        Kf_Soil_dry = kf_dry_silt**self.percent_silt * \
+                   kf_dry_clay**self.percent_clay * \
+                   kf_dry_sand**self.percent_sand * \
+                   kf_dry_peat**self.percent_peat
+
+        Kf_Soil = Kf_Soil_dry**(1.0-vwc)*2.35**(vwc-uwc)*0.54**(uwc);
+            
+
+#            Kf_Soil = Kf_Soil*0.+1.38
+#            Kt_Soil = Kf_Soil*0.+0.85
+            
+        # Consider the effect of water content on thermal conductivity        
+        
+        self.Kt = Kt_Soil;
+        self.Kf = Kf_Soil;
+                 
 if __name__ == "__main__":
     # Run the code
     fn = FrostnumberMethod()
