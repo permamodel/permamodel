@@ -265,10 +265,13 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             if var_name in var_name_list:
                 return grid_id
 
-    def get_grid_shape(self, grid_id):
-        var_name = self._grids[grid_id]
-        value = np.array(self.get_value_ref(var_name)).shape
-        return value
+    def get_grid_shape(self, grid_id, out=None):
+        grid_shape = np.array(self.get_value_ref(var_name)).shape
+        if out is None:
+            out = grid_shape
+        else:
+            out[:] = grid_shape
+        return out
 
     def get_grid_size(self, grid_id):
         grid_size = self.get_grid_shape(grid_id)
