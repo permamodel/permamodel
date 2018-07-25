@@ -1,6 +1,6 @@
-
 ## Copyright (c) 2001-2013, Scott D. Peckham
 ## January 2009  (converted from IDL)
+from __future__ import print_function
 
 import glob   # (for exists())
 import numpy  # (for things like uint8(), int16(), float64())
@@ -72,12 +72,12 @@ def unit_test():
     #---------------------------
     # Test the "get" functions
     #---------------------------
-    print 'RTI byte order =', get_rti_byte_order()
-    print 'RTI file BPE   =', get_bpe( info.data_type )
-    print 'RTI grid size  =', get_grid_size( RTI_file )
-    print ' '
-    print 'Finished with unit_test().'
-    print ' '
+    print('RTI byte order =', get_rti_byte_order())
+    print('RTI file BPE   =', get_bpe( info.data_type ))
+    print('RTI grid size  =', get_grid_size( RTI_file ))
+    print(' ')
+    print('Finished with unit_test().')
+    print(' ')
 
 #   unit_test()
 #-------------------------------------------------------------------
@@ -133,9 +133,9 @@ def try_to_find_rti_file( file_name, SILENT=False ):
                 str1 = 'Could not find the RTI file:'
             else:
                 str1 = 'Could not find RTI file for:'
-            print 'ERROR: ' + str1
-            print '      ' + file_name
-            print ' '
+            print('ERROR: ' + str1)
+            print('      ' + file_name)
+            print(' ')
         #---------------
         return None
 
@@ -221,7 +221,7 @@ def exists(RTI_file, SILENT=False):
                    'The file: ', '  ' + RTI_file, \
                    'was not found in the working directory. ', \
                    ' ']
-            for line in msg: print line
+            for line in msg: print(line)
         return False
 
 #   exists()
@@ -321,7 +321,7 @@ def read_info(file_name, SILENT=False, REPORT=False):
                'The file: ', '  ' + self.RTI_file, \
                'is not a valid RTI file. ', ' ']
         if not(SILENT):
-            for line in msg: print line
+            for line in msg: print(line)
         return None
 
     #--------------------------------
@@ -374,29 +374,29 @@ def read_info(file_name, SILENT=False, REPORT=False):
     # Optional report
     #------------------
     if (REPORT):
-        print '-----------------'
-        print 'Grid Information'
-        print '-----------------'
-        print 'grid_file    =', info.grid_file
-        print 'data_source  =', info.data_source
-        print 'ncols        =', info.ncols
-        print 'nrows        =', info.nrows
-        print 'data_type    =', info.data_type
-        print 'byte_order   =', info.byte_order
-        print 'pixel_geom   =', info.pixel_geom
-        print 'xres         =', info.xres
-        print 'yres         =', info.yres
-        print 'zres         =', info.zres
-        print 'z_units      =', info.z_units
-        print 'y_south_edge =', info.y_south_edge
-        print 'y_north_edge =', info.y_north_edge
-        print 'x_east_edge  =', info.x_east_edge
-        print 'x_west_edge  =', info.x_west_edge
-        print 'box_units    =', info.box_units
-        print 'gmin         =', info.gmin
-        print 'gmax         =', info.gmax
-        print 'UTM_zone     =', info.UTM_zone
-        print ' '
+        print('-----------------')
+        print('Grid Information')
+        print('-----------------')
+        print('grid_file    =', info.grid_file)
+        print('data_source  =', info.data_source)
+        print('ncols        =', info.ncols)
+        print('nrows        =', info.nrows)
+        print('data_type    =', info.data_type)
+        print('byte_order   =', info.byte_order)
+        print('pixel_geom   =', info.pixel_geom)
+        print('xres         =', info.xres)
+        print('yres         =', info.yres)
+        print('zres         =', info.zres)
+        print('z_units      =', info.z_units)
+        print('y_south_edge =', info.y_south_edge)
+        print('y_north_edge =', info.y_north_edge)
+        print('x_east_edge  =', info.x_east_edge)
+        print('x_west_edge  =', info.x_west_edge)
+        print('box_units    =', info.box_units)
+        print('gmin         =', info.gmin)
+        print('gmax         =', info.gmax)
+        print('UTM_zone     =', info.UTM_zone)
+        print(' ')
 
     return info
 
@@ -422,30 +422,30 @@ def make_info(grid_file=None,
               dtype=None, SILENT=True):
 
     if (grid_file == None):
-        print '---------------------------------------------------'
-        print 'ERROR: make_info() requires "grid_file" argument.'
-        print '---------------------------------------------------'
-        print ' '
+        print('---------------------------------------------------')
+        print('ERROR: make_info() requires "grid_file" argument.')
+        print('---------------------------------------------------')
+        print(' ')
         return None
 
     if (ncols == None) or (nrows == None) or \
        (xres == None)  or (yres == None):
         RTI_file = try_to_find_rti_file( grid_file )
         if (RTI_file != None):
-            print 'Copying info from RTI_file: '
-            print '    ' + RTI_File
+            print('Copying info from RTI_file: ')
+            print('    ' + RTI_File)
             info = read_info( grid_file )
             if (ncols == None): ncols = info.ncols
             if (nrows == None): nrows = info.nrows
             if (xres  == None): xres  = info.xres
             if (yres  == None): yres  = info.yres
         else:
-            print '----------------------------------------------'
-            print 'ERROR: "make_info()" requires the arguments:'
-            print '        ncols, nrows, xres and yres.'
-            print '        Could not find any RTI_file to copy.'
-            print '----------------------------------------------'
-            print ' '
+            print('----------------------------------------------')
+            print('ERROR: "make_info()" requires the arguments:')
+            print('        ncols, nrows, xres and yres.')
+            print('        Could not find any RTI_file to copy.')
+            print('----------------------------------------------')
+            print(' ')
             return None
 
     #-------------------------------------------------
@@ -514,8 +514,8 @@ def make_info(grid_file=None,
                   SWAP_ENDIAN  = SWAP_ENDIAN )
 
     if not(SILENT):
-        print 'Finished creating info structure.'
-        print ' '
+        print('Finished creating info structure.')
+        print(' ')
 
     return info
 
@@ -636,9 +636,9 @@ def write_info(file_name, info, SILENT=True):
     # Print or display a message
     #-----------------------------
     if not(SILENT):
-        print 'Finished writing new RTI file: '
-        print '   ' + RTI_file
-        print ' '
+        print('Finished writing new RTI file: ')
+        print('   ' + RTI_file)
+        print(' ')
 
 #   write_info()
 #---------------------------------------------------------------------

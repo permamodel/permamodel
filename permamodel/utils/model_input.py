@@ -32,6 +32,8 @@ SOFTWARE.
 *
 """
 #-------------------------------------------------------------------
+from __future__ import print_function
+
 from numpy import *
 import numpy
 
@@ -54,8 +56,8 @@ def open_file(var_type, input_file):
     if (var_type.lower() == 'scalar'):
         return file_unit
     if (input_file == ''):
-        print 'ERROR in model_input.open_file():'
-        print '    Input file is null string.'
+        print('ERROR in model_input.open_file():')
+        print('    Input file is null string.')
         # print '    variable type =' + var_type
         return file_unit
 
@@ -63,9 +65,9 @@ def open_file(var_type, input_file):
     # Does input file exist locally ?
     #----------------------------------
     if not(os.path.exists(input_file)):
-        print 'ERROR in model_input.open_file():'
-        print '    Could not find input file ='
-        print '    ' + input_file
+        print('ERROR in model_input.open_file():')
+        print('    Could not find input file =')
+        print('    ' + input_file)
         # print '   ' + input_file
         return file_unit
 

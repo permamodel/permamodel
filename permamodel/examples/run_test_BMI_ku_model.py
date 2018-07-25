@@ -8,6 +8,7 @@ A simple BMI KuModel example. Run with:
 Created on Tue Jan 10 10:56:16 2017
 @author: kangwang
 """
+from __future__ import print_function
 
 import os
 from permamodel.components import bmi_Ku_component
@@ -22,4 +23,4 @@ x.update()
 x.finalize()
 
 # print x._values["ALT"][:]
-print x.get_value('soil__active_layer_thickness')
+print(x.get_value('soil__active_layer_thickness'))

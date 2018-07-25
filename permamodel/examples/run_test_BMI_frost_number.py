@@ -8,6 +8,7 @@ A simple BMI FrostNumberModel example. Run with:
 Created on Tue Jan 10 10:56:16 2017
 @author: kangwang
 """
+from __future__ import print_function
 
 import os
 from permamodel.components import bmi_frost_number
@@ -22,4 +23,4 @@ x.initialize(cfg_file)
 x.update()
 x.finalize()
 
-print x.get_value('frostnumber__air')
+print(x.get_value('frostnumber__air'))

@@ -21,6 +21,7 @@ SOFTWARE.
 *
 
 """
+from __future__ import print_function
 
 import numpy as np
 from permamodel.utils import model_input
@@ -94,10 +95,10 @@ class gipl_model( perma_base.PermafrostComponent ):
         try:
             return self._att_map[ att_name.lower() ]
         except:
-            print '###################################################'
-            print ' ERROR: Could not find attribute: ' + att_name
-            print '###################################################'
-            print ' '
+            print('###################################################')
+            print(' ERROR: Could not find attribute: ' + att_name)
+            print('###################################################')
+            print(' ')
 
     #   get_attribute() 
     #-------------------------------------------------------------------   
@@ -175,8 +176,8 @@ class gipl_model( perma_base.PermafrostComponent ):
         #-------------------------------------------------------
         T_air = model_input.read_next_modified(self.T_air_unit, self.T_air_type)
         if (T_air != None): self.T_air = T_air
-        print T_air
-        print 'OKOK'
+        print(T_air)
+        print('OKOK')
 
         #T0 = model_input.read_next(self.T0_unit, self.T0_type, rti)
         #if (T0 != None): self.T0 = T0
@@ -200,8 +201,8 @@ class gipl_model( perma_base.PermafrostComponent ):
                    SILENT=False):
 
         if not(SILENT):
-            print ' '
-            print 'GIPL component: Initializing...'
+            print(' ')
+            print('GIPL component: Initializing...')
             
         self.status   = 'initializing'  # (OpenMI 2.0 convention)
         self.mode     = mode
@@ -511,7 +512,7 @@ class gipl_model( perma_base.PermafrostComponent ):
         #print rab1,rab2,akapa2,q2,amu2 
         
         if (abs(akapa2)>1.0):
-            print "YOU CAN NOT APPLY PROGONKA ON U1 - CHANGE STEPS"
+            print("YOU CAN NOT APPLY PROGONKA ON U1 - CHANGE STEPS")
         
         if (self.lbound==2):
             self.U2[self.N-1]=(amu2+akapa2*self.bet[self.N-1])/(1-self.alf[self.N-1]*akapa2)
@@ -659,8 +660,8 @@ class gipl_model( perma_base.PermafrostComponent ):
         #for i in range(0,self.N):
         #	print i,np.around(self.U1[i], decimals=5)
         res=self.U1[self.z_idx]
-        print "U1"
-        print np.around(res, decimals=5)
+        print("U1")
+        print(np.around(res, decimals=5))
         
         # update internal time 
         self.i_time=self.i_time+1
@@ -675,7 +676,7 @@ class gipl_model( perma_base.PermafrostComponent ):
         #---------------------------------------------------------
         # 		coming up
         #--------------------------------------------------
-		print 'In Progress'        
+		print('In Progress')        
         		
     #   update_ALT()
     #-------------------------------------------------------------------

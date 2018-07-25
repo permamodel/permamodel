@@ -14,13 +14,14 @@
 # read_main_basin_IDs()
 #
 #-----------------------------------------------------------------------
+from __future__ import print_function
 
 import numpy as np
 import os
 import os.path
 
 def extract_grid_value(self):
-     print 'OK1'
+     print('OK1')
 
 #-----------------------------------------------------------------------
 def write_outlet_file( self ):
@@ -75,12 +76,12 @@ def read_outlet_file( self ):
     #--------------------------------------
     if not(os.path.exists( self.outlet_file )):
         hash_line = ''.rjust(60, "#")
-        print hash_line
-        print ' ERROR: Could not find monitored pixel file:'
-        print ' ' + self.outlet_file
-        print ' Creating default version of file. '
-        print hash_line
-        print ' '
+        print(hash_line)
+        print(' ERROR: Could not find monitored pixel file:')
+        print(' ' + self.outlet_file)
+        print(' Creating default version of file. ')
+        print(hash_line)
+        print(' ')
         write_outlet_file( self )
         # return
 
@@ -135,8 +136,8 @@ def read_outlet_file( self ):
     #------------------------------------------
     OK = check_outlet_IDs( outlet_IDs, self.rti.n_pixels )
     if not(OK):
-        print 'ERROR: Some outlet_IDs lie outside of DEM.'
-        print ' '
+        print('ERROR: Some outlet_IDs lie outside of DEM.')
+        print(' ')
         return
 
     #-------------------------------------------

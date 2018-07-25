@@ -41,6 +41,7 @@ SOFTWARE.
 #  meters_per_degree_lat()
 #
 #-------------------------------------------------------------------
+from __future__ import print_function
 
 from numpy import *
 import numpy
@@ -50,39 +51,39 @@ def unit_test():
 
     import rti_files
 
-    print 'Testing meters_per_degree_lon()...'
+    print('Testing meters_per_degree_lon()...')
     MPD_lon = meters_per_degree_lon(0)
-    print 'meters_per_degree_lon(0)   =', MPD_lon
-    print 'meters_per_3_arcsec_lon(0) =', MPD_lon / 1200.0
-    print ' '
+    print('meters_per_degree_lon(0)   =', MPD_lon)
+    print('meters_per_3_arcsec_lon(0) =', MPD_lon / 1200.0)
+    print(' ')
     #------------------------------------------------------------
-    print 'Testing meters_per_degree_lat()...'
+    print('Testing meters_per_degree_lat()...')
     MPD_lat = meters_per_degree_lat(0)
-    print 'meters_per_degree_lat(0)   =', MPD_lat
-    print 'meters_per_3_arcsec_lat(0) =', MPD_lat / 1200.0
-    print ' '
+    print('meters_per_degree_lat(0)   =', MPD_lat)
+    print('meters_per_3_arcsec_lat(0) =', MPD_lat / 1200.0)
+    print(' ')
     #------------------------------------------------------------
-    print 'Testing get_da() with KY_Sub (fixed-angle pixels)...'
+    print('Testing get_da() with KY_Sub (fixed-angle pixels)...')
     in_directory  = '/Applications/RIVIX/RiverTools_3.0/basins/KY_Sub/'
     site_prefix = 'KY_Sub'
     RTI_file    = (in_directory + site_prefix + '.rti')
     info = rti_files.read_info( RTI_file, REPORT=True )
     da   = get_da(info, REPORT=True, VERBOSE=True)
-    print 'da = '
-    print da
-    print 'shape(da) =', shape(da)
-    print ' '
+    print('da = ')
+    print(da)
+    print('shape(da) =', shape(da))
+    print(' ')
     #------------------------------------------------------------
-    print 'Testing get_da() with Beaver... (fixed-length pixels)'
+    print('Testing get_da() with Beaver... (fixed-length pixels)')
     in_directory  = '/Applications/RIVIX/RiverTools_3.0/basins/Beaver_Creek_KY/'
     site_prefix = 'Beaver'
     RTI_file    = (in_directory + site_prefix + '.rti')
     info = rti_files.read_info( RTI_file, REPORT=True )
     da   = get_da(info, REPORT=True, VERBOSE=True)
-    print 'da = '
-    print da
-    print 'shape(da) =', shape(da)
-    print ' '
+    print('da = ')
+    print(da)
+    print('shape(da) =', shape(da))
+    print(' ')
 
 #   unit_test()
 #-------------------------------------------------------------------
@@ -166,23 +167,23 @@ def get_sizes_by_row(rti, REPORT=False, METERS=False):
         if (rti.pixel_geom == 0):
             RADEG = (float64(180) / numpy.pi)
             #---------------------
-            print 'Pixel geometry = Fixed-angle '
-            print ' '
-            print 'Actual south edge lat   = ' + str(rti.y_south_edge)
-            print 'Computed south edge lat = ' + str(lats[rti.nrows - 1] * RADEG)
-            print 'Actual north edge lat   = ' + str(rti.y_north_edge)
-            print 'Computed north edge lat = ' + str((lats[0] + yresdeg) * RADEG)
+            print('Pixel geometry = Fixed-angle ')
+            print(' ')
+            print('Actual south edge lat   = ' + str(rti.y_south_edge))
+            print('Computed south edge lat = ' + str(lats[rti.nrows - 1] * RADEG))
+            print('Actual north edge lat   = ' + str(rti.y_north_edge))
+            print('Computed north edge lat = ' + str((lats[0] + yresdeg) * RADEG))
         else:
-            print 'Pixel geometry = Fixed-length '
-            print ' '
-            print 'Actual south edge y   = ' + str(rti.y_south_edge)
-            print 'Actual north edge y   = ' + str(rti.y_north_edge)
-        print ' '
-        print 'Min(dx), Max(dx) = ' + str(dx.min()) + str(dx.max())
-        print 'Min(dy), Max(dy) = ' + str(dy.min()) + str(dy.max())
-        print 'Min(dd), Max(dd) = ' + str(dd.min()) + str(dd.max())
-        print 'Min(da), Max(da) = ' + str(da.min()) + str(da.max())
-        print ' '
+            print('Pixel geometry = Fixed-length ')
+            print(' ')
+            print('Actual south edge y   = ' + str(rti.y_south_edge))
+            print('Actual north edge y   = ' + str(rti.y_north_edge))
+        print(' ')
+        print('Min(dx), Max(dx) = ' + str(dx.min()) + str(dx.max()))
+        print('Min(dy), Max(dy) = ' + str(dy.min()) + str(dy.max()))
+        print('Min(dd), Max(dd) = ' + str(dd.min()) + str(dd.max()))
+        print('Min(da), Max(da) = ' + str(da.min()) + str(da.max()))
+        print(' ')
 
     return (dx, dy, dd)
 
@@ -204,9 +205,9 @@ def get_da(rti, METERS=False, REPORT=False, VERBOSE=False):
         da = (dx[0] * dy[0])
 
         if (VERBOSE):
-            print('dx = ' + str(dx[0]) + '  [m]')
-            print('dy = ' + str(dy[0]) + '  [m]')
-            print('da = ' + str(da) + '  [m^2]')
+            print(('dx = ' + str(dx[0]) + '  [m]'))
+            print(('dy = ' + str(dy[0]) + '  [m]'))
+            print(('da = ' + str(da) + '  [m^2]'))
     else:
         #---------------------------------
         # Convert da from 1D to 2D array
@@ -233,16 +234,16 @@ def get_da(rti, METERS=False, REPORT=False, VERBOSE=False):
         if (VERBOSE):
             da_min = da.min()
             da_max = da.max()
-            print('    min(da) = ' + str(da_min) + '  [m^2]')
-            print('    max(da) = ' + str(da_max) + '  [m^2]')
+            print(('    min(da) = ' + str(da_min) + '  [m^2]'))
+            print(('    max(da) = ' + str(da_max) + '  [m^2]'))
             dx_min = dx.min()
             dx_max = dx.max()
-            print('    min(dx) = ' + str(dx_min) + '  [m]')
-            print('    max(dx) = ' + str(dx_max) + '  [m]')
+            print(('    min(dx) = ' + str(dx_min) + '  [m]'))
+            print(('    max(dx) = ' + str(dx_max) + '  [m]'))
             dy_min = dy.min()
             dy_max = dy.max()
-            print('    min(dy) = ' + str(dy_min) + '  [m]')
-            print('    max(dy) = ' + str(dy_max) + '  [m]')
+            print(('    min(dy) = ' + str(dy_min) + '  [m]'))
+            print(('    max(dy) = ' + str(dy_max) + '  [m]'))
             print(' ')
 
     return da
