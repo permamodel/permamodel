@@ -226,7 +226,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return self._grid_type[grid_number]
 
     def get_time_step(self):
-        return self._model._timestep_duration
+        return float(self._model._timestep_duration)
 
     def get_value_ref(self, var_name):
         return self._values[var_name]
@@ -248,10 +248,11 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
     def get_value(self, var_name, out=None):
+        value = self.get_value_ref(var_name).reshape((-1, ))
         if out is None:
-            out = self.get_value_ref(var_name).copy()
+            out = value.copy()
         else:
-            out[...] = self.get_value_ref(var_name)
+            out[...] = value
         return out
 
     def get_var_type(self, var_name):
@@ -266,6 +267,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
                 return grid_id
 
     def get_grid_shape(self, grid_id, out=None):
+        var_name = self._grids[grid_id]
         grid_shape = np.array(self.get_value_ref(var_name)).shape
         if out is None:
             out = grid_shape
@@ -282,6 +284,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     def get_grid_spacing(self, grid_id, out=None):
         assert_true(grid_id < self.ngrids)
+        var_name = self._grids[grid_id]
         if out is None:
             ndim = np.array(self.get_value_ref(var_name)).ndim
             out = np.full(ndim, 1.)
@@ -291,6 +294,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     # Todo: Revise once we can work with georeferenced data in the CMF.
     def get_grid_origin(self, grid_id, out=None):
+        var_name = self._grids[grid_id]
         if out is None:
             ndim = np.array(self.get_value_ref(var_name)).ndim
             out = np.full(ndim, 0.)
