@@ -280,9 +280,14 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         else:
             return int(np.prod(grid_size))
 
-    def get_grid_spacing(self, grid_id):
+    def get_grid_spacing(self, grid_id, out=None):
         assert_true(grid_id < self.ngrids)
-        return np.array([1, 1], dtype='float32')
+        if out is None:
+            ndim = np.array(self.get_value_ref(var_name)).ndim
+            out = np.full(ndim, 1.)
+        else:
+            out[:] = 1.
+        return out
 
     # Todo: Revise once we can work with georeferenced data in the CMF.
     def get_grid_origin(self, grid_id):
