@@ -200,14 +200,14 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
 
-        self._values = _values = {
+        self._values = {
         # These are the links to the model's variables and
         # should be consistent with _var_name_map 
             'latitude':                                 self._model.lat,
             'longitude':                                self._model.lon,
             'datetime__start':                          self._model.start_year,
             'datetime__end':                                self._model.end_year,
-            'atmosphere_bottom_air__temperature':       self._model.T_air,
+            'atmosphere_bottom_air__temperature': "T_air",
             'atmosphere_bottom_air__temperature_amplitude': self._model.A_air,
             'snowpack__depth':                          self._model.h_snow,
             'snowpack__density':                        self._model.rho_snow,
@@ -264,7 +264,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         return self._var_units_map[ long_var_name ]
 
     def get_var_location(self, long_var_name):
-        return return "node"
+        return "node"
 
     def update(self):
 #        self._model.update(self._model.dt)
