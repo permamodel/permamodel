@@ -596,8 +596,7 @@ class BMI_component:
     def get_var_rank(self, long_var_name):
 
         var_name = self.get_var_name( long_var_name )  # (2/20/12)
-
-        exec("rank = np.ndim(self." + var_name + ")")
+        rank = np.ndim(getattr(self, var_name))
 
         ### print '######## rank(' + var_name + ') =', rank
 
@@ -619,7 +618,7 @@ class BMI_component:
         var_name = self.get_var_name( long_var_name )  # (2/20/12)
 
         try:
-            exec( "dtype = self." + var_name + ".dtype" )
+            dtype = getattr(self, var_name).dtype
         except:
             dtype = 'unknown'
         return str(dtype)       # (need str() here)
@@ -1467,7 +1466,7 @@ class BMI_component:
                 # Update var_type based on droplist setting
                 #--------------------------------------------
                 if (last_var_name.startswith(var_base + '_type')):
-                    exec( "type_choice = self." + last_var_name )
+                    type_choice = getattr(self, last_var_name)
                     if (type_choice.lower() == 'scalar'):
                         #--------------------------------------------------
                         # It seems that things will work as long as the
@@ -1478,11 +1477,11 @@ class BMI_component:
                         # "Mismatch with value found in typemap
                         #  (requested type String, actual type Double)."
                         #--------------------------------------------------
-                        exec( "self." + var_name_file_str + " = ''")
+                        setattr(self, var_name_file_str, "")
                         READ_SCALAR = True
                         ## var_type = 'float64'
                     else:
-                        exec( "self." + var_name + " = 0.0")
+                        setattr(self, var_name, 0.)
                         READ_FILENAME = True
                         ## var_type = 'string'
 
@@ -1502,10 +1501,10 @@ class BMI_component:
 ##                    print 'value    =', value
 ##                    print '---------------------------------'
 
-                    exec( "self." + var_name + " = value" )
+                    setattr(self, var_name, value)
                 elif (var_type in ['long', 'int']):
                     value = np.int32( value )
-                    exec( "self." + var_name + " = value" )
+                    setattr(self, var_name, value)
                 elif (var_type == 'string'):
                     #-----------------------------------------
                     # Get the value string for this var_name
@@ -1537,9 +1536,9 @@ class BMI_component:
                     if (var_name[:5] == 'SAVE_'):
                         VALUE_SET = True
                         if (s.lower() == 'yes'):
-                            exec( "self." + var_name + " = True" )
+                            setattr(self, var_name, True)
                         elif (s.lower() == 'no'):
-                            exec( "self." + var_name + " = False" )
+                            setattr(self, var_name, False)
                         else:
                             VALUE_SET = False
                     else:
@@ -1547,11 +1546,11 @@ class BMI_component:
                     #----------------------------------------------------------
                     if not(VALUE_SET):
                         if (READ_FILENAME):
-                            exec( "self." + var_name_file_str + " = value_str" )
+                            setattr(self, var_name_file_str, value_str)
                         elif (READ_SCALAR):
-                            exec( "self." + var_name + " = np.float64(value_str)")
+                            setattr(self, var_name, np.float64(value_str))
                         else:
-                            exec( "self." + var_name + " = value_str" )
+                            setattr(self, var_name, value_str)
                 else:
                     print('ERROR in BMI_base.read_config_file().')
                     print('   Unsupported data type = ' + var_type + '.')
@@ -1725,15 +1724,14 @@ class BMI_component:
         #   self.prepend_directory( ['slope_file', 'width_file'] )
         #-----------------------------------------------------------
         if (INPUT):
-            dir_part = " = self.in_directory + "
+            dirname = self.in_directory
         else:
-            dir_part = " = self.out_directory + "
+            dirname = self.out_directory
 
         for file_str in file_list:
-            self_part = "self." + file_str
-            exec( 'filename = ' + self_part )
+            filename = getattr(self, file_str)
             if (filename != ''):
-                exec( self_part + dir_part + self_part )
+                setattr(self, file_str, os.path.join(dirname, file_str))
 
     #   prepend_directory
     #-------------------------------------------------------------------
@@ -1880,7 +1878,7 @@ class BMI_component:
         #------------------------------------------------
         # NB!  Case in var_name must be an exact match.
         #-------------------------------------------------
-        exec("n = np.ndim(self." + var_name + ")")
+        n = np.ndim(getattr(self, var_name))
         return (n == 0)
 
     #   is_scalar()
@@ -1890,7 +1888,7 @@ class BMI_component:
         #------------------------------------------------
         # NB!  Case in var_name must be an exact match.
         #------------------------------------------------
-        exec("n = np.ndim(self." + var_name + ")")
+        n = np.ndim(getattr(self, var_name))
         return (n == 1)
 
     #   is_vector()
@@ -1920,7 +1918,7 @@ class BMI_component:
 ##            print 'ERROR: type(' + var_name + ') =' + type_str
 ##            return False
         #-------------------------------------------------------
-        exec("n = np.ndim(self." + var_name + ")")
+        n = np.ndim(getattr(self, var_name))
         return (n == 2)
 
     #   is_grid()
