@@ -164,6 +164,9 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
     def get_var_units(self, long_var_name):
         return self._var_units_map[long_var_name]
 
+    def get_var_location(self, long_var_name):
+        return "node"
+
     def update(self):
         self._model.update()
         self._values['frostnumber__air'] = self._model.air_frost_number_Geo

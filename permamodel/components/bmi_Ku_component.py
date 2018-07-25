@@ -258,12 +258,13 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
 
     #   get_var_name()
     #-------------------------------------------------------------------
+
     def get_var_units(self, long_var_name):
 
         return self._var_units_map[ long_var_name ]
 
-    #   get_var_units()
-    #-------------------------------------------------------------------
+    def get_var_location(self, long_var_name):
+        return return "node"
 
     def update(self):
 #        self._model.update(self._model.dt)

@@ -140,8 +140,10 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         return self._var_name_map[long_var_name]
 
     def get_var_units(self, long_var_name):
-
         return self._var_units_map[long_var_name]
+
+    def get_var_location(self, long_var_name):
+        return "node"
 
     def update(self):
         """ This overwrites update() in Permafrost component
