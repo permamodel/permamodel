@@ -367,7 +367,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     def get_var_nbytes(self, var_name):
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
-    def get_value(self, var_name):
+    def get_value(self, var_name, out=None):
         """Copy of values.
 
         Parameters
@@ -390,12 +390,11 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         #    return np.array(self.get_value_ref(var_name).copy())
         #except AttributeError:
         #    return np.array(self.get_value_ref(var_name))
-
-        # This version is simpler than above, but it may break when
-        #   using scalars because the resulting variable doesn't
-        #   have a shape
-        return np.asarray(self.get_value_ref(var_name))
-
+        if out is None:
+            out = self.get_value_ref(var_name).copy()
+        else:
+            out[...] = self.get_value_ref(var_name)
+        return out
 
     def get_var_type(self, var_name):
         """Data type of variable.

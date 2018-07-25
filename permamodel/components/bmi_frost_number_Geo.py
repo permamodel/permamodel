@@ -247,8 +247,12 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
     def get_var_nbytes(self, var_name):
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
-    def get_value(self, var_name):
-        return self.get_value_ref(var_name).copy()
+    def get_value(self, var_name, out=None):
+        if out is None:
+            out = self.get_value_ref(var_name).copy()
+        else:
+            out[...] = self.get_value_ref(var_name)
+        return out
 
     def get_var_type(self, var_name):
         return str(self.get_value_ref(var_name).dtype)
