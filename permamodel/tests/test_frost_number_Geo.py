@@ -84,13 +84,13 @@ def test_Geo_frostnumber_get_datacube_slice():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod()
     config_dict = \
         {'n_temperature_grid_fields': 4,
-         'temperature_grid_date_0': datetime.date(1901, 01, 01),
+         'temperature_grid_date_0': datetime.date(1901, 1, 1),
          'temperature_grid_data_0': '((-10, -5), (-20, -15), (0, 5))',
-         'temperature_grid_date_1': datetime.date(1901, 07, 01),
+         'temperature_grid_date_1': datetime.date(1901, 7, 1),
          'temperature_grid_data_1': '((10, 15), (0, 5), (20, 15))',
-         'temperature_grid_date_2': datetime.date(1902, 01, 01),
+         'temperature_grid_date_2': datetime.date(1902, 1, 1),
          'temperature_grid_data_2': '((-7, -2), (-17, -12), (3, 8))',
-         'temperature_grid_date_3': datetime.date(1902, 07, 01),
+         'temperature_grid_date_3': datetime.date(1902, 7, 1),
          'temperature_grid_data_3': '((7, 2), (17, 12), (23, 28))'}
     dates, cube = fn_geo.initialize_datacube('temperature', config_dict)
 
