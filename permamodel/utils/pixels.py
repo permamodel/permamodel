@@ -49,7 +49,7 @@ import numpy
 #-------------------------------------------------------------------
 def unit_test():
 
-    import rti_files
+    from . import rti_files
 
     print('Testing meters_per_degree_lon()...')
     MPD_lon = meters_per_degree_lon(0)

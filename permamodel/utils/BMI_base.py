@@ -161,9 +161,9 @@ import traceback        # (10/10/10)
 
 ## import cfg_files as cfg   # (not used)
 
-import outlets          ## (9/19/14)
+from . import outlets          ## (9/19/14)
 #import pixels
-import rti_files
+from . import rti_files
 
 from .. import data_directory
 
