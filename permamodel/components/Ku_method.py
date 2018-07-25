@@ -70,6 +70,7 @@ References:
         Available on-line [http://daac.ornl.gov] from Oak Ridge National Laboratory Distributed Active Archive Center, Oak Ridge, Tennessee, USA.  http://dx.doi.org/10.3334/ORNLDAAC/1247  .
 
 """
+from __future__ import print_function
 
 import os
 import numpy as np
@@ -868,8 +869,8 @@ class Ku_method( perma_base.PermafrostComponent ):
         # affects the ET rate.  Otherwise, return to caller.
         #---------------------------------------------------------
         if not(SILENT):
-            print ' '
-            print 'Ku model component: Initializing...'
+            print(' ')
+            print('Ku model component: Initializing...')
 
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
         self.mode       = mode
@@ -929,7 +930,7 @@ class Ku_method( perma_base.PermafrostComponent ):
             #########################################
                ####### and (ep.method != 2):  ??????
             if not(SILENT):
-                print 'Permafrost component: Disabled.'
+                print('Permafrost component: Disabled.')
             self.lat    = self.initialize_scalar(0, dtype='float64')
             self.lon    = self.initialize_scalar(0, dtype='float64')
             self.start_year    = self.initialize_scalar(0, dtype='float64')
@@ -1291,8 +1292,8 @@ class Ku_method( perma_base.PermafrostComponent ):
         if (var_type.lower() == 'scalar'):
             return file_unit
         if (input_file == ''):
-            print 'ERROR in model_input.open_file():'
-            print '    Input file is null string.'
+            print('ERROR in model_input.open_file():')
+            print('    Input file is null string.')
             # print '    variable type =' + var_type
             return file_unit
     
@@ -1300,9 +1301,9 @@ class Ku_method( perma_base.PermafrostComponent ):
         # Does input file exist locally ?
         #----------------------------------
         if not(os.path.exists(input_file)):
-            print 'ERROR in model_input.open_file():'
-            print '    Could not find input file ='
-            print '    ' + input_file
+            print('ERROR in model_input.open_file():')
+            print('    Could not find input file =')
+            print('    ' + input_file)
             # print '   ' + input_file
             return file_unit
     

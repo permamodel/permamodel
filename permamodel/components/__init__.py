@@ -1,1 +1,1 @@
-import perma_base
+from . import perma_base

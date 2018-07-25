@@ -25,6 +25,7 @@ SOFTWARE.
 *
 
 """
+from __future__ import print_function
 
 import warnings
 warnings.filterwarnings("ignore",category =RuntimeWarning) 
@@ -228,10 +229,10 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         try:
             return self._att_map[ att_name.lower() ]
         except:
-            print '###################################################'
-            print ' ERROR: Could not find attribute: ' + att_name
-            print '###################################################'
-            print ' '
+            print('###################################################')
+            print(' ERROR: Could not find attribute: ' + att_name)
+            print('###################################################')
+            print(' ')
 
     #   get_attribute()
     #-------------------------------------------------------------------
@@ -297,7 +298,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     
     def update_until(self, then):
         n_steps = (then - self.get_current_time()) / self.get_time_step()
-        for _ in xrange(int(n_steps)):
+        for _ in range(int(n_steps)):
             self.update()
         self.update_frac(n_steps - int(n_steps))
 
@@ -489,11 +490,11 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         try:        
             assert self._model.SAVE_ALT_GRIDS
         except:
-            print 'NO OUTPUT of ALT'
+            print('NO OUTPUT of ALT')
         try:
             assert self._model.SAVE_TPS_GRIDS
         except:
-            print 'NO OUTPUT of TPS'
+            print('NO OUTPUT of TPS')
             
         if (self._model.SAVE_ALT_GRIDS):
             
@@ -504,6 +505,6 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         if (self._model.SAVE_TPS_GRIDS):
             self._model.write_out_ncfile(self._model.TPS_file,self.output_tps)
         
-        print "***"
-        print "Writing output finished!"
-        print "Please look at"+self._model.ALT_file+'.nc and '+self._model.TPS_file+'.nc'
+        print("***")
+        print("Writing output finished!")
+        print("Please look at"+self._model.ALT_file+'.nc and '+self._model.TPS_file+'.nc')

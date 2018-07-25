@@ -22,6 +22,7 @@ SOFTWARE.
 *
 
 """
+from __future__ import print_function
 
 import os
 import numpy as np
@@ -180,13 +181,13 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         # if year is -1, then use the current year of self
         # otherwise, use the specified year
         if year > 0:
-            print("Year: %d  F_air=%5.3f  F_surface=%5.3f  F_stefan=%5.3f" %
+            print(("Year: %d  F_air=%5.3f  F_surface=%5.3f  F_stefan=%5.3f" %
                   (self.year,
                    self.air_frost_number, self.surface_frost_number,
-                   self.stefan_frost_number))
+                   self.stefan_frost_number)))
         else:
             for year in sorted(self.output.keys()):
-                print("Year: %d  output=%s" % (year, self.output[year]))
+                print(("Year: %d  output=%s" % (year, self.output[year])))
 
     def calculate_air_frost_number(self):
         """ Air frost number requires degree days before calculation """
@@ -283,8 +284,8 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
                     f_out.write("Year: %d  output=%s\n" %
                                 (year, self.output[year]))
         except IOError:
-            print('WARNING: Unable to write output to {}'.format(
-                self.fn_out_filename))
+            print(('WARNING: Unable to write output to {}'.format(
+                self.fn_out_filename)))
             return False
 
         return True

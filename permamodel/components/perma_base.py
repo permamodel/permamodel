@@ -62,6 +62,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *
 """
+from __future__ import print_function
 
 import numpy as np
 import os
@@ -113,8 +114,8 @@ class PermafrostComponent( BMI_base.BMI_component ):
         # Each component that inherits from snow_base.py must
         # implement its own versions of these.
         #------------------------------------------------------
-        print 'ERROR: open_input_files() for permafrost component'
-        print '       has not been implemented for this component.'
+        print('ERROR: open_input_files() for permafrost component')
+        print('       has not been implemented for this component.')
 
     #   open_input_files()
     #-------------------------------------------------------------------
@@ -182,7 +183,7 @@ class PermafrostComponent( BMI_base.BMI_component ):
     def get_param_nc4_filename(self, filename_root):
         filename = os.path.join(data_directory, '%s.nc4' % filename_root)
         if not os.path.isfile(filename):
-            print("Error: File %s does not exist" % filename)
+            print(("Error: File %s does not exist" % filename))
             exit(-1)
         return filename
 
@@ -199,30 +200,32 @@ class PermafrostComponent( BMI_base.BMI_component ):
         SILENT = True
 
         if not SILENT:
-            print 'Permafrost component: Initializing...'
+            print('Permafrost component: Initializing...')
 
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
 
         # Set the cfg file if it exists, otherwise, a default
         if os.path.isfile(cfg_file):
             if not SILENT:
-                print("passed cfg_file: %s" % cfg_file)
+                print(("passed cfg_file: %s" % cfg_file))
             self.cfg_file = cfg_file
         else:
             cfg_file = \
             "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg"
             print("No valid configuration file specified, trying: ")
-            print("   %s" % cfg_file)
+            print(("   %s" % cfg_file))
             self.cfg_file = cfg_file
 
             if os.path.isfile(cfg_file):
-                print("Default config file exists: %s" % cfg_file)
+                print(("Default config file exists: %s" % cfg_file))
             else:
                 print("Default config file does not exist: ")
-                print("  %s" % cfg_file)
-                raise(ValueError(
-                    "Default frostnumber config file %s does not exist" %\
-                    cfg_file))
+                print(("  %s" % cfg_file))
+                raise ValueError(
+                    "Default frostnumber config file {fname} does not exist".format(
+                        fname=cfg_file
+                    )
+                )
 
         #print mode, cfg_file
 
@@ -250,7 +253,7 @@ class PermafrostComponent( BMI_base.BMI_component ):
             #########################################
                ####### and (ep.method != 2):  ??????
             if not(SILENT):
-                print 'Permafrost component: Disabled.'
+                print('Permafrost component: Disabled.')
             self.lat    = self.initialize_scalar(0, dtype='float64')
             self.lon    = self.initialize_scalar(0, dtype='float64')
             self.T_air  = self.initialize_scalar(0, dtype='float64')
@@ -318,9 +321,9 @@ class PermafrostComponent( BMI_base.BMI_component ):
 
     def read_input_files(self):
 
-        print 'ERROR: read_input_files() for permafrost component'
-        print '       has not been implemented.'
-        print ' Ignoring this message for now. Can not find the rti class'
+        print('ERROR: read_input_files() for permafrost component')
+        print('       has not been implemented.')
+        print(' Ignoring this message for now. Can not find the rti class')
 
     #   read_input_files()
     #-------------------------------------------------------------------
@@ -361,8 +364,8 @@ class PermafrostComponent( BMI_base.BMI_component ):
         #       This "method" will be over-ridden by a
         #       particular snowmelt method.
         #--------------------------------------------------
-        print 'ERROR: update_ALT() method for Permafrost component'
-        print '       has not been implemented.'
+        print('ERROR: update_ALT() method for Permafrost component')
+        print('       has not been implemented.')
 
     #   update_ALT()
     #-------------------------------------------------------------------
@@ -375,8 +378,8 @@ class PermafrostComponent( BMI_base.BMI_component ):
         #       This "method" will be over-ridden by a
         #       particular snowmelt method.
         #--------------------------------------------------
-        print 'ERROR: update_ground_temperatures method for Permafrost component'
-        print '       has not been implemented.'
+        print('ERROR: update_ground_temperatures method for Permafrost component')
+        print('       has not been implemented.')
 
     #   update_ground_temperatures()
     #-------------------------------------------------------------------
@@ -536,8 +539,8 @@ class PermafrostComponent( BMI_base.BMI_component ):
     #-------------------------------------------------------------------
     def close_input_files(self):
 
-        print 'ERROR: close_input_files() for Snow component'
-        print '       has not been implemented.'
+        print('ERROR: close_input_files() for Snow component')
+        print('       has not been implemented.')
 
     #   close_input_files()
     #-------------------------------------------------------------------

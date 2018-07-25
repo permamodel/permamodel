@@ -144,6 +144,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *
 """
+from __future__ import print_function
 
 import numpy as np
 import os
@@ -160,9 +161,9 @@ import traceback        # (10/10/10)
 
 ## import cfg_files as cfg   # (not used)
 
-import outlets          ## (9/19/14)
+from . import outlets          ## (9/19/14)
 #import pixels
-import rti_files
+from . import rti_files
 
 from .. import data_directory
 
@@ -178,7 +179,7 @@ from .. import data_directory
 def unit_test():
 
     c = BMI_component()
-    print 'Instantiated BMI component.'
+    print('Instantiated BMI component.')
 
 #   unit_test()
 #-----------------------------------------------------------------------
@@ -249,10 +250,10 @@ class BMI_component:
         try:
             return att_map[ att_name.lower() ]
         except:
-            print '######################################################'
-            print ' ERROR: Could not find BMI attribute: ' + att_name
-            print '######################################################'
-            print ' '
+            print('######################################################')
+            print(' ERROR: Could not find BMI attribute: ' + att_name)
+            print('######################################################')
+            print(' ')
 
     #   get_attribute()
     #-------------------------------------------------------------------
@@ -334,10 +335,10 @@ class BMI_component:
         try:
             return amap[ att_name.lower() ]
         except:
-            print '######################################################'
-            print ' ERROR: Could not find grid attribute: ' + att_name
-            print '######################################################'
-            print ' '
+            print('######################################################')
+            print(' ERROR: Could not find grid attribute: ' + att_name)
+            print('######################################################')
+            print(' ')
 
     #   get_grid_attribute()
     #-------------------------------------------------------------------
@@ -352,7 +353,7 @@ class BMI_component:
         # in the current working directory.
         #------------------------------------------
         if (self.DEBUG):
-            print 'Process component: Reading grid info...'
+            print('Process component: Reading grid info...')
 
         self.grid_info_file = (self.in_directory +
                                self.site_prefix + '.rti')
@@ -364,9 +365,9 @@ class BMI_component:
             # created, as for Erode (see erode_base.py), then
             # it uses "out_directory" and "case_prefix". (2/17/13)
             #-------------------------------------------------------
-            print '### In BMI_base.read_grid_info():'
-            print '### out_directory =', self.out_directory
-            print ' '
+            print('### In BMI_base.read_grid_info():')
+            print('### out_directory =', self.out_directory)
+            print(' ')
 
             self.grid_info_file = (self.out_directory +
                                    self.case_prefix + '.rti')
@@ -595,8 +596,7 @@ class BMI_component:
     def get_var_rank(self, long_var_name):
 
         var_name = self.get_var_name( long_var_name )  # (2/20/12)
-
-        exec("rank = np.ndim(self." + var_name + ")")
+        rank = np.ndim(getattr(self, var_name))
 
         ### print '######## rank(' + var_name + ') =', rank
 
@@ -618,7 +618,7 @@ class BMI_component:
         var_name = self.get_var_name( long_var_name )  # (2/20/12)
 
         try:
-            exec( "dtype = self." + var_name + ".dtype" )
+            dtype = getattr(self, var_name).dtype
         except:
             dtype = 'unknown'
         return str(dtype)       # (need str() here)
@@ -667,9 +667,9 @@ class BMI_component:
             ## return np.float64(result)
 
         except:
-            print 'ERROR in BMI_base.get_values()'
-            print '    for var_name =', var_name
-            print '    Returning 0.'
+            print('ERROR in BMI_base.get_values()')
+            print('    for var_name =', var_name)
+            print('    Returning 0.')
 
             #-----------------------------------------
             # We could also call get_var_rank() and
@@ -727,8 +727,8 @@ class BMI_component:
             result = getattr(self, var_IDs_name)  ## (2/19/13)
             return np.array(result, dtype='float64')
         except:
-            print 'ERROR in BMI_base.get_values_at_indices().'
-            print '    Returning zeros.'
+            print('ERROR in BMI_base.get_values_at_indices().')
+            print('    Returning zeros.')
             dtype = self.get_var_type( long_var_name )
             return np.zeros(len(IDs), dtype=dtype)
 
@@ -807,10 +807,10 @@ class BMI_component:
         if (COMPUTABLE):
             return np.float64( self.n_steps * self.dt )
         else:
-            print '##############################################'
-            print ' ERROR: Unable to compute model stop_time.'
-            print '##############################################'
-            print ' '
+            print('##############################################')
+            print(' ERROR: Unable to compute model stop_time.')
+            print('##############################################')
+            print(' ')
             return np.float64( -1 )
 
     #   get_time()
@@ -855,10 +855,10 @@ class BMI_component:
         if (COMPUTABLE):
             return np.float64( self.n_steps * self.dt )
         else:
-            print '##############################################'
-            print ' ERROR: Unable to compute model stop_time.'
-            print '##############################################'
-            print ' '
+            print('##############################################')
+            print(' ERROR: Unable to compute model stop_time.')
+            print('##############################################')
+            print(' ')
             return np.float64( -1 )
 
     #   get_end_time()
@@ -986,7 +986,7 @@ class BMI_component:
                 # Python error messages will be displayed.
                 #-------------------------------------------
                 if (self.DEBUG):
-                    print 'time_index =', self.time_index
+                    print('time_index =', self.time_index)
                 self.update()
                 # self.update( -1 )  # (BMI later: use own dt)
             else:
@@ -994,8 +994,8 @@ class BMI_component:
                     self.update()
                     # self.update( -1 )  # (BMI later: use own dt)
                 except:
-                    print 'ERROR in run_model() method at:'
-                    print '   time_index =', self.time_index
+                    print('ERROR in run_model() method at:')
+                    print('   time_index =', self.time_index)
                     self.status = 'failed'
                     self.DONE = True
 
@@ -1175,7 +1175,7 @@ class BMI_component:
         # (8/2/10) Print message about interval.
         #-----------------------------------------
         if (self.time_index == 0):
-            print 'Will print values every', interval, 'seconds.'
+            print('Will print values every', interval, 'seconds.')
 
         #---------------------------------------------------
         # Note: Print the model time, in minutes, and the
@@ -1199,11 +1199,11 @@ class BMI_component:
             var_str  = var_name + ' = ' + ("%10.5f" % var)
             var_str  = var_str  + ' ' + units_name
             #-------------------------------------------------
-            print (time_str + ',  ' + var_str)
+            print((time_str + ',  ' + var_str))
             #-----------------------------------------------------
             if (PRINT_INDEX):
                 index = (self.time_index + 1)  # (starts at 0)
-                print 'n =', index, 'of', self.n_steps
+                print('n =', index, 'of', self.n_steps)
             #-----------------------------------------------------
             self.last_print_time = time.time()
 
@@ -1303,9 +1303,9 @@ class BMI_component:
                        ### SUB_PROCESS=False)
 
 
-        print ('Run time for ' + proc_name + ' = ')
-        print  self.get_run_time_string()
-        print ' '
+        print(('Run time for ' + proc_name + ' = '))
+        print(self.get_run_time_string())
+        print(' ')
 
     #   print_run_time()
     #-------------------------------------------------------------------
@@ -1313,7 +1313,7 @@ class BMI_component:
                            mode='nondriver'):
 
         if (mode == 'nondriver'):
-            print comp_name + ': Finished.'
+            print(comp_name + ': Finished.')
             return
 
         if not(hasattr( self, 'in_directory' )):
@@ -1323,15 +1323,15 @@ class BMI_component:
         # Print the report
         #-------------------
         hline = ''.ljust(60, '-')
-        print hline
-        print comp_name
-        print time.asctime()
-        print ' '
-        print 'Input directory:      ' + self.in_directory
-        print 'Output directory:     ' + self.out_directory
-        print 'Site prefix:          ' + self.site_prefix
-        print 'Case prefix:          ' + self.case_prefix
-        print ' '
+        print(hline)
+        print(comp_name)
+        print(time.asctime())
+        print(' ')
+        print('Input directory:      ' + self.in_directory)
+        print('Output directory:     ' + self.out_directory)
+        print('Site prefix:          ' + self.site_prefix)
+        print('Case prefix:          ' + self.case_prefix)
+        print(' ')
 
         #-----------------------------------
         # Construct sinulation time string
@@ -1344,16 +1344,16 @@ class BMI_component:
         #----------------------------
         run_time_str = self.get_run_time_string()
 
-        print 'Simulated time:      ' + sim_time_str
-        print 'Program run time:    ' + run_time_str
-        print ' '
-        print 'Number of timesteps: ' + str(self.time_index)
-        print 'Process timestep:    ' + str(self.dt) + sim_units
-        print 'Number of columns:   ' + str(self.nx)
-        print 'Number of rows:      ' + str(self.ny)
-        print ' '
-        print 'Finished. (' + self.case_prefix + ')'
-        print ' '
+        print('Simulated time:      ' + sim_time_str)
+        print('Program run time:    ' + run_time_str)
+        print(' ')
+        print('Number of timesteps: ' + str(self.time_index))
+        print('Process timestep:    ' + str(self.dt) + sim_units)
+        print('Number of columns:   ' + str(self.nx))
+        print('Number of rows:      ' + str(self.ny))
+        print(' ')
+        print('Finished. (' + self.case_prefix + ')')
+        print(' ')
 
         ## finish_str = ': Finished. (' + self.case_prefix + ')'
         ## print finish_str
@@ -1363,10 +1363,10 @@ class BMI_component:
     #-------------------------------------------------------------------
     def print_traceback(self, caller_name='TopoFlow'):
 
-        print '################################################'
-        print ' ERROR encountered in ' + caller_name
-        print '       Please check your input parameters.'
-        print '################################################'
+        print('################################################')
+        print(' ERROR encountered in ' + caller_name)
+        print('       Please check your input parameters.')
+        print('################################################')
 
         traceback.print_exc()
 
@@ -1385,7 +1385,7 @@ class BMI_component:
         #        this method to read settings from the file.
         #----------------------------------------------------------
         if not(self.SILENT):
-            print 'Reading config file into component state.'
+            print('Reading config file into component state.')
 
         # print '######## In read_config_file(): cfg_file =', self.cfg_file
         # print '######## In read_config_file(): cfg_prefix =', self.cfg_prefix
@@ -1406,10 +1406,10 @@ class BMI_component:
         # Does CFG file exist ?
         #------------------------
         if (self.DEBUG):
-            print 'cfg_file =', self.cfg_file
+            print('cfg_file =', self.cfg_file)
         if not(os.path.exists(self.cfg_file)):
-            print 'WARNING: cfg_file not found:'
-            print '         ' + self.cfg_file
+            print('WARNING: cfg_file not found:')
+            print('         ' + self.cfg_file)
             return
 
         #-----------------------------
@@ -1466,7 +1466,7 @@ class BMI_component:
                 # Update var_type based on droplist setting
                 #--------------------------------------------
                 if (last_var_name.startswith(var_base + '_type')):
-                    exec( "type_choice = self." + last_var_name )
+                    type_choice = getattr(self, last_var_name)
                     if (type_choice.lower() == 'scalar'):
                         #--------------------------------------------------
                         # It seems that things will work as long as the
@@ -1477,11 +1477,11 @@ class BMI_component:
                         # "Mismatch with value found in typemap
                         #  (requested type String, actual type Double)."
                         #--------------------------------------------------
-                        exec( "self." + var_name_file_str + " = ''")
+                        setattr(self, var_name_file_str, "")
                         READ_SCALAR = True
                         ## var_type = 'float64'
                     else:
-                        exec( "self." + var_name + " = 0.0")
+                        setattr(self, var_name, 0.)
                         READ_FILENAME = True
                         ## var_type = 'string'
 
@@ -1501,10 +1501,10 @@ class BMI_component:
 ##                    print 'value    =', value
 ##                    print '---------------------------------'
 
-                    exec( "self." + var_name + " = value" )
+                    setattr(self, var_name, value)
                 elif (var_type in ['long', 'int']):
                     value = np.int32( value )
-                    exec( "self." + var_name + " = value" )
+                    setattr(self, var_name, value)
                 elif (var_type == 'string'):
                     #-----------------------------------------
                     # Get the value string for this var_name
@@ -1536,9 +1536,9 @@ class BMI_component:
                     if (var_name[:5] == 'SAVE_'):
                         VALUE_SET = True
                         if (s.lower() == 'yes'):
-                            exec( "self." + var_name + " = True" )
+                            setattr(self, var_name, True)
                         elif (s.lower() == 'no'):
-                            exec( "self." + var_name + " = False" )
+                            setattr(self, var_name, False)
                         else:
                             VALUE_SET = False
                     else:
@@ -1546,15 +1546,15 @@ class BMI_component:
                     #----------------------------------------------------------
                     if not(VALUE_SET):
                         if (READ_FILENAME):
-                            exec( "self." + var_name_file_str + " = value_str" )
+                            setattr(self, var_name_file_str, value_str)
                         elif (READ_SCALAR):
-                            exec( "self." + var_name + " = np.float64(value_str)")
+                            setattr(self, var_name, np.float64(value_str))
                         else:
-                            exec( "self." + var_name + " = value_str" )
+                            setattr(self, var_name, value_str)
                 else:
-                    print 'ERROR in BMI_base.read_config_file().'
-                    print '   Unsupported data type = ' + var_type + '.'
-                    print ' '
+                    print('ERROR in BMI_base.read_config_file().')
+                    print('   Unsupported data type = ' + var_type + '.')
+                    print(' ')
 
                 last_var_name = var_name
                 #print 'var_name', var_name
@@ -1695,7 +1695,7 @@ class BMI_component:
 
     #   initialize_basin_vars()
     def initialize_soil_texture(self):
-        print self.lat
+        print(self.lat)
         Clay_file = os.path.join(data_directory, 'T_CLAY.nc4')
         Sand_file = os.path.join(data_directory, 'T_SAND.nc4')
         Silt_file = os.path.join(data_directory, 'T_SILT.nc4')
@@ -1711,7 +1711,7 @@ class BMI_component:
         #                 latname, lat_grid_scale,
         #                 varname)
 
-        print 'OK'
+        print('OK')
 
 
 
@@ -1724,15 +1724,14 @@ class BMI_component:
         #   self.prepend_directory( ['slope_file', 'width_file'] )
         #-----------------------------------------------------------
         if (INPUT):
-            dir_part = " = self.in_directory + "
+            dirname = self.in_directory
         else:
-            dir_part = " = self.out_directory + "
+            dirname = self.out_directory
 
         for file_str in file_list:
-            self_part = "self." + file_str
-            exec( 'filename = ' + self_part )
+            filename = getattr(self, file_str)
             if (filename != ''):
-                exec( self_part + dir_part + self_part )
+                setattr(self, file_str, os.path.join(dirname, file_str))
 
     #   prepend_directory
     #-------------------------------------------------------------------
@@ -1879,7 +1878,7 @@ class BMI_component:
         #------------------------------------------------
         # NB!  Case in var_name must be an exact match.
         #-------------------------------------------------
-        exec("n = np.ndim(self." + var_name + ")")
+        n = np.ndim(getattr(self, var_name))
         return (n == 0)
 
     #   is_scalar()
@@ -1889,7 +1888,7 @@ class BMI_component:
         #------------------------------------------------
         # NB!  Case in var_name must be an exact match.
         #------------------------------------------------
-        exec("n = np.ndim(self." + var_name + ")")
+        n = np.ndim(getattr(self, var_name))
         return (n == 1)
 
     #   is_vector()
@@ -1919,7 +1918,7 @@ class BMI_component:
 ##            print 'ERROR: type(' + var_name + ') =' + type_str
 ##            return False
         #-------------------------------------------------------
-        exec("n = np.ndim(self." + var_name + ")")
+        n = np.ndim(getattr(self, var_name))
         return (n == 2)
 
     #   is_grid()

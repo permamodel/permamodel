@@ -133,7 +133,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                 # self.get_config_from_yaml_file(self._config_filename)
         # Ensure that this config file is for this type of Method
         assert_equal(self._configuration['config_for_method'],
-                     str(self.__class__).split('.')[-1])
+                     self.__class__.__name__.split('.')[-1])
 
         # Set some model description strings
         self._config_description = self._configuration['config_description']
@@ -429,7 +429,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         # Determine the number of lines for this grid
         ngridlines = 0
         thisdate = datetime.date(1900, self.month, self.day)  # This is a dummy init value
-        exec("ngridlines = config['n_%s_grid_fields']" % gridname)
+        ngridlines = config['n_{0}_grid_fields'.format(gridname)]
 
         # Create the datelist for this grid
         datelist = []
@@ -437,7 +437,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
             # This version converts a string to a datetime.date object
             # exec("thisdate = datetime.datetime.strptime(
             # config['%s_grid_date_%d' % (gridname, n)], '%Y-%m-%d').date()")
-            exec("thisdate = config['%s_grid_date_%d' % (gridname, n)]")
+            thisdate = config['{0}_grid_date_{1}'.format(gridname, n)]
             if isinstance(thisdate, str):
                 thisdate = self.datefrom(thisdate)
             datelist.append(thisdate)

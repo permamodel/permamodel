@@ -1,1 +1,1 @@
-import model_input
+from . import model_input

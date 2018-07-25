@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *
 """
+from __future__ import print_function
 
 import glob
 ## import os     (for os.remove)
@@ -110,10 +111,10 @@ def file_exists( filename ):
 
     f = glob.glob( filename )
     if (len(f) == 0):
-        print 'SORRY, The file:'
-        print '  ' + filename
-        print 'was not found in the working directory.'
-        print ' '
+        print('SORRY, The file:')
+        print('  ' + filename)
+        print('was not found in the working directory.')
+        print(' ')
         found = False
     else:
         found = True
@@ -166,10 +167,10 @@ def count_lines( filename, SILENT=False ):
     # Print a message ?
     #--------------------
     if not(SILENT):
-        print 'For the file: ' + filename
-        print 'Total number of lines    = ' + str(n_total)
-        print 'Number of nonblank lines = ' + str(n_lines)
-        print ' '
+        print('For the file: ' + filename)
+        print('Total number of lines    = ' + str(n_total))
+        print('Number of nonblank lines = ' + str(n_lines))
+        print(' ')
 
     return n_lines
 
