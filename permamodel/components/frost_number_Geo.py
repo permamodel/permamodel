@@ -133,7 +133,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                 # self.get_config_from_yaml_file(self._config_filename)
         # Ensure that this config file is for this type of Method
         assert_equal(self._configuration['config_for_method'],
-                     str(self.__class__).split('.')[-1])
+                     self.__class__.__name__.split('.')[-1])
 
         # Set some model description strings
         self._config_description = self._configuration['config_description']
