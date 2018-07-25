@@ -221,9 +221,11 @@ class PermafrostComponent( BMI_base.BMI_component ):
             else:
                 print("Default config file does not exist: ")
                 print(("  %s" % cfg_file))
-                raise(ValueError(
-                    "Default frostnumber config file %s does not exist" %\
-                    cfg_file))
+                raise ValueError(
+                    "Default frostnumber config file {fname} does not exist".format(
+                        fname=cfg_file
+                    )
+                )
 
         #print mode, cfg_file
 
