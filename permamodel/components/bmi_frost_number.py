@@ -113,7 +113,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         self._values = {
             # These are the links to the model's variables and
             # should be consistent with _var_name_map
-            'atmosphere_bottom_air__temperature':    self._model.T_air,
+            'atmosphere_bottom_air__temperature':    self._model.T_air_min,
             'frostnumber__air':         self._model.air_frost_number,
             'frostnumber__surface':     self._model.surface_frost_number,
             'frostnumber__stefan':      self._model.stefan_frost_number}
