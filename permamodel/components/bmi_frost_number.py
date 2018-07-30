@@ -214,7 +214,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
 
     def get_time_step(self):
         """ BMI: return the time step value (years) """
-        return self._model.dt
+        return float(self._model.dt)
 
     def get_value_ref(self, var_name):
         """Reference to values.
