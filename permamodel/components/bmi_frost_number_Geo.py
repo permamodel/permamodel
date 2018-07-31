@@ -164,6 +164,9 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
     def get_var_units(self, long_var_name):
         return self._var_units_map[long_var_name]
 
+    def get_var_location(self, long_var_name):
+        return "node"
+
     def update(self):
         self._model.update()
         self._values['frostnumber__air'] = self._model.air_frost_number_Geo
@@ -223,7 +226,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return self._grid_type[grid_number]
 
     def get_time_step(self):
-        return self._model._timestep_duration
+        return float(self._model._timestep_duration)
 
     def get_value_ref(self, var_name):
         return self._values[var_name]
@@ -244,8 +247,13 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
     def get_var_nbytes(self, var_name):
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
-    def get_value(self, var_name):
-        return self.get_value_ref(var_name).copy()
+    def get_value(self, var_name, out=None):
+        value = self.get_value_ref(var_name).reshape((-1, ))
+        if out is None:
+            out = value.copy()
+        else:
+            out[...] = value
+        return out
 
     def get_var_type(self, var_name):
         return str(self.get_value_ref(var_name).dtype)
@@ -258,10 +266,14 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             if var_name in var_name_list:
                 return grid_id
 
-    def get_grid_shape(self, grid_id):
+    def get_grid_shape(self, grid_id, out=None):
         var_name = self._grids[grid_id]
-        value = np.array(self.get_value_ref(var_name)).shape
-        return value
+        grid_shape = np.array(self.get_value_ref(var_name)).shape
+        if out is None:
+            out = grid_shape
+        else:
+            out[:] = grid_shape
+        return out
 
     def get_grid_size(self, grid_id):
         grid_size = self.get_grid_shape(grid_id)
@@ -270,13 +282,25 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         else:
             return int(np.prod(grid_size))
 
-    def get_grid_spacing(self, grid_id):
+    def get_grid_spacing(self, grid_id, out=None):
         assert_true(grid_id < self.ngrids)
-        return np.array([1, 1], dtype='float32')
+        var_name = self._grids[grid_id]
+        if out is None:
+            ndim = np.array(self.get_value_ref(var_name)).ndim
+            out = np.full(ndim, 1.)
+        else:
+            out[:] = 1.
+        return out
 
     # Todo: Revise once we can work with georeferenced data in the CMF.
-    def get_grid_origin(self, grid_id):
-        return np.array([0.0, 0.0], dtype='float32')
+    def get_grid_origin(self, grid_id, out=None):
+        var_name = self._grids[grid_id]
+        if out is None:
+            ndim = np.array(self.get_value_ref(var_name)).ndim
+            out = np.full(ndim, 0.)
+        else:
+            out[:] = 0.
+        return out
 
     def get_grid_rank(self, var_id):
         return len(self.get_grid_shape(var_id))

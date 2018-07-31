@@ -277,8 +277,8 @@ def test_FNGeo_simulate_WMT_run():
     # use January as 'coldest'
     # use July as 'warmest'
     airtemps_of_one = np.ones_like(airtemp_values)
-    jan_airtemp_values[:, :] = -10.0 * airtemps_of_one[:, :]
-    jul_airtemp_values[:, :] = 10.0 * airtemps_of_one[:, :]
+    jan_airtemp_values[:] = -10.0 * airtemps_of_one
+    jul_airtemp_values[:] = 10.0 * airtemps_of_one
     fng.set_value('atmosphere_bottom_air__temperature_mean_jan',
                   jan_airtemp_values)
     fng.set_value('atmosphere_bottom_air__temperature_mean_jul',

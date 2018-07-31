@@ -113,7 +113,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         self._values = {
             # These are the links to the model's variables and
             # should be consistent with _var_name_map
-            'atmosphere_bottom_air__temperature':    self._model.T_air,
+            'atmosphere_bottom_air__temperature':    self._model.T_air_min,
             'frostnumber__air':         self._model.air_frost_number,
             'frostnumber__surface':     self._model.surface_frost_number,
             'frostnumber__stefan':      self._model.stefan_frost_number}
@@ -140,8 +140,10 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         return self._var_name_map[long_var_name]
 
     def get_var_units(self, long_var_name):
-
         return self._var_units_map[long_var_name]
+
+    def get_var_location(self, long_var_name):
+        return "node"
 
     def update(self):
         """ This overwrites update() in Permafrost component
@@ -212,7 +214,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
 
     def get_time_step(self):
         """ BMI: return the time step value (years) """
-        return self._model.dt
+        return float(self._model.dt)
 
     def get_value_ref(self, var_name):
         """Reference to values.
@@ -249,7 +251,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         """ BMI: number of bytes of a variable """
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
-    def get_value(self, var_name):
+    def get_value(self, var_name, out=None):
         """Copy of values.
 
         Parameters
@@ -272,11 +274,11 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         #    return np.array(self.get_value_ref(var_name).copy())
         #except AttributeError:
         #    return np.array(self.get_value_ref(var_name))
-
-        # This version is simpler than above, but it may break when
-        #   using scalars because the resulting variable doesn't
-        #   have a shape
-        return np.asarray(self.get_value_ref(var_name))
+        if out is None:
+            out = self.get_value_ref(var_name).copy()
+        else:
+            out[...] = self.get_value_ref(var_name)
+        return out
 
     def get_var_type(self, var_name):
         """Data type of variable.
