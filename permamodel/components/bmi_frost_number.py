@@ -317,12 +317,6 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             if var_name in var_name_list:
                 return grid_id
 
-    def get_grid_shape(self, grid_id):
-        """Number of rows and columns of uniform rectilinear grid."""
-        var_name = self._grids[grid_id]
-        value = np.array(self.get_value_ref(var_name)).shape
-        return value
-
     def get_grid_size(self, grid_id):
         """Size of grid.
 
@@ -337,11 +331,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             Size of grid.
 
         """
-        grid_size = self.get_grid_shape(grid_id)
-        if grid_size == ():
-            return 1
-        else:
-            return int(np.prod(grid_size))
+        return 1
 
     def get_grid_rank(self, var_id):
         """Rank of grid.
@@ -356,4 +346,4 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         int
             Rank of grid.
         """
-        return len(self.get_grid_shape(var_id))
+        return 0
