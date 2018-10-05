@@ -433,12 +433,6 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             if var_name in var_name_list:
                 return grid_id
 
-    def get_grid_shape(self, grid_id):
-        """Number of rows and columns of uniform rectilinear grid."""
-        var_name = self._grids[grid_id]
-        value = np.array(self.get_value_ref(var_name)).shape
-        return value
-
     def get_grid_size(self, grid_id):
         """Size of grid.
 
@@ -453,19 +447,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             Size of grid.
 
         """
-        grid_size = self.get_grid_shape(grid_id)
-        if grid_size == ():
-            return 1
-        else:
-            return int(np.prod(grid_size))
-
-    # Todo: Revise once we can work with georeferenced data in the CMF.
-    def get_grid_spacing(self, grid_id):
-        return np.array([1, 1], dtype='float32')
-
-    # Todo: Revise once we can work with georeferenced data in the CMF.
-    def get_grid_origin(self, grid_id):
-        return np.array([0.0, 0.0], dtype='float32')
+        return 1
 
     def get_grid_rank(self, var_id):
         """Rank of grid.
@@ -480,7 +462,7 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         int
             Rank of grid.
         """
-        return len(self.get_grid_shape(var_id))
+        return 0
 
     def save_grids(self):
         # Saves the grid values based on the prescribed ones in cfg file
