@@ -354,7 +354,8 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
-        self._values[var_name] = new_var_values
+        setattr(self._model, self._var_name_map[var_name], new_var_values)
+        # self._values[var_name] = new_var_values
 
     def set_value_at_indices(self, var_name, new_var_values, indices):
         self.get_value_ref(var_name).flat[indices] = new_var_values
