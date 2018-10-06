@@ -145,10 +145,12 @@ class Ku_method( perma_base.PermafrostComponent ):
 
         #rti = self.rti # has a problem with loading rti: do not know where its been initialized
 
-        self.thermal_data = np.genfromtxt(self.thermal_parameters_file,
-                                          names = True,
-                                          delimiter=',',
-                                          dtype=None)
+        self.thermal_data = np.genfromtxt(
+            self.thermal_parameters_file,
+            names = True,
+            delimiter=',',
+            # dtype=None,
+        )
 
         #-------------------------------------------------------
         # All grids are assumed to have a data type of Float32.
@@ -573,7 +575,7 @@ class Ku_method( perma_base.PermafrostComponent ):
         n_grid = np.size(self.T_air) 
 
         if n_grid > 1:        
-        
+
             K = self.Kt
             C = self.Ct       
             if np.size(self.Kf)>1:        
@@ -581,14 +583,14 @@ class Ku_method( perma_base.PermafrostComponent ):
             	C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
             
         else:
-            
+
             if self.Tps_numerator<=0.0:
                 K = self.Kt
                 C = self.Ct
             else:
                 K = self.Kf
                 C = self.Cf
-                
+
         Aps = (self.Ags - abs(self.Tps))/np.log((self.Ags+self.L/(2.*C)) / \
                     (abs(self.Tps)+self.L/(2.*C))) - self.L/(2.*C);
 
