@@ -2,17 +2,15 @@
 test_frost_number_Geo.py
   tests of the Geo version of the frost_number component of permamodel
 """
+import datetime
+import os
+
+import numpy as np
+import pytest
 
 from permamodel.components import frost_number_Geo
-import os
-import numpy as np
-import datetime
-from .. import permamodel_directory, examples_directory
-from nose.tools import (assert_is_instance, assert_greater_equal,
-                        assert_less_equal, assert_almost_equal,
-                        assert_greater, assert_less, assert_in,
-                        assert_false, assert_true, assert_equal,
-                        assert_raises)
+
+from .. import examples_directory, permamodel_directory
 
 # List of files to be removed after testing is complete
 # use files_to_remove.append(<filename>) to add to it
@@ -34,27 +32,26 @@ def test_can_initialize_Geo_frostnumber_module():
 
 def test_Geo_frostnumber_has_default_config_file():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod()
-    assert_true(fn_geo._config_filename is not None)
+    assert fn_geo._config_filename is not None
 
 def test_Geo_frostnumber_can_be_passed_config_filename():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod(cfgfile="a file")
-    assert_true(fn_geo._config_filename == "a file")
+    assert fn_geo._config_filename == "a file"
 
 # Configuration from "Files" not supported for WMT version
 #def test_Geo_frostnumber_initializes_from_files_config_file():
 #    fn_geo = frost_number_Geo.FrostnumberGeoMethod(cfgfile=files_cfg_file)
-#    assert_true(os.path.isfile(fn_geo._config_filename))
+#    assert os.path.isfile(fn_geo._config_filename)
 #    fn_geo.initialize_frostnumberGeo_component()
-#    assert_true(fn_geo._grid_type == 'uniform rectilinear')
-#    assert_true(fn_geo._calc_surface_fn is not None)
-#    assert_true(fn_geo._calc_stefan_fn is not None)
-#    assert_in(fn_geo._dd_method, ('ObservedMinMax', 'MinJanMaxJul',
-#            'MonthlyAverages', 'DailyValues'))
+#    assert fn_geo._grid_type == 'uniform rectilinear'
+#    assert fn_geo._calc_surface_fn is not None
+#    assert fn_geo._calc_stefan_fn is not None
+#    assert fn_geo._dd_method in ('ObservedMinMax', 'MinJanMaxJul', 'MonthlyAverages', 'DailyValues')
 #    if fn_geo._dd_method == 'MinJanMaxJul':
-#        assert_equal(fn_geo.T_air_min.shape, fn_geo._grid_shape)
-#        assert_equal(fn_geo.T_air_max.shape, fn_geo._grid_shape)
+#        assert fn_geo.T_air_min.shape == fn_geo._grid_shape
+#        assert fn_geo.T_air_max.shape == fn_geo._grid_shape
 #        if fn_geo._using_Files:
-#            assert_true(fn_geo._temperature_dataset is not None)
+#            assert fn_geo._temperature_dataset is not None
 #
 #    fn_geo.finalize_frostnumber_Geo()
 #    files_to_remove.append(fn_geo.output_filename)
@@ -73,11 +70,11 @@ def test_Geo_frostnumber_initialize_datacube():
          'temperature_grid_data_3': '((7, 2), (17, 12), (23, 28))'}
     dates, cube = fn_geo.initialize_datacube('temperature', config_dict)
 
-    assert_in(datetime.date(1901,7,1), dates)  # second date
+    assert datetime.date(1901,7,1) in dates  # second date
 
-    assert_equal(cube[0, 0, 0], -10)  # very first value
-    assert_equal(cube[3, 2, 1], 28)   # very last value
-    assert_equal(cube[2, 1, 0], -17)   # 3rd date, 2nd set, 1st value
+    assert cube[0, 0, 0] == -10  # very first value
+    assert cube[3, 2, 1] == 28   # very last value
+    assert cube[2, 1, 0] == -17   # 3rd date, 2nd set, 1st value
 
 
 def test_Geo_frostnumber_get_datacube_slice():
@@ -96,35 +93,37 @@ def test_Geo_frostnumber_get_datacube_slice():
 
     test_date = datetime.date(1901, 2, 27)
     test_field = fn_geo.get_datacube_slice(test_date, cube, dates)
-    assert_equal(test_field[0, 0], -10)
-    assert_equal(test_field[1, 1], -15)
+    assert test_field[0, 0] == -10
+    assert test_field[1, 1] == -15
 
     test_date = datetime.date(1902, 3, 10)
     test_field = fn_geo.get_datacube_slice(test_date, cube, dates)
-    assert_equal(test_field[1, 0], -17)
-    assert_equal(test_field[2, 1], 8)
+    assert test_field[1, 0] == -17
+    assert test_field[2, 1] == 8
 
     test_date = datetime.date(1900, 3, 10)
-    assert_raises(ValueError, fn_geo.get_datacube_slice, test_date, cube, dates)
+    with pytest.raises(ValueError):
+        fn_geo.get_datacube_slice(test_date, cube, dates)
 
     test_date = datetime.date(1980, 3, 10)
-    assert_raises(ValueError, fn_geo.get_datacube_slice, test_date, cube, dates)
+    with pytest.raises(ValueError):
+        fn_geo.get_datacube_slice(test_date, cube, dates)
 
 
 def test_Geo_frostnumber_initializes_from_default_config_file():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod()
-    assert_true(os.path.isfile(fn_geo._config_filename))
+    assert os.path.isfile(fn_geo._config_filename)
     fn_geo.initialize_frostnumberGeo_component()
-    assert_true(fn_geo._grid_type == 'uniform rectilinear')
-    assert_true(fn_geo._calc_surface_fn is not None)
-    assert_true(fn_geo._calc_stefan_fn is not None)
-    assert_in(fn_geo._dd_method, ('ObservedMinMax', 'MinJanMaxJul',
-            'MonthlyAverages', 'DailyValues'))
+    assert fn_geo._grid_type == 'uniform rectilinear'
+    assert fn_geo._calc_surface_fn is not None
+    assert fn_geo._calc_stefan_fn is not None
+    assert fn_geo._dd_method in ('ObservedMinMax', 'MinJanMaxJul',
+            'MonthlyAverages', 'DailyValues')
     if fn_geo._dd_method == 'MinJanMaxJul':
-        assert_equal(fn_geo.T_air_min.shape, fn_geo._grid_shape)
-        assert_equal(fn_geo.T_air_max.shape, fn_geo._grid_shape)
+        assert fn_geo.T_air_min.shape == fn_geo._grid_shape
+        assert fn_geo.T_air_max.shape == fn_geo._grid_shape
         if fn_geo._using_Files:
-            assert_true(fn_geo._temperature_dataset is not None)
+            assert fn_geo._temperature_dataset is not None
 
     fn_geo.finalize_frostnumber_Geo()
     files_to_remove.append(fn_geo.output_filename)
@@ -134,18 +133,16 @@ def test_Geo_frostnumber_can_compute_real_date_from_timestep():
     fn_geo.initialize_frostnumberGeo_component()
 
     # Timestep should be one year
-    assert_equal(fn_geo._timestep_duration, 1)
+    assert fn_geo._timestep_duration == 1
 
     # Model reference date should have timestep of zero
-    assert_equal(fn_geo.get_timestep_from_date(fn_geo._reference_date), 0)
+    assert fn_geo.get_timestep_from_date(fn_geo._reference_date) == 0
 
     # Timestep of first date should be first timestep
-    assert_equal(fn_geo._timestep_first,
-                 fn_geo.get_timestep_from_date(fn_geo._start_date))
+    assert fn_geo._timestep_first == fn_geo.get_timestep_from_date(fn_geo._start_date)
 
     # Last date should be date of last timestep
-    assert_equal(fn_geo._end_date,
-                 fn_geo.get_date_from_timestep(fn_geo._timestep_last))
+    assert fn_geo._end_date == fn_geo.get_date_from_timestep(fn_geo._timestep_last)
 
     fn_geo.finalize_frostnumber_Geo()
 
@@ -154,10 +151,10 @@ def test_Geo_frostnumber_can_return_temperature_field():
     fn_geo.initialize_frostnumberGeo_component()
 
     current_temperature_field = fn_geo.get_temperature_field()
-    assert_equal(current_temperature_field.shape, fn_geo._grid_shape)
+    assert current_temperature_field.shape == fn_geo._grid_shape
 
     bad_date_field = fn_geo.get_temperature_field(datetime.date(100, 1, 1))
-    assert_true(np.all(np.isnan(bad_date_field)))
+    assert np.all(np.isnan(bad_date_field))
 
     fn_geo.finalize_frostnumber_Geo()
 
@@ -167,13 +164,13 @@ def test_Geo_frostnumber_get_latest_min_max_months():
 
     this_date = datetime.date(1905, 1, 1)
     (mindate, maxdate) = fn_geo.get_min_and_max_dates(this_date)
-    assert_equal(mindate, datetime.date(1905, 1, 15))
-    assert_equal(maxdate, datetime.date(1904, 7, 15))
+    assert mindate == datetime.date(1905, 1, 15)
+    assert maxdate == datetime.date(1904, 7, 15)
 
     this_date = datetime.date(2004, 8, 1)
     (mindate, maxdate) = fn_geo.get_min_and_max_dates(this_date)
-    assert_equal(mindate, datetime.date(2004, 1, 15))
-    assert_equal(maxdate, datetime.date(2004, 7, 15))
+    assert mindate == datetime.date(2004, 1, 15)
+    assert maxdate == datetime.date(2004, 7, 15)
 
     fn_geo.finalize_frostnumber_Geo()
 
@@ -191,50 +188,50 @@ def test_Geo_frostnumber_compute_array_of_degree_days():
     # Test that we get NaN-filled arrays when no input vars available
     fn_geo.set_current_date_and_timestep_with_timestep(-100)
     fn_geo.get_input_vars()
-    assert_less(fn_geo._date_current, fn_geo._temperature_first_date)
+    assert fn_geo._date_current < fn_geo._temperature_first_date
     if fn_geo._dd_method == 'MinJanMaxJul':
         # A timestep out of bounds should yield nans for temp and dd
-        assert_true(np.all(np.isnan(fn_geo.T_air_min)))
-        assert_true(np.all(np.isnan(fn_geo.T_air_max)))
+        assert np.all(np.isnan(fn_geo.T_air_min))
+        assert np.all(np.isnan(fn_geo.T_air_max))
 
         # Calculating degree days on all NaNs yields all NaNs
         fn_geo.compute_degree_days()
-        assert_true(np.all(np.isnan(fn_geo.ddt)))
-        assert_true(np.all(np.isnan(fn_geo.ddf)))
+        assert np.all(np.isnan(fn_geo.ddt))
+        assert np.all(np.isnan(fn_geo.ddf))
 
         # Calculating air frost number on NaNs yields NaNs
         fn_geo.compute_air_frost_number_Geo()
-        assert_true(np.all(np.isnan(fn_geo.air_frost_number_Geo)))
+        assert np.all(np.isnan(fn_geo.air_frost_number_Geo))
 
     # Test that we get real values
     fn_geo.set_current_date_and_timestep_with_timestep(2)
     fn_geo.get_input_vars()
-    assert_greater_equal(fn_geo._date_current, fn_geo._temperature_first_date)
+    assert fn_geo._date_current >= fn_geo._temperature_first_date
     if fn_geo._dd_method == 'MinJanMaxJul':
         # The default should have no missing temperature values
-        assert_false(np.any(np.isnan(fn_geo.T_air_min)))
-        assert_false(np.any(np.isnan(fn_geo.T_air_max)))
+        assert not np.any(np.isnan(fn_geo.T_air_min))
+        assert not np.any(np.isnan(fn_geo.T_air_max))
         #fn_geo.T_air_min.tofile("Tairmin.dat")
         #fn_geo.T_air_max.tofile("Tairmax.dat")
 
         # Calculating degree days on all NaNs yields all NaNs
         fn_geo.compute_degree_days()
-        assert_false(np.any(np.isnan(fn_geo.ddt)))
-        assert_false(np.any(np.isnan(fn_geo.ddf)))
+        assert not np.any(np.isnan(fn_geo.ddt))
+        assert not np.any(np.isnan(fn_geo.ddf))
         #fn_geo.ddt.tofile("ddt.dat")
         #fn_geo.ddf.tofile("ddf.dat")
 
         # Calculating air frost number on NaNs yields NaNs
         fn_geo.compute_air_frost_number_Geo()
-        assert_false(np.any(np.isnan(fn_geo.air_frost_number_Geo)))
+        assert not np.any(np.isnan(fn_geo.air_frost_number_Geo))
         #fn_geo.air_frost_number_Geo.tofile("afn_geod.dat")
     fn_geo.finalize_frostnumber_Geo()
 
 def test_Geo_frostnumber_output_a_netcdf_file():
     fn_geo = frost_number_Geo.FrostnumberGeoMethod()
     fn_geo.initialize_frostnumberGeo_component()
-    assert_true(fn_geo.output_filename is not None)
-    assert_true(fn_geo.output_filename[-3:] == '.nc')
+    assert fn_geo.output_filename is not None
+    assert fn_geo.output_filename[-3:] == '.nc'
     fn_geo.initial_update()
     for t in range(0, 10):
         fn_geo.get_input_vars()
@@ -250,4 +247,3 @@ def test_Geo_frostnumber_update_until_timestep():
     fn_geo.initial_update()
     fn_geo.update_until_timestep(fn_geo._timestep_last)
     fn_geo.finalize()
-
