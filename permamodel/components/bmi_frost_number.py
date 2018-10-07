@@ -241,7 +241,10 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
     def set_value(self, var_name, new_var_values):
         """ BMI: allow external set-access to model variable """
         array = getattr(self._model, self._var_name_map[var_name])
-        array[int(self._model.year - self._model.start_year)] = new_var_values
+        if len(array) == 1:
+            array[0] = new_var_values
+        else:
+            array[int(self._model.year - self._model.start_year) + 1] = new_var_values
 
         # setattr(self._model, self._var_name_map[var_name], new_var_values)
         # self._values[var_name] = new_var_values
