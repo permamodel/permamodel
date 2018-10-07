@@ -6,17 +6,16 @@
 """
 from __future__ import print_function
 
-import os
 import datetime
+import os
+
 import numpy as np
 from dateutil.relativedelta import relativedelta
 from netCDF4 import Dataset
+
+from permamodel import data_directory, examples_directory
 # import yaml  # Used if yaml-style imports are used instead of Topoflow-like
 from permamodel.components import perma_base
-from permamodel import examples_directory, data_directory
-from nose.tools import (assert_greater_equal, assert_less_equal,
-                        assert_true,
-                        assert_equal)
 
 default_frostnumberGeo_config_filename = "FrostnumberGeo_Default.cfg"
 
@@ -127,13 +126,12 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     def initialize_frostnumberGeo_component(self):
         # Read in the overall configuration from the configuration file
-        assert_true(os.path.isfile(self._config_filename))
+        assert os.path.isfile(self._config_filename)
         self._configuration = \
                 self.get_config_from_oldstyle_file(self._config_filename)
                 # self.get_config_from_yaml_file(self._config_filename)
         # Ensure that this config file is for this type of Method
-        assert_equal(self._configuration['config_for_method'],
-                     self.__class__.__name__.split('.')[-1])
+        assert self._configuration['config_for_method'] == self.__class__.__name__.split('.')[-1]
 
         # Set some model description strings
         self._config_description = self._configuration['config_description']
@@ -225,7 +223,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                     os.path.join(
                         examples_directory,
                         self._configuration['temperature_config_filename'])
-                assert_true(os.path.isfile(self._temperature_config_filename))
+                assert os.path.isfile(self._temperature_config_filename)
                 temperature_configuration = \
                         self.get_config_from_yaml_file(
                             self._temperature_config_filename)
@@ -253,8 +251,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                     os.path.join(
                         examples_directory,
                         self._configuration['precipitation_config_filename'])
-                assert_true(os.path.isfile(\
-                    self._precipitation_config_filename))
+                assert os.path.isfile(self._precipitation_config_filename)
                 self._calc_surface_fn = True
             else:
                 self._calc_surface_fn = False
@@ -267,8 +264,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                     os.path.join(
                         examples_directory,
                         self._configuration['soil_properties_config_filename'])
-                assert_true(os.path.isfile(
-                    self._soil_properties_config_filename))
+                assert os.path.isfile(self._soil_properties_config_filename)
                 self._calc_stefan_fn = True
             else:
                 self._calc_stefan_fn = False
@@ -564,7 +560,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
             outdirname = data_directory
         elif outdirname == 'EXAMPLES':
             outdirname = examples_directory
-        assert_true(os.path.isdir(outdirname))
+        assert os.path.isdir(outdirname)
 
         # Replace substitutions in filename
         outfilename = outfilename.replace('STARTDATE', str(self._start_date))
@@ -731,7 +727,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         # Determine the first and last timesteps, ensure ordering!
         self._timestep_first = self.get_timestep_from_date(self._start_date)
         self._timestep_last = self.get_timestep_from_date(self._end_date)
-        assert_greater_equal(self._timestep_last, self._timestep_first)
+        assert np.all(self._timestep_last >= self._timestep_first)
 
         # Set the current timestep to the first timestep
         self.set_current_date_and_timestep_with_timestep(self._timestep_first)
@@ -769,7 +765,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
         # file with the appropriate monthly values for
         self._temperature_dataset = \
                 Dataset(self._temperature_source_filename, 'r', mmap=True)
-        assert_true(self._temperature_dataset is not None)
+        assert self._temperature_dataset is not None
 
     def get_input_vars(self):
         if self._using_WMT:
@@ -837,7 +833,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                 # self._temperature_current[]
                 temperature_subregion = self._temperature_current
 
-            assert_equal(temperature_subregion.shape, self._grid_shape)
+            assert np.all(temperature_subregion.shape == self._grid_shape)
 
             # Fill the field with Nan if value is 'missing value'
             nan_locations = temperature_subregion < -90
@@ -911,8 +907,8 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                         if var_name[-4:] == 'date':
                             # date variables end with "_date"
                             # Note: these should be years
-                            assert_less_equal(int(value), 2100)
-                            assert_greater_equal(int(value), 1800)
+                            assert int(value) <= 2100
+                            assert int(value) >= 1800
                             cfg_struct[var_name] = datetime.date(
                                 int(value), self.month, self.day)
                         elif var_name[0:4] == 'grid':
@@ -927,7 +923,7 @@ class FrostnumberGeoMethod(perma_base.PermafrostComponent):
                             cfg_struct[var_name] = int(value)
                         else:
                             # Everything else is just passed as a string
-                            assert_equal(var_type, 'string')
+                            assert var_type == 'string'
                             cfg_struct[var_name] = value
 
         except:
@@ -1064,4 +1060,3 @@ if __name__ == "__main__":
     fn_geo.initial_update()
     fn_geo.update_until_timestep(fn_geo._timestep_last)
     fn_geo.finalize()
-
