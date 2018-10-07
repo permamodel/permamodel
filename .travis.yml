@@ -16,4 +16,4 @@ install:
 script:
   - pytest --cov --cov-report=xml:$(pwd)/coverage.xml
 after_success:
-  - coveralls --verbose
+  - coveralls
