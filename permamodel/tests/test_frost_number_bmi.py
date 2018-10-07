@@ -5,6 +5,7 @@ test_frost_number_bmi.py
 import os
 
 import pytest
+from pytest import approx
 
 from permamodel import examples_directory
 from permamodel.components import bmi_frost_number
@@ -30,6 +31,37 @@ def teardown_module():
     for f in files_to_remove:
         if os.path.exists(f):
             os.remove(f)
+
+
+_CONFIG_FILE_TEMPLATE = """
+start_year      | {start_year} | int      | begining of the simulation time [year]
+end_year        | {end_year}   | int      | begining of the simulation time [year]
+dt              | 1            | int      | timestep for permafrost process [year]
+T_air_min_type  | Scalar       | string   | allowed input types
+T_air_min       | {t_air_min}  | float    | Mean annual air temperature [C]
+T_air_max_type  | Scalar       | string   | allowed input types
+T_air_max       | {t_air_max}  | float    | Mean annual air temperature [C]
+#===============================================================================
+# Output
+fn_out_filename | fn_test_output.dat | string   | Name of the file to output the frostnumber data to
+"""
+
+
+def write_config_file(
+    config_file, start_year=2000, end_year=2010, t_air_min=-20, t_air_max=20
+):
+    """Write a default configuration file for FrostNumberMethod."""
+    values = {
+        "start_year": start_year,
+        "end_year": end_year,
+        "t_air_min": t_air_min,
+        "t_air_max": t_air_max,
+    }
+    with open(config_file, "w") as fp:
+        fp.write(_CONFIG_FILE_TEMPLATE.format(**values))
+
+    return values
+
 
 # ---------------------------------------------------
 # Tests that ensure we have bmi functionality
@@ -166,3 +198,37 @@ def test_bmi_fn_get_var_units():
     fn = bmi_frost_number.BmiFrostnumberMethod()
     fn.initialize(cfg_file=onesite_multiyear_filename)
     assert 'deg' in fn.get_var_units('atmosphere_bottom_air__time_min_of_temperature')
+
+
+def test_frostnumber_updating_with_scalars(tmpdir):
+    """Test updating past one year with scalars."""
+    start_year, end_year = 2000, 2010
+    with tmpdir.as_cwd():
+        write_config_file("frost_number.cfg", start_year=start_year, end_year=end_year)
+
+        fn = bmi_frost_number.BmiFrostnumberMethod()
+        fn.initialize(cfg_file="frost_number.cfg")
+        for year in range(start_year, end_year):
+            assert fn.get_value("frostnumber__air")== approx(0.5)
+            assert fn.get_current_time() == (year - start_year)
+            fn.update()
+
+
+def test_frostnumber_set_value_with_scalars(tmpdir):
+    """Test set_values changes the frost number to the correct value."""
+    with tmpdir.as_cwd():
+        write_config_file("frost_number.cfg", t_air_max=10.)
+
+        fn = bmi_frost_number.BmiFrostnumberMethod()
+        fn.initialize(cfg_file="frost_number.cfg")
+        fn.update()
+        expected_value = fn.get_value("frostnumber__air")
+
+        write_config_file("frost_number.cfg", t_air_max=999.)
+        fn = bmi_frost_number.BmiFrostnumberMethod()
+        fn.initialize(cfg_file="frost_number.cfg")
+        fn.update()
+
+        fn.set_value("atmosphere_bottom_air__time_max_of_temperature", 10)
+        fn.update()
+        assert fn.get_value("frostnumber__air") == approx(expected_value)
