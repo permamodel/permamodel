@@ -57,8 +57,9 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             'time_units':         'years'}
 
         self._input_var_names = (
-            'atmosphere_bottom_air__temperature',
-            )
+            'atmosphere_bottom_air__time_min_of_temperature',
+            'atmosphere_bottom_air__time_max_of_temperature',
+        )
 
         self._output_var_names = (
             'frostnumber__air',            # Air Frost number
@@ -66,16 +67,20 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
             'frostnumber__stefan')        # Stefan Frost number
 
         self._var_name_map = {
-            'atmosphere_bottom_air__temperature':  'T_air_min',
-            'frostnumber__air':                    'air_frost_number',
-            'frostnumber__surface':                'surface_frost_number',
-            'frostnumber__stefan':                 'stefan_frost_number'}
+            'atmosphere_bottom_air__time_min_of_temperature': 'T_air_min',
+            'atmosphere_bottom_air__time_max_of_temperature': 'T_air_max',
+            'frostnumber__air': 'air_frost_number',
+            'frostnumber__surface': 'surface_frost_number',
+            'frostnumber__stefan': 'stefan_frost_number',
+        }
 
         self._var_units_map = {
-            'atmosphere_bottom_air__temperature':   'deg_C',
-            'frostnumber__air':                     '1',
-            'frostnumber__surface':                 '1',
-            'frostnumber__stefan':                  '1'}
+            'atmosphere_bottom_air__time_min_of_temperature': 'deg_C',
+            'atmosphere_bottom_air__time_max_of_temperature': 'deg_C',
+            'frostnumber__air': '1',
+            'frostnumber__surface': '1',
+            'frostnumber__stefan': '1',
+        }
 
     def initialize(self, cfg_file=None):
         """ this overwrites initialize() in PermafrostComponent """
@@ -113,10 +118,12 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         self._values = {
             # These are the links to the model's variables and
             # should be consistent with _var_name_map
-            'atmosphere_bottom_air__temperature':    self._model.T_air_min,
+            'atmosphere_bottom_air__time_min_of_temperature': self._model.T_air_min,
+            'atmosphere_bottom_air__time_max_of_temperature': self._model.T_air_max,
             'frostnumber__air':         self._model.air_frost_number,
             'frostnumber__surface':     self._model.surface_frost_number,
-            'frostnumber__stefan':      self._model.stefan_frost_number}
+            'frostnumber__stefan':      self._model.stefan_frost_number,
+        }
 
     def get_attribute(self, att_name):
         try:
@@ -233,7 +240,14 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
 
     def set_value(self, var_name, new_var_values):
         """ BMI: allow external set-access to model variable """
-        self._values[var_name] = new_var_values
+        array = getattr(self._model, self._var_name_map[var_name])
+        if len(array) == 1:
+            array[0] = new_var_values
+        else:
+            array[int(self._model.year - self._model.start_year) + 1] = new_var_values
+
+        # setattr(self._model, self._var_name_map[var_name], new_var_values)
+        # self._values[var_name] = new_var_values
 
     def set_value_at_indices(self, var_name, new_var_values, indices):
         """ BMI: allow external set-access to model array variable """
@@ -333,7 +347,7 @@ class BmiFrostnumberMethod(perma_base.PermafrostComponent):
         """
         return 1
 
-    def get_grid_rank(self, var_id):
+    def get_grid_rank(self, grid_id):
         """Rank of grid.
 
         Parameters

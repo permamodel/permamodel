@@ -7,9 +7,9 @@
 from __future__ import print_function
 
 import numpy as np
-from permamodel.components import perma_base
-from permamodel.components import frost_number_Geo
-from nose.tools import (assert_in, assert_true)
+
+from permamodel.components import frost_number_Geo, perma_base
+
 
 class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
     """ Implement the Nelson-Outcalt Frost numbers
@@ -125,11 +125,11 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         # Verify that all input and output variable names are in the
         # variable name and the units map
         for varname in self._input_var_names:
-            assert_in(varname, self._var_name_map)
-            assert_in(varname, self._var_units_map)
+            assert varname in self._var_name_map
+            assert varname in self._var_units_map
         for varname in self._output_var_names:
-            assert_in(varname, self._var_name_map)
-            assert_in(varname, self._var_units_map)
+            assert varname in self._var_name_map
+            assert varname in self._var_units_map
 
         # Set the names and types of the grids
         # Note: A single value is a uniform rectilinear grid of shape (1)
@@ -283,7 +283,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
             return int(np.prod(grid_size))
 
     def get_grid_spacing(self, grid_id, out=None):
-        assert_true(grid_id < self.ngrids)
+        assert grid_id < self.ngrids
         var_name = self._grids[grid_id]
         if out is None:
             ndim = np.array(self.get_value_ref(var_name)).ndim

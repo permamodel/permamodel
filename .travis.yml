@@ -6,7 +6,7 @@ python:
 before_install:
   - pip install --upgrade pip setuptools wheel
   - pip install coveralls
-  - pip install nose
+  - pip install pytest pytest-cov
   - pip install --only-binary=numpy numpy
   - pip install --only-binary=scipy scipy
   - pip install --only-binary=netcdf4 netcdf4
@@ -14,6 +14,6 @@ before_install:
 install:
   - python setup.py install
 script:
-  - nosetests --with-doctest --with-coverage --cover-package=permamodel
+  - pytest --cov --cov-report=xml:$(pwd)/coverage.xml
 after_success:
-  - coveralls --verbose
+  - coveralls

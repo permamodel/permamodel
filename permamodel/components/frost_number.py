@@ -25,11 +25,12 @@ SOFTWARE.
 from __future__ import print_function
 
 import os
+
 import numpy as np
-from permamodel.utils import model_input
-from permamodel.components import perma_base
+
 from permamodel import examples_directory
-from nose.tools import assert_greater_equal, assert_true, assert_equal
+from permamodel.components import perma_base
+from permamodel.utils import model_input
 
 
 class FrostnumberMethod(perma_base.PermafrostComponent):
@@ -116,33 +117,35 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         self.end_year = self._configuration['end_year']
         self.fn_out_filename = self._configuration['fn_out_filename']
 
-        # These don't need to be used after this routine
         T_air_min_type = self._configuration['T_air_min_type']
-        T_air_max_type = self._configuration['T_air_max_type']
-
-        if self.start_year == self.end_year:
-            # Only one year specified, so inputs should be scalar
-            assert_equal(T_air_min_type.lower(), 'scalar')
-            assert_equal(T_air_max_type.lower(), 'scalar')
+        if T_air_min_type.lower() == "scalar":
             self.T_air_min = np.array([self._configuration['T_air_min']],
-                                 dtype=np.float32)
-            self.T_air_max = np.array([self._configuration['T_air_max']],
-                                 dtype=np.float32)
+                                      dtype=np.float32)
         else:
-            # Several years specified, should be timesteps
             in_dir = os.path.realpath(self._configuration['in_directory'])
+            self.T_air_min = np.array(
+                np.loadtxt(
+                    os.path.join(in_dir, self._configuration['T_air_min']),
+                    skiprows=0,
+                    unpack=False
+                ),
+                dtype=np.float32
+            )
 
-            fname = os.path.join(in_dir,
-                                 self._configuration['T_air_min'])
-            assert_true(os.path.isfile(fname))
-            Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
-            self.T_air_min = np.array(Tvalues, dtype=np.float32)
-
-            fname = os.path.join(in_dir,
-                                 self._configuration['T_air_max'])
-            assert_true(os.path.isfile(fname))
-            Tvalues = np.loadtxt(fname, skiprows=0, unpack=False)
-            self.T_air_max = np.array(Tvalues, dtype=np.float32)
+        T_air_max_type = self._configuration['T_air_max_type']
+        if T_air_max_type.lower() == "scalar":
+            self.T_air_max = np.array([self._configuration['T_air_max']],
+                                      dtype=np.float32)
+        else:
+            in_dir = os.path.realpath(self._configuration['in_directory'])
+            self.T_air_max = np.array(
+                np.loadtxt(
+                    os.path.join(in_dir, self._configuration['T_air_max']),
+                    skiprows=0,
+                    unpack=False
+                ),
+                dtype=np.float32
+            )
 
     def initialize_frostnumber_component(self):
         """ Set the starting values for the frostnumber component """
@@ -152,9 +155,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
 
         self.year = self.start_year
 
-        try:
-            assert_greater_equal(self.end_year, self.start_year)
-        except AssertionError:
+        if self.start_year > self.end_year:
             self.end_year = self.start_year
 
         # Create a dictionary to hold the output values
@@ -216,10 +217,16 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         """
 
         # In the first test case, we used T_air_max and T_air_min
-        T_cold = self.T_air_min[int(self.year - self.start_year)]
-        T_hot = self.T_air_max[int(self.year - self.start_year)]
+        if len(self.T_air_min) == 1:
+            T_cold = self.T_air_min[0]
+        else:
+            T_cold = self.T_air_min[int(self.year - self.start_year)]
+        if len(self.T_air_max) == 1:
+            T_hot = self.T_air_max[0]
+        else:
+            T_hot = self.T_air_max[int(self.year - self.start_year)]
 
-        assert_greater_equal(T_hot, T_cold)
+        assert T_hot >= T_cold
         T_avg = (T_hot + T_cold) / 2.0
 
         # Note that these conditions should cover T_hot == T_cold
@@ -330,7 +337,7 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
                             cfg_struct[var_name] = float(value)
                         else:
                             # Everything else is just passed as a string
-                            assert_equal(var_type, 'string')
+                            assert var_type == 'string'
                             cfg_struct[var_name] = value
 
         except:
@@ -349,14 +356,9 @@ class FrostnumberMethod(perma_base.PermafrostComponent):
         else:
             time_change = self.dt
 
-        if (self.year + time_change) > self.end_year:
-            print("Update would have incremented past last year")
-            print("So setting to end year")
-            self.year = self.end_year
-        else:
-            self.year += time_change
-
+        self.year += time_change
         self.calculate_frost_numbers()
+
 
 if __name__ == "__main__":
     # Run the code

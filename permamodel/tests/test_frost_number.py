@@ -5,11 +5,12 @@ test_frost_number.py
 from __future__ import print_function
 
 import os
+
+from pytest import approx
+
 from permamodel.components import frost_number
+
 from .. import examples_directory
-from nose.tools import (assert_equal, assert_greater_equal,
-                        assert_almost_equal, assert_raises,
-                        assert_true)
 
 # List of files to be removed after testing is complete
 # use files_to_remove.append(<filename>) to add to it
@@ -40,7 +41,7 @@ def test_end_year_before_start_year_error():
     fn.start_year = 2000
     fn.end_year = 1990
     fn.initialize_frostnumber_component()
-    assert_equal(fn.start_year, fn.end_year)
+    assert fn.start_year == fn.end_year
 
 def test_can_initialize_frostnumber_method_from_scalar_file():
     """ Test fn initialization from config file (scalar) """
@@ -56,8 +57,8 @@ def test_frostnumber_method_has_date_info():
     cfg_file = os.path.join(examples_directory,
                             'Frostnumber_example_scalar.cfg')
     fn.initialize(cfg_file=cfg_file)
-    assert_greater_equal(fn.year, 0)
-    assert_equal(fn.year, fn.start_year)
+    assert fn.year >= 0
+    assert fn.year == fn.start_year
 
 def test_can_initialize_frostnumber_method_from_timeseries_file():
     """ Test fn initialization from config file (time series) """
@@ -71,7 +72,7 @@ def test_frostnumber_method_calculates_fn():
     """ Test fn gets calculated """
     fn = frost_number.FrostnumberMethod()
     fn.initialize()
-    assert_almost_equal(fn.air_frost_number, 0.63267, places=3)
+    assert fn.air_frost_number == approx(0.6326749410343562)
 
 def test_frostnumber_method_calculates_exact_fn():
     """ Test fn gets calculated """
@@ -80,11 +81,11 @@ def test_frostnumber_method_calculates_exact_fn():
     fn.T_air_min = [5.0]
     fn.T_air_max = [15.0]
     fn.calculate_air_frost_number()
-    assert_almost_equal(fn.air_frost_number, 0.0, places=3)
+    assert fn.air_frost_number == approx(0.0)
     fn.T_air_min = [-25.0]
     fn.T_air_max = [-5.0]
     fn.calculate_air_frost_number()
-    assert_almost_equal(fn.air_frost_number, 1.0, places=3)
+    assert fn.air_frost_number == approx(1.0)
 
 def test_frostnumber_method_updates():
     """ Test fn update() """
@@ -93,8 +94,8 @@ def test_frostnumber_method_updates():
                             'Frostnumber_example_timeseries.cfg')
     fn.initialize(cfg_file=cfg_file)
     fn.update()
-    assert_equal(fn.year, 2001)
-    assert_almost_equal(fn.air_frost_number, 0.5, places=3)
+    assert fn.year == 2001
+    assert fn.air_frost_number == approx(0.5)
 
 def test_frostnumber_generates_output():
     """ Test fn generates output file """
@@ -105,7 +106,7 @@ def test_frostnumber_generates_output():
     fn.update()
     output_written = fn.write_output_to_file()
     if output_written:
-        assert_true(os.path.isfile(fn.fn_out_filename))
+        assert os.path.isfile(fn.fn_out_filename)
         files_to_remove.append(fn.fn_out_filename)
     else:
         print('Unable to test output to: {}'.format(fn.fn_out_filename))
