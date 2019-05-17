@@ -18,3 +18,10 @@ from permamodel.components import KuFlex_method
 ku = KuFlex_method.KuFlex_method()
 
 ku.initialize('KuFlex_method.cfg')
+
+ku.update()
+
+print(ku.Aps)
+print(ku.Tps)
+
+print(ku.Zal)

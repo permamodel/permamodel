@@ -243,15 +243,14 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
     def update_soil_thermal_conductivity(self):
         
-        self.Kt = self.kt_Soil + 0.;
-        self.Kf = self.kf_Soil + 0.;
+        self.Kt = self.kt_soil + 0.;
+        self.Kf = self.kf_soil + 0.;
         
     #   update_soil_thermal_conductivity()
     #-------------------------------------------------------------------
     def update_snow_thermal_properties(self):
 
         self.Ksn = self.k_snow + 0.; # Unit: (W m-1 C-1)
-
         self.Csn = self.c_snow + 0.; # Unit: J m-3 C-1
 
     #   update_ssnow_thermal_properties()
@@ -425,7 +424,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         # Cold and Warm Season, Page-129, Sazonova, 2003
         self.tao1 = tao*(0.5 - 1./np.pi*np.arcsin(self.T_air/self.A_air));
         self.tao2 = tao - self.tao1;
-        self.L=334000.*1000.*self.vwc_H2O
+        self.L=self.lh_soil
 
         self.update_TOP_temperatures()
 
