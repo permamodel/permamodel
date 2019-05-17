@@ -91,13 +91,20 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #        currently always scalars.
         #--------------------------------------------------
         are_scalars = np.array([
-                          self.is_scalar('lat'),
-                          self.is_scalar('lon'),
                           self.is_scalar('T_air'),
                           self.is_scalar('A_air'),
+                          
                           self.is_scalar('h_snow'),
+                          self.is_scalar('k_snow'),
+                          self.is_scalar('c_snow'),
                           self.is_scalar('rho_snow'),
-                          self.is_scalar('vwc_H2O'),
+                          
+                          self.is_scalar('lh_soil'),
+                          self.is_scalar('kt_soil'),
+                          self.is_scalar('kf_soil'),
+                          self.is_scalar('ct_soil'),
+                          self.is_scalar('cf_soil'),
+                          
                           self.is_scalar('Hvgf'),
                           self.is_scalar('Hvgt'),
                           self.is_scalar('Dvf'),
@@ -109,358 +116,143 @@ class KuFlex_method( perma_base.PermafrostComponent ):
     #-------------------------------------------------------------------
     def open_input_files(self):
         # this function will work only if filename is not empty
-
-        self.thermal_parameters_file = os.path.join(data_directory,
-                                                    'Typical_Thermal_Parameters.csv')
+        
+        # Variables related to air:
 
         self.T_air_file       = self.in_directory + self.T_air_file
         self.A_air_file       = self.in_directory + self.A_air_file
+        
+        # Variables related to snow:
+        
         self.h_snow_file      = self.in_directory + self.h_snow_file
+        self.k_snow_file      = self.in_directory + self.k_snow_file
+        self.c_snow_file      = self.in_directory + self.c_snow_file
         self.rho_snow_file    = self.in_directory + self.rho_snow_file
-        self.vwc_H2O_file     = self.in_directory + self.vwc_H2O_file
+        
+        # Variables related to vegetation:
+        
         self.Hvgf_file        = self.in_directory + self.Hvgf_file
         self.Hvgt_file        = self.in_directory + self.Hvgt_file
         self.Dvf_file         = self.in_directory + self.Dvf_file
         self.Dvt_file         = self.in_directory + self.Dvt_file
-#        self.lat_file         = self.in_directory + self.lat_file
-#        self.lon_file         = self.in_directory + self.lon_file
-        self.ALT_file  = self.out_directory + self.ALT_file
-        self.TPS_file  = self.out_directory + self.TPS_file
+        
+        # Variables related to soil thermal:
+        
+        self.lh_soil_file     = self.in_directory + self.lh_soil_file
+        self.kt_soil_file     = self.in_directory + self.kt_soil_file
+        self.kf_soil_file     = self.in_directory + self.kf_soil_file
+        self.ct_soil_file     = self.in_directory + self.ct_soil_file
+        self.cf_soil_file     = self.in_directory + self.cf_soil_file
+        
+        # Variables for outputs:
+
+        self.ALT_file         = self.out_directory + self.ALT_file
+        self.TPS_file         = self.out_directory + self.TPS_file
+        
+        # File Units for each:
          
         self.T_air_unit       = self.open_file_KU(self.T_air_type,  self.T_air_file)
         self.A_air_unit       = self.open_file_KU(self.A_air_type,  self.A_air_file)
+        
         self.h_snow_unit      = self.open_file_KU(self.h_snow_type,  self.h_snow_file)
         self.rho_snow_unit    = self.open_file_KU(self.rho_snow_type,  self.rho_snow_file)
-        self.vwc_H2O_unit     = self.open_file_KU(self.vwc_H2O_type,  self.vwc_H2O_file)
+        self.k_snow_unit      = self.open_file_KU(self.k_snow_type,  self.k_snow_file)
+        self.c_snow_unit      = self.open_file_KU(self.c_snow_type,  self.c_snow_file)
+        
         self.Hvgf_unit        = self.open_file_KU(self.Hvgf_type,  self.Hvgf_file)
         self.Hvgt_unit        = self.open_file_KU(self.Hvgt_type,  self.Hvgt_file)
         self.Dvf_unit         = self.open_file_KU(self.Dvf_type,  self.Dvf_file)
         self.Dvt_unit         = self.open_file_KU(self.Dvt_type,  self.Dvt_file)
-#        self.lat_unit         = model_input.open_file(self.lat_type,  self.lat_file)
-#        self.lon_unit         = model_input.open_file(self.lon_type,  self.lon_file)
-
+        
+        self.lh_soil_unit     = self.open_file_KU(self.lh_soil_type,  self.lh_soil_file)
+        self.kt_soil_unit     = self.open_file_KU(self.kt_soil_type,  self.kt_soil_file)
+        self.kf_soil_unit     = self.open_file_KU(self.kf_soil_type,  self.kf_soil_file)
+        self.ct_soil_unit     = self.open_file_KU(self.ct_soil_type,  self.ct_soil_file)
+        self.cf_soil_unit     = self.open_file_KU(self.cf_soil_type,  self.cf_soil_file)
+        
     #   open_input_files()
     #-------------------------------------------------------------------
     def read_input_files(self):
 
         #rti = self.rti # has a problem with loading rti: do not know where its been initialized
 
-        self.thermal_data = np.genfromtxt(
-            self.thermal_parameters_file,
-            names = True,
-            delimiter=',',
-            # dtype=None,
-        )
-
         #-------------------------------------------------------
         # All grids are assumed to have a data type of Float32.
         #-------------------------------------------------------    
-
-        if self.T_air_type.lower() == 'grid': # these lines just available for GRID inputs
-
-            [Lat_list, Lon_list] = self.read_nc_lat_lon(self.T_air_unit, self.T_air_type)
-                        
-            if Lon_list is not None:
-                self.lon = Lon_list 
-            if (Lat_list is not None): 
-                self.lat = Lat_list    
-                        
-        T_air = self.read_next_modified_KU(self.T_air_unit,self.T_air_type)
-#        
+ 
+        #--------------  AIR              
+        T_air = self.read_next_modified_KU(self.T_air_unit,self.T_air_type)        
         if (T_air is not None):
-            self.T_air = T_air
-        #        
-#        print self.T_air
-             
-#        T_air = self.read_next_modified_KU(self.T_air_file, self.T_air_type)
-#        if (T_air is not None): 
-#            self.T_air = T_air
-#            n_T_air = len(T_air)
-            
+            self.T_air = T_air            
         A_air = self.read_next_modified_KU(self.A_air_unit, self.A_air_type)
         if (A_air is not None): 
             self.A_air = A_air
-#            n_A_air = len(A_air)
-            
+        #--------------  SNOW                          
         h_snow = self.read_next_modified_KU(self.h_snow_unit, self.h_snow_type)
         if (h_snow is not None): 
             self.h_snow = h_snow
-#            n_h_snow = len(h_snow) 
-            
+        k_snow = self.read_next_modified_KU(self.k_snow_unit, self.k_snow_type)
+        if (k_snow is not None): 
+            self.k_snow = k_snow
+        c_snow = self.read_next_modified_KU(self.c_snow_unit, self.c_snow_type)
+        if (c_snow is not None): 
+            self.c_snow = c_snow            
         rho_snow = self.read_next_modified_KU(self.rho_snow_unit, self.rho_snow_type)
         if (rho_snow is not None): 
             self.rho_snow = rho_snow
-#            n_rho_snow = len(rho_snow)
-        
-        vwc_H2O = self.read_next_modified_KU(self.vwc_H2O_unit, self.vwc_H2O_type)
-        if (vwc_H2O is not None): 
-            self.vwc_H2O = vwc_H2O
-#            n_vwc_H2O = len(vwc_H2O)
-            
+        #--------------   VEG                         
         Hvgf = self.read_next_modified_KU(self.Hvgf_unit, self.Hvgf_type)
         if (Hvgf is not None): 
-            self.Hvgf = Hvgf
-#            n_Hvgf = len(Hvgf)
-            
+            self.Hvgf = Hvgf           
         Hvgt = self.read_next_modified_KU(self.Hvgt_unit, self.Hvgt_type)
         if (Hvgt is not None): 
             self.Hvgt = Hvgt
-#            n_Hvgt = len(Hvgt)
-            
         Dvt = self.read_next_modified_KU(self.Dvt_unit, self.Dvt_type)
         if (Dvt is not None): 
             self.Dvt = Dvt
-#            n_Dvt = len(Dvt)
-            
         Dvf = self.read_next_modified_KU(self.Dvf_unit, self.Dvf_type)
         if (Dvf is not None): 
             self.Dvf = Dvf
-#            n_Dvf = len(Dvf)
-        
-#        # Check the number of grid in input files:
-#        
-#        num_check= np.array([n_Lat, n_Lon, n_T_air, n_A_air, n_h_snow, 
-#                             n_rho_snow, n_vwc_H2O, n_Hvgf, n_Hvgt,
-#                             n_Dvf, n_Dvt])
-#                             
-#        num_unique = np.unique(num_check)                  
-#                             
-#        if len(num_unique)>1:
-#            print "Warning: Dimensions of input must agree!"
-#            exit
-#        else:
-#            self.n_grid = num_unique;
-        
-        
+        #--------------    SOIL
+        lh_soil = self.read_next_modified_KU(self.lh_soil_unit, self.lh_soil_type)
+        if (lh_soil is not None): 
+            self.lh_soil = lh_soil
+        kt_soil = self.read_next_modified_KU(self.kt_soil_unit, self.kt_soil_type)
+        if (kt_soil is not None): 
+            self.kt_soil = kt_soil
+        kf_soil = self.read_next_modified_KU(self.kf_soil_unit, self.kf_soil_type)
+        if (kf_soil is not None): 
+            self.kf_soil = kf_soil
+        ct_soil = self.read_next_modified_KU(self.ct_soil_unit, self.ct_soil_type)
+        if (ct_soil is not None): 
+            self.ct_soil = ct_soil
+        cf_soil = self.read_next_modified_KU(self.cf_soil_unit, self.cf_soil_type)
+        if (cf_soil is not None): 
+            self.cf_soil = cf_soil            
         
     #   read_input_files()
     #-------------------------------------------------------------------
 
     def update_soil_heat_capacity(self):
 
-        #---------------------------------------------------------
-        # Notes: we need a better documentation of this subroutine here
-        #
-        #
-        #---------------------------------------------------------
-        # Note: need to update frozen and thawed (Cf,Ct)
-        #       heat capacities yearly
-        #       this methods overriddes the method in the perma_base
-        #
-        #
-        #--------------------------------------------------
-        # I do not like this input file here need fix later
-        #input_file = 'Parameters/Typical_Thermal_Parameters.csv'
-
-        Bulk_Density_Texture = self.thermal_data['Bulk_Density']
-        Heat_Capacity_Texture = self.thermal_data['Heat_Capacity']
-
-        # Adjusting percent of sand, silt, clay and peat ==
-        tot_percent = self.p_sand+self.p_clay+self.p_silt+self.p_peat
-
-        percent_sand = self.p_sand / tot_percent
-        percent_clay = self.p_clay / tot_percent
-        percent_silt = self.p_silt / tot_percent
-        percent_peat = self.p_peat / tot_percent
-
-        # Calculate heat capacity and bulk density of soil using exponential weighted.
-        Heat_Capacity =  Heat_Capacity_Texture[2]*percent_clay + \
-                         Heat_Capacity_Texture[1]*percent_sand + \
-                         Heat_Capacity_Texture[0]*percent_silt + \
-                         Heat_Capacity_Texture[3]*percent_peat       # Unit: J kg-1 C-1
-
-        Bulk_Density  =  Bulk_Density_Texture[2]*percent_clay + \
-                         Bulk_Density_Texture[1]*percent_sand + \
-                         Bulk_Density_Texture[0]*percent_silt + \
-                         Bulk_Density_Texture[3]*percent_peat        # Unit: kg m-3
-                         
-        # Estimate heat capacity for composed soil
-        # based on the empirical approaches suggested by Anisimov et al. (1997)
-        self.Ct = (Heat_Capacity*Bulk_Density + 4190.*self.vwc_H2O) # eq-15, Anisimov et al. 1997; Unit: J m-3 C-1
-        self.Cf = (Heat_Capacity*Bulk_Density + 2025.*self.vwc_H2O) # eq-15, Anisimov et al. 1997; Unit: J m-3 C-1
-#        self.Bulk_Density = Bulk_Density;
-#        self.Heat_Capacity = Heat_Capacity;
-#        self.Ct = Heat_Capacity*0.+2500000
-#        self.Cf = Heat_Capacity*0.+1300000
+        self.Ct = self.ct_soil + 0. 
+        self.Cf = self.cf_soil + 0.
         
     #   update_soil_heat_capacity()
     #-------------------------------------------------------------------
 
     def update_soil_thermal_conductivity(self):
-
-        #---------------------------------------------------------
-        # Notes: we need a better documentation of this subroutine here
-        #
-        #
-        #---------------------------------------------------------
-        # Note: need to update frozen and thawed (kf,kt)
-        #       thermal conductivities yearly
-        #       this methods overriddes the method in the perma_base
-        #
-        #
-        #--------------------------------------------------
-        #input_file = 'Parameters/Typical_Thermal_Parameters.csv'
-
-        vwc=self.vwc_H2O
-                
-        KT_DRY = self.thermal_data['KT_DRY'] # DRY soil thermal conductivity in THAWED states
-        KT_WET = self.thermal_data['KT_WET'] # WET soil thermal conductivity in THAWED states
-        KF_DRY = self.thermal_data['KF_DRY'] # DRY soil thermal conductivity in FROZEN states 
-        KF_WET = self.thermal_data['KF_WET'] # WET soil thermal conductivity in FROZEN states
         
-        KT_DRY = KT_DRY * 1;
-        KT_WET = KT_WET * 1;
-        KF_DRY = KF_DRY * 1;
-        KF_WET = KF_WET * 1;
-        
-        kt_dry_silt = KT_DRY[0]
-        kt_wet_silt = KT_WET[0]
-        
-        kt_dry_sand = KT_DRY[1]
-        kt_wet_sand = KT_WET[1]
-        
-        kt_dry_clay = KT_DRY[2]
-        kt_wet_clay = KT_WET[2]
-        
-        kt_dry_peat = KT_DRY[3]
-        kt_wet_peat = KT_WET[3]
-        
-        #===
-        
-        kf_dry_silt = KF_DRY[0]
-        kf_wet_silt = KF_WET[0]
-        
-        kf_dry_sand = KF_DRY[1]
-        kf_wet_sand = KF_WET[1]
-        
-        kf_dry_clay = KF_DRY[2]
-        kf_wet_clay = KF_WET[2]
-        
-        kf_dry_peat = KF_DRY[3]
-        kf_wet_peat = KF_WET[3]
-
-        #=== Estimate soil thermal conductivity according to water content:
-        #    Here we assumed  a linear correlation from dry to wet
-        
-        # Adjusting percent of sand, silt, clay and peat ==
-        tot_percent = self.p_sand+self.p_clay+self.p_silt+self.p_peat
-        
-        percent_sand = self.p_sand / tot_percent
-        percent_clay = self.p_clay / tot_percent
-        percent_silt = self.p_silt / tot_percent
-        percent_peat = self.p_peat / tot_percent
-        
-        self.mask = tot_percent;
-        self.mask[np.where(tot_percent<=0.9)] = np.nan
-        self.mask[np.where(tot_percent>0.9)] = 1.0
-        
-        self.tot_percent = tot_percent
-        
-        # Estimate thermal conductivity for composed soil
-        
-        method_option = 3
-        
-        if method_option == 1:
-                     
-            Kt_Soil_dry = kt_dry_silt**percent_silt * \
-                   kt_dry_clay**percent_clay * \
-                   kt_dry_sand**percent_sand * \
-                   kt_dry_peat**percent_peat 
-
-            Kt_Soil_wet = kt_wet_silt**percent_silt * \
-                   kt_wet_clay**percent_clay * \
-                   kt_wet_sand**percent_sand * \
-                   kt_wet_peat**percent_peat
-
-            Kt_Soil = Kt_Soil_dry +(Kt_Soil_wet - Kt_Soil_dry) * vwc;
-            #Kt_Soil = Kt_Soil_dry**(1.0-vwc)*0.54**vwc;
-
-            Kf_Soil_dry = kf_dry_silt**percent_silt * \
-                   kf_dry_clay**percent_clay * \
-                   kf_dry_sand**percent_sand * \
-                   kf_dry_peat**percent_peat
-
-            Kf_Soil_wet = kf_wet_silt**percent_silt * \
-                   kf_wet_clay**percent_clay * \
-                   kf_wet_sand**percent_sand * \
-                   kf_wet_peat**percent_peat
-
-            Kf_Soil = Kf_Soil_dry +(Kf_Soil_wet - Kf_Soil_dry) * vwc; 
-            #Kf_Soil = Kf_Soil_dry**(1.0-vwc)*2.35**vwc;
-        
-        if method_option == 2:
-            
-            kt_silt = kt_dry_silt + (kt_wet_silt - kt_dry_silt) * vwc;
-            kt_sand = kt_dry_sand + (kt_wet_sand - kt_dry_sand) * vwc;
-            kt_clay = kt_dry_clay + (kt_wet_clay - kt_dry_clay) * vwc;
-            kt_peat = kt_dry_peat + (kt_wet_peat - kt_dry_peat) * vwc;
-            
-            kf_silt = kf_dry_silt + (kf_wet_silt - kf_dry_silt) * vwc;
-            kf_sand = kf_dry_sand + (kf_wet_sand - kf_dry_sand) * vwc;
-            kf_clay = kf_dry_clay + (kf_wet_clay - kf_dry_clay) * vwc;
-            kf_peat = kf_dry_peat + (kf_wet_peat - kf_dry_peat) * vwc;
-                     
-            Kt_Soil = kt_silt**percent_silt * \
-                   kt_clay**percent_clay * \
-                   kt_sand**percent_sand * \
-                   kt_peat**percent_peat 
-
-            Kf_Soil = kf_silt**percent_silt * \
-                   kf_clay**percent_clay * \
-                   kf_sand**percent_sand * \
-                   kf_peat**percent_peat           
-        
-        if method_option == 3:
-                     
-            Kt_Soil_dry = kt_dry_silt**percent_silt * \
-                   kt_dry_clay**percent_clay * \
-                   kt_dry_sand**percent_sand * \
-                   kt_dry_peat**percent_peat 
-                   
-            uwc = 0.05;
-
-            Kt_Soil = Kt_Soil_dry**(1.0-vwc)*0.54**vwc;
-
-            Kf_Soil_dry = kf_dry_silt**percent_silt * \
-                   kf_dry_clay**percent_clay * \
-                   kf_dry_sand**percent_sand * \
-                   kf_dry_peat**percent_peat
-
-            Kf_Soil = Kf_Soil_dry**(1.0-vwc)*2.35**(vwc-uwc)*0.54**(uwc);
-            
-
-#            Kf_Soil = Kf_Soil*0.+1.38
-#            Kt_Soil = Kf_Soil*0.+0.85
-            
-        # Consider the effect of water content on thermal conductivity        
-        
-        self.Kt = Kt_Soil;
-        self.Kf = Kf_Soil;
-        
-#        self.Kt = Kt_Soil**(1.0-vwc)*0.54**vwc #   Unit: (W m-1 C-1)
-#        self.Kf = Kf_Soil**(1.0-vwc-0.0)*2.35**(vwc-0.0)*0.54**0.0 #   Unit: (W m-1 C-1)
+        self.Kt = self.kt_Soil + 0.;
+        self.Kf = self.kf_Soil + 0.;
         
     #   update_soil_thermal_conductivity()
     #-------------------------------------------------------------------
     def update_snow_thermal_properties(self):
 
-        #---------------------------------------------------------
-        # Notes: we need a better documentation of this subroutine here
-        # Conductivity of snow:  eq-4, Sturm et al., 1997:
-        # Capacity of snow:
-        #   eq-30, Ling et al., 2004; OR Table-1, Goodrich, 1982.
-        #---------------------------------------------------------
-        # Note: need to update frozen and thawed (kf,kt)
-        #       thermal conductivities yearly
-        #       this methods overriddes the method in the perma_base
-        #
-        #
-        #--------------------------------------------------
-        rho_sn=self.rho_snow
+        self.Ksn = self.k_snow + 0.; # Unit: (W m-1 C-1)
 
-        self.Ksn = (rho_sn/1000.)**2*3.233-1.01*(rho_sn/1000.)+0.138; # Unit: (W m-1 C-1)
-
-        self.Csn = 2.09E3 ;                                                # Unit: J m-3 C-1
+        self.Csn = self.c_snow + 0.; # Unit: J m-3 C-1
 
     #   update_ssnow_thermal_properties()
     #-------------------------------------------------------------------
@@ -872,14 +664,14 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #---------------------------------------------------------
         if not(SILENT):
             print(' ')
-            print('Ku model component: Initializing...')
+            print('KuFlex model component: Initializing...')
 
         self.status     = 'initializing'  # (OpenMI 2.0 convention)
         self.mode       = mode
 
         # Set the cfg file if it exists, otherwise, provide a default.
         if cfg_file is None:
-            cfg_file = "permamodel/examples/Ku_method.cfg"
+            cfg_file = "permamodel/examples/KuFlex_method.cfg"
         self.cfg_file = cfg_file
 
 #            if os.path.isfile(cfg_file):
@@ -955,18 +747,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         self.read_input_files()
         
         #        self.read_nc_lat_lon(self, file_name, var_type)
-        
-        #---------------------------------------------
-        # Extract soil texture from Grid Soil Database (Netcdf files)
-        # according to locations
-        #---------------------------------------------
-        self.read_whole_soil_texture_from_GSD()  # import whole GSD      
-        self.Extract_Soil_Texture_Loops_New()        # Extract soil texture for each cell.
-        
-        #---------------------------
-        # Initialize computed vars
-        #---------------------------
-        #self.check_input_types()  # (maybe not used yet)
 
         self.status = 'initialized'
     

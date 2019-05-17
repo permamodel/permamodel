@@ -14,3 +14,7 @@ import os
 #from permamodel.components import bmi_Ku_component
 from permamodel import examples_directory
 from permamodel.components import KuFlex_method
+
+ku = KuFlex_method.KuFlex_method()
+
+ku.initialize('KuFlex_method.cfg')
