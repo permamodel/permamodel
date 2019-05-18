@@ -10,6 +10,8 @@ Created on Tue Jan 10 10:56:16 2017
 """
 from __future__ import print_function
 
+import numpy as np
+
 import os
 #from permamodel.components import bmi_Ku_component
 from permamodel import examples_directory
@@ -19,9 +21,17 @@ ku = KuFlex_method.KuFlex_method()
 
 ku.initialize('KuFlex_method.cfg')
 
-ku.update()
+#ku.T_air = 2
+#ku.A_air = 12
 
-print(ku.Aps)
-print(ku.Tps)
+for i in np.arange(4):
 
-print(ku.Zal)
+    ku.update()
+    
+    #for i in dir(ku): 
+    #    print (i)
+    print('Tair=',ku.T_air)
+    print('Aps=',ku.Aps)
+    print('Tps=',ku.Tps)
+    print('Tps_numerator=', ku.Tps_numerator)
+    print('Zal=',ku.Zal)

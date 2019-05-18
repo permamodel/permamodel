@@ -76,6 +76,7 @@ import os
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
+from netCDF4 import Dataset
 from .. import data_directory
 # from permamodel.tests import examples_directory
 
@@ -183,7 +184,9 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #--------------  AIR              
         T_air = self.read_next_modified_KU(self.T_air_unit,self.T_air_type)        
         if (T_air is not None):
-            self.T_air = T_air            
+            self.T_air = T_air
+            n_T_air  = np.size(T_air)
+            print(n_T_air)
         A_air = self.read_next_modified_KU(self.A_air_unit, self.A_air_type)
         if (A_air is not None): 
             self.A_air = A_air
@@ -228,8 +231,8 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             self.ct_soil = ct_soil
         cf_soil = self.read_next_modified_KU(self.cf_soil_unit, self.cf_soil_type)
         if (cf_soil is not None): 
-            self.cf_soil = cf_soil            
-        
+            self.cf_soil = cf_soil
+
     #   read_input_files()
     #-------------------------------------------------------------------
 
@@ -276,8 +279,8 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         Tvg = self.T_air + deta_Tsn;
         Avg = self.A_air - deta_Asn;
         
-        self.deta_Tsn = deta_Tsn;
-        self.deta_Asn = deta_Asn;
+        self.deta_Tsn = deta_Tsn + 0.;
+        self.deta_Asn = deta_Asn + 0.;
 
         #---------------------------------------------------------
         #   2.  Estimating Snow Effects
@@ -300,8 +303,8 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         Tgs = Tvg + deta_Tv;
         Ags = Avg - deta_Av;
         
-        self.deta_Tv = deta_Tv;
-        self.deta_Av = deta_Av;
+        self.deta_Tv = deta_Tv + 0.;
+        self.deta_Av = deta_Av + 0.;
 
         #---------------------------------------------------------
         #   3.  Calculates Tps_Numerator;
@@ -319,21 +322,19 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
         n_grid = np.size(self.T_air)
         
-        if n_grid >1 :               
+        if n_grid > 1:               
         
             K_star = self.Kf
             
             if np.size(self.Kf)>1:
-            	K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
+                K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
             
         else:
             if Tps_numerator<=0.0:
                 K_star = self.Kf
             else:
                 K_star = self.Kt
-            
-
-                
+       
         self.Tgs=Tgs
         self.Ags=Ags
         self.Tps_numerator=Tps_numerator
@@ -369,9 +370,9 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
             K = self.Kt
             C = self.Ct       
-            if np.size(self.Kf)>1:        
-            	K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
-            	C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
+            if np.size(self.Kf)>1:
+                K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
+                C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
             
         else:
 
@@ -424,7 +425,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         # Cold and Warm Season, Page-129, Sazonova, 2003
         self.tao1 = tao*(0.5 - 1./np.pi*np.arcsin(self.T_air/self.A_air));
         self.tao2 = tao - self.tao1;
-        self.L=self.lh_soil
+        self.L=self.lh_soil + 0.
 
         self.update_TOP_temperatures()
 
@@ -446,191 +447,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
     #   close_input_files()
     #-------------------------------------------------------------------
-    
-    def Extract_Soil_Texture_Loops(self):
-        
-        n_lat = np.size(self.lat)
-        n_lon = np.size(self.lon)
-        
-        n_grid = n_lat*n_lon     
-        
-        if n_grid > 1:
-            
-            p_clay_list = np.zeros((n_lat,n_lon));
-            p_sand_list = np.zeros((n_lat,n_lon));
-            p_silt_list = np.zeros((n_lat,n_lon));
-            p_peat_list = np.zeros((n_lat,n_lon));
-            
-#            lon = np.reshape(self.lon, (n_grid,1))
-#            lat = np.reshape(self.lat, (n_grid,1))
-                    
-            for i in range(n_lon):
-                for j in range(n_lat):
-                
-                    input_lat   = self.lat[j]
-                    input_lon   = self.lon[i]
-                    
-                    [p_clay0, p_sand0, p_silt0, p_peat0] = self.Extract_Soil_Texture(input_lat, input_lon);
-                
-                    p_clay_list[j,i] = p_clay0            
-                    p_sand_list[j,i] = p_sand0        
-                    p_silt_list[j,i] = p_silt0        
-                    p_peat_list[j,i] = p_peat0
-        else:
-            
-            input_lat   = self.lat
-            input_lon   = self.lon
-                
-            [p_clay0, p_sand0, p_silt0, p_peat0] = self.Extract_Soil_Texture(input_lat, input_lon);
-            
-            p_clay_list = p_clay0            
-            p_sand_list = p_sand0        
-            p_silt_list = p_silt0        
-            p_peat_list = p_peat0*0.
-                         
-                    
-        self.p_clay = p_clay_list
-        self.p_sand = p_sand_list
-        self.p_silt = p_silt_list
-        self.p_peat = p_peat_list
-        
-    def Extract_Soil_Texture_Loops_New(self):
-        
-        [p_clay_list, p_sand_list, p_silt_list, p_peat_list] = self.Extract_Soil_Texture2();
-        
-        self.p_clay = p_clay_list
-        self.p_sand = p_sand_list
-        self.p_silt = p_silt_list
-        self.p_peat = p_peat_list*0.0
-
-    def Extract_Soil_Texture(self, input_lat, input_lon): 
-    
-        """ 
-        The function is to extract the grid value from matrix,
-        according to input of latitude and longitude;
-        
-        INPUTs:
-                input_lat: Latitude;
-                input_lon: Longitude;
-                lon_grid : Array of longitude
-                lat_grid : Array of latitude
-                p_data   : Matrix of data (from NetCDF file)
-                
-        OUTPUTs:
-                q_data: grid value (SINGLE)   
-                        
-        DEPENDENTs:
-                None 
-        """
-            
-        import numpy as np
-        
-        lon_grid_scale = 0.05;
-        lat_grid_scale = 0.05;
-        
-        lon_grid_top = self.lon_grid + lon_grid_scale / 2.0;
-        lat_grid_top = self.lat_grid + lat_grid_scale / 2.0;
-        
-        lon_grid_bot = self.lon_grid - lon_grid_scale / 2.0;
-        lat_grid_bot = self.lat_grid - lat_grid_scale / 2.0;
-        
-        # Get the index of input location acccording to lat and lon inputed
-        
-        idx_lon = np.where((input_lon <= lon_grid_top) & (input_lon >= lon_grid_bot))          
-        idx_lat = np.where((input_lat <= lat_grid_top) & (input_lat >= lat_grid_bot))
-        
-        idx_lon = np.array(idx_lon)
-        idx_lat = np.array(idx_lat)
-        
-        if np.size(idx_lon) >= 1 and np.size(idx_lat) >= 1:
-            clay_perc  = self.Clay_percent[idx_lat[0,0], idx_lon[0,0]]
-            sand_perc  = self.Sand_percent[idx_lat[0,0], idx_lon[0,0]]
-            silt_perc  = self.Silt_percent[idx_lat[0,0], idx_lon[0,0]]
-            peat_perc  = self.Peat_percent[idx_lat[0,0], idx_lon[0,0]]
-        else:
-            clay_perc  = np.nan;
-            sand_perc  = np.nan;
-            silt_perc  = np.nan;
-            peat_perc  = np.nan;            
-    
-        return clay_perc, sand_perc, silt_perc, peat_perc
-
-    def Extract_Soil_Texture2(self): 
-        
-        import numpy as np
-        from affine import Affine
-    
-        lon_cell_size = abs(self.lon_grid[0] - self.lon_grid[1])
-        lat_cell_size = abs(self.lat_grid[0] - self.lat_grid[1])
-    
-        min_lon = min(self.lon_grid) - lon_cell_size/2.0*0.
-        min_lat = min(self.lat_grid) - lat_cell_size/2.0*0. 
-        
-        n_lat = np.size(self.lat)
-        n_lon = np.size(self.lon)
-    
-        aff = Affine.from_gdal(min_lon, lon_cell_size, 0.0, min_lat, 0.0, lat_cell_size)
-        
-        lon = np.reshape(np.repeat(self.lon,n_lat), (n_lon,n_lat));
-        lat = np.transpose(np.reshape(np.repeat(self.lat,n_lon), (n_lat,n_lon)));
-    
-        x_coords, y_coords = ~aff * (lon, lat)
-    
-        x_coords = np.round(x_coords).astype(np.int)
-        y_coords = np.round(y_coords).astype(np.int)
-    
-        if np.size(x_coords) >= 1 and np.size(y_coords) >= 1:
-            
-            clay_perc0  = self.Clay_percent[y_coords, x_coords]
-            sand_perc0  = self.Sand_percent[y_coords, x_coords]
-            silt_perc0  = self.Silt_percent[y_coords, x_coords]
-            peat_perc0  = self.Peat_percent[y_coords, x_coords]
-
-            clay_perc  =  np.transpose(np.reshape(clay_perc0, (n_lon, n_lat)))
-            sand_perc  =  np.transpose(np.reshape(sand_perc0, (n_lon, n_lat)))           
-            silt_perc  =  np.transpose(np.reshape(silt_perc0, (n_lon, n_lat)))
-            peat_perc  =  np.transpose(np.reshape(peat_perc0, (n_lon, n_lat)))
-            
-            
-        else:
-            clay_perc  = np.nan;
-            sand_perc  = np.nan;
-            silt_perc  = np.nan;
-            peat_perc  = np.nan;
-            
-        return clay_perc, sand_perc, silt_perc, peat_perc
-        
-    def read_whole_soil_texture_from_GSD(self):
-        
-        Clay_file = self.get_param_nc4_filename("T_CLAY")
-        Sand_file = self.get_param_nc4_filename("T_SAND")
-        Silt_file = self.get_param_nc4_filename("T_SILT")
-        Peat_file = self.get_param_nc4_filename("T_OC")
-
-        lonname    = 'lon';
-        latname    = 'lat';
-        
-        varname    = 'T_CLAY';                                        
-        [lat_grid, lon_grid, Clay_percent] = self.import_ncfile(Clay_file, 
-                                                lonname, latname, varname)
-        varname    = 'T_SAND';                                        
-        [lat_grid, lon_grid, Sand_percent] = self.import_ncfile(Sand_file, 
-                                                lonname, latname, varname)
-         
-        varname    = 'T_SILT';                                        
-        [lat_grid, lon_grid, Silt_percent] = self.import_ncfile(Silt_file, 
-                                                lonname, latname, varname)
-                                                
-        varname    = 'T_OC';                                        
-        [lat_grid, lon_grid, Peat_percent] = self.import_ncfile(Peat_file, 
-                                                lonname, latname, varname)
-        
-        self.Clay_percent = Clay_percent;
-        self.Sand_percent = Sand_percent;
-        self.Silt_percent = Silt_percent;
-        self.Peat_percent = Peat_percent;
-        self.lon_grid     = lon_grid;
-        self.lat_grid     = lat_grid;
     
     def import_ncfile(self, input_file, lonname,  latname,  varname): 
                                            
@@ -748,47 +564,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #        self.read_nc_lat_lon(self, file_name, var_type)
 
         self.status = 'initialized'
-    
-    def read_nc_lat_lon(self, file_unit, var_type):
         
-        if (var_type.lower() == 'scalar'):
-            #-------------------------------------------
-            # Scalar value was entered by user already
-            #-------------------------------------------
-            lat = None
-            lon = None
-            
-        elif (var_type.lower() == 'time_series'):
-            #----------------------------------------------
-            # Time series: Read scalar value from file.
-            # File is ASCII text with one value per line.
-            #----------------------------------------------
-            lat = None
-            lon = None
-            
-        elif (var_type.lower() == 'grid'):
-            for var in file_unit.variables.keys():
-                if var[0:3] =='lat':
-                    lat = file_unit.variables[var][:]
-                if var[0:3] =='lon':
-                    lon = file_unit.variables[var][:]
-#            lon = self.ncread(file_unit, 'longitude')
-            
-            if (np.min(lon) > 0.):
-            	lon = np.mod((lon+180.),360.) -180.
-            
-#            lat = np.float(lat)
-#            lon = np.float(lon)
-            
-        else:
-            raise RuntimeError('No match found for "var_type".')
-            return None            
-        
-        if (lat is None):
-            return
-        else:
-            return lat,lon
-    
     def read_next_modified_KU(self, file_unit, var_type, \
                   dtype='Float32', factor=1.0):
     
@@ -826,7 +602,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             #----------------------------------------------
 #            data = np.loadtxt(file_name)
 #            print self.cont
-            from netCDF4 import Dataset
             for var in file_unit.variables.keys():
                 if (var != 'time' and var[0:3] !='lat' and var[0:3] != 'lon'):
                     data  = file_unit.variables[var][self.cont,:,:]
@@ -853,7 +628,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
     def ncread(self, input_file, varname):
 
-        from netCDF4 import Dataset
+#        from netCDF4 import Dataset
         
         f = Dataset(input_file, mode='r') # Open the nc file -> handle
     
@@ -906,8 +681,8 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #----------------------------------------------
         # Components use own self.time_sec by default.
         #-----------------------------------------------
-        if (self.SAVE_ALT_GRIDS):       
-        	self.save_grids()
+        if (self.SAVE_ALT_GRIDS):
+            self.save_grids()
 
         #-----------------------------
         # Update internal clock
@@ -915,59 +690,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #-----------------------------
         self.update_time( dt )
         self.status = 'updated'  # (OpenMI)
-
-    #   update()
-    
-#     def finalize(self):
-#         SILENT = True
-# 
-#         # Finish with the run
-#         self._model.status = 'finalizing'  # (OpenMI)
-# 
-#         # Close the input files
-#         self._model.close_input_files()   # Close any input files
-# 
-#         # Write output last output
-#         # self._model.write_output_to_file(SILENT=True)
-# 
-#         if (self.SAVE_ALT_GRIDS):       
-#             self.save_grids()
-# 
-#         # Close the output files
-#         self._model.close_output_files()
-# 
-#         # Done finalizing  
-#         self._model.status = 'finalized'  # (OpenMI)
-# 
-#         # Print final report, as desired
-#         if not SILENT:
-#             self._model.print_final_report(\
-#                     comp_name='Permamodel Ku component')
-    # finalize()
-
-   
-#    def save_grids(self):
-#        # Saves the grid values based on the prescribed ones in cfg file
-#
-#        #if (self.SAVE_MR_GRIDS):
-#        #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
-#        self.ALT_file  = self.out_directory + self.ALT_file
-#        
-#        if (self.SAVE_ALT_GRIDS):
-#            self.write_out_ncfile(self.ALT_file,self.output_alt)
-##            self.write_out_ncfile(self.ALT_file,self.Zal)
-#            
-#        self.TPS_file  = self.out_directory + self.TPS_file
-#        
-#        if (self.SAVE_TPS_GRIDS):
-#            self.write_out_ncfile(self.TPS_file,self.output_tps)
-#            self.write_out_ncfile(self.TPS_file,self.Tps)
-            
-        #if (self.SAVE_SW_GRIDS):
-        #    model_output.add_grid( self, self.Tps, 'Tps', self.time_min )
-
-        #if (self.SAVE_CC_GRIDS):
-        #    model_output.add_grid( self, self.Zal, 'Zal', self.time_min )
 
     def close_output_files(self):
         
@@ -1000,11 +722,11 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #print output_file[-1-2]
         
         if (output_file[-1-2] == 'T'):
-        	units = 'degree C';
-        	long_name = 'Temperature at top of permafrost';
+            units = 'degree C'
+            long_name = 'Temperature at top of permafrost'
         else:
-        	units = 'm'; 
-        	long_name = 'Active Layer Thickness'
+            units = 'm'
+            long_name = 'Active Layer Thickness'
         
         # Open a file to save the final result
         w_nc_fid = Dataset(output_file+'.nc', 'w', format='NETCDF4');
