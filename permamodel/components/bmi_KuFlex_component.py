@@ -323,12 +323,12 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         
         self._values['soil__active_layer_thickness'] = self._model.Zal
         self._values['soil__temperature'] = self._model.Tps
+        self._values['soil_surface__temperature'] = self._model.Tgs
+        self._values['soil_surface__temperature_amplitude'] = self._model.Ags
         
         # Update the time
         self._model.year += self._model.dt
-        
-        self._model.cont = self._model.cont + 1
-        
+                
 #        self.output_alt = np.append(self.output_alt, self._model.Zal)
 #        self.output_tps = np.append(self.output_tps, self._model.Tps)
         self.output_alt[self._model.cont,:,:] = self._model.Zal
@@ -350,7 +350,6 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         self.update_frac(n_steps - int(n_steps))
 
     def finalize(self):
-        SILENT = True
 
         # Finish with the run
         self._model.status = 'finalizing'  # (OpenMI)
@@ -399,8 +398,10 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
+        if np.size(new_var_values) ==1:
+            new_var_values = np.zeros(self._model.grid_shape) + new_var_values;
         setattr(self._model, self._var_name_map[var_name], new_var_values)
-        # self._values[var_name] = new_var_values
+#        self._values[var_name] = new_var_values
 
     def set_value_at_indices(self, var_name, new_var_values, indices):
         self.get_value_ref(var_name).flat[indices] = new_var_values
