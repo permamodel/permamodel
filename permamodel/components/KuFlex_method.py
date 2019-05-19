@@ -386,9 +386,37 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
         if n_T_air ==1:
             self.T_air = self.T_air + np.zeros(self.grid_shape)
-        
+        if n_A_air ==1:
+            self.A_air = self.A_air + np.zeros(self.grid_shape)
+
+        if n_h_snow ==1:
+            self.h_snow = self.h_snow + np.zeros(self.grid_shape)            
+        if n_k_snow ==1:
+            self.k_snow = self.k_snow + np.zeros(self.grid_shape) 
         if n_c_snow ==1:
-            self.c_snow = self.c_snow + np.zeros(self.grid_shape)
+            self.c_snow = self.c_snow + np.zeros(self.grid_shape)         
+        if n_rho_snow ==1:
+            self.rho_snow = self.rho_snow + np.zeros(self.grid_shape)
+            
+        if n_Hvgf ==1:
+            self.Hvgf = self.Hvgf  + np.zeros(self.grid_shape)
+        if n_Hvgt ==1:
+            self.Hvgt = self.Hvgt  + np.zeros(self.grid_shape)
+        if n_Dvf ==1:
+            self.Dvf = self.Dvf   + np.zeros(self.grid_shape)
+        if n_Dvt ==1:
+            self.Dvt = self.Dvt   + np.zeros(self.grid_shape)
+            
+        if n_kf_soil ==1:
+            self.kf_soil = self.kf_soil  + np.zeros(self.grid_shape)
+        if n_kt_soil ==1:
+            self.kt_soil = self.kt_soil  + np.zeros(self.grid_shape)
+        if n_lh_soil ==1:
+            self.lh_soil = self.lh_soil  + np.zeros(self.grid_shape)
+        if n_cf_soil ==1:
+            self.cf_soil = self.cf_soil   + np.zeros(self.grid_shape)
+        if n_ct_soil ==1:
+            self.ct_soil = self.ct_soil  + np.zeros(self.grid_shape)
 
     #   read_input_files()
     #-------------------------------------------------------------------
@@ -596,17 +624,9 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         
         self.tao1[idx_unfrozen] = 0.
         self.tao2[idx_unfrozen] = self.sec_per_year +0.
-        
-#        print(np.shape(self.T_air))
-#        print(np.shape(self.A_air))
-        
-#        test = tao[idx_others]*(0.5 - 1./np.pi*np.arcsin(self.T_air[idx_others]/self.A_air[idx_others]))
-        
-#        print(self.T_air)
-        
-        
-        self.tao1 = tao*(0.5 - 1./np.pi*np.arcsin(self.T_air/self.A_air));
-        self.tao2 = tao - self.tao1;
+
+        self.tao1[idx_others] = tao[idx_others]*(0.5 - 1./np.pi*np.arcsin(self.T_air[idx_others]/self.A_air[idx_others]));
+        self.tao2[idx_others] = tao[idx_others] - self.tao1[idx_others];
         
         self.L=self.lh_soil + 0.
 
