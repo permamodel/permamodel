@@ -208,7 +208,9 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
                 
         self.output_alt = np.zeros((n_time,n_lat,n_lon))*np.nan;
         self.output_tps = np.zeros((n_time,n_lat,n_lon))*np.nan;
-
+        self.output_tgs = np.zeros((n_time,n_lat,n_lon))*np.nan;
+        self.output_ags = np.zeros((n_time,n_lat,n_lon))*np.nan;
+        
         # Verify that all input and output variable names are in the
         # variable name and the units map
         for varname in self._input_var_names:
@@ -333,6 +335,8 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
 #        self.output_tps = np.append(self.output_tps, self._model.Tps)
         self.output_alt[self._model.cont,:,:] = self._model.Zal
         self.output_tps[self._model.cont,:,:] = self._model.Tps
+        self.output_tgs[self._model.cont,:,:] = self._model.Tgs
+        self.output_ags[self._model.cont,:,:] = self._model.Ags
         
         # Get new input values
         self._model.read_input_files()
@@ -357,9 +361,6 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         # Close the input files
         self._model.close_input_files()   # Close any input files
 
-        # Write output last output
-        self.save_grids()
-        
         # Done finalizing  
         self._model.status = 'finalized'  # (OpenMI)
         
@@ -368,6 +369,9 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
 
     def get_current_time(self):
         return float(self._model.year - self._model.start_year)
+    
+    def get_time(self):
+        return self.get_current_time()
 
     def get_end_time(self):
         return self._model.end_year - self._model.start_year + 1.0
@@ -398,6 +402,7 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         return self._values[var_name]
 
     def set_value(self, var_name, new_var_values):
+        assert np.size(new_var_values) == 1 or np.shape(new_var_values) == self._model.grid_shape, 'inconsistent array shape' 
         if np.size(new_var_values) ==1:
             new_var_values = np.zeros(self._model.grid_shape) + new_var_values;
         setattr(self._model, self._var_name_map[var_name], new_var_values)
@@ -557,29 +562,14 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         return 2
 
     def save_grids(self):
+        
         # Saves the grid values based on the prescribed ones in cfg file
-
-        #if (self.SAVE_MR_GRIDS):
-        #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
-#        self.ALT_file  = self.out_directory + self.ALT_file
-        try:        
-            assert self._model.SAVE_ALT_GRIDS
-        except:
-            print('NO OUTPUT of ALT')
-        try:
-            assert self._model.SAVE_TPS_GRIDS
-        except:
-            print('NO OUTPUT of TPS')
             
-        if (self._model.SAVE_ALT_GRIDS):
+        if (self._model.SAVE_ALT_GRIDS):            
+            self._model.write_out_ncfile(self._model.ALT_file, self.output_alt+'.nc')
+            print("Please look at"+self._model.ALT_file)
             
-            self._model.write_out_ncfile(self._model.ALT_file, self.output_alt)
-            
-#        self.TPS_file  = self.out_directory + self.TPS_file
         
         if (self._model.SAVE_TPS_GRIDS):
             self._model.write_out_ncfile(self._model.TPS_file,self.output_tps)
-        
-        print("***")
-        print("Writing output finished!")
-        print("Please look at"+self._model.ALT_file+'.nc and '+self._model.TPS_file+'.nc')
+            print("Please look at"+self._model.TPS_file+'.nc')
