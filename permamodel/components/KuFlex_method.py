@@ -176,62 +176,200 @@ class KuFlex_method( perma_base.PermafrostComponent ):
     def read_input_files(self):
 
         #rti = self.rti # has a problem with loading rti: do not know where its been initialized
+        
+        size_of_inputs = np.ones(15)
+        size_of_x      = np.ones(15)
 
         #-------------------------------------------------------
         # All grids are assumed to have a data type of Float32.
         #-------------------------------------------------------    
  
         #--------------  AIR              
-        T_air = self.read_next_modified_KU(self.T_air_unit,self.T_air_type)        
-        if (T_air is not None):
+        T_air = self.read_next_modified_KU(self.T_air_unit,self.T_air_type)   
+        
+        if (self.T_air_type.lower() == 'grid'):
             self.T_air = T_air
             n_T_air  = np.size(T_air)
-            print(n_T_air)
+            size_of_inputs[0] = n_T_air
+            size_of_x[0]      = np.shape(T_air)[0]
+        elif (self.T_air_type.lower() == 'time_series'):
+            self.T_air = T_air
+        else:
+            n_T_air = 1
+            
         A_air = self.read_next_modified_KU(self.A_air_unit, self.A_air_type)
-        if (A_air is not None): 
+        if (self.A_air_type.lower() == 'grid'): 
             self.A_air = A_air
+            n_A_air  = np.size(A_air)
+            size_of_inputs[1] = n_A_air
+            size_of_x[1]      = np.shape(A_air)[0]
+        elif (self.A_air_type.lower() == 'time_series'):
+            self.A_air = A_air
+        else:
+            n_A_air = 1
+            
         #--------------  SNOW                          
         h_snow = self.read_next_modified_KU(self.h_snow_unit, self.h_snow_type)
         if (h_snow is not None): 
             self.h_snow = h_snow
+            n_h_snow  = np.size(h_snow)
+            size_of_inputs[2] = n_h_snow
+            size_of_x[2]      = np.shape(h_snow)[0]
+        elif (self.h_snow_type.lower() == 'time_series'):
+            self.h_snow = h_snow
+        else:
+            n_h_snow = 1
+            
         k_snow = self.read_next_modified_KU(self.k_snow_unit, self.k_snow_type)
-        if (k_snow is not None): 
+        if (self.k_snow_type.lower() == 'grid'): 
             self.k_snow = k_snow
+            n_k_snow  = np.size(k_snow)
+            size_of_inputs[3] = n_k_snow
+            size_of_x[3]      = np.shape(k_snow)[0]
+        elif (self.k_snow_type.lower() == 'time_series'):
+            self.k_snow = k_snow
+        else:
+            n_k_snow = 1
+            
         c_snow = self.read_next_modified_KU(self.c_snow_unit, self.c_snow_type)
-        if (c_snow is not None): 
-            self.c_snow = c_snow            
+        if (self.c_snow_type.lower() == 'grid'): 
+            self.c_snow = c_snow    
+            n_c_snow  = np.size(c_snow)
+            size_of_inputs[4] = n_c_snow
+            size_of_x[4]      = np.shape(c_snow)[0]
+        elif (self.c_snow_type.lower() == 'time_series'):
+            self.c_snow = c_snow
+        else:
+            n_c_snow = 1
+            
         rho_snow = self.read_next_modified_KU(self.rho_snow_unit, self.rho_snow_type)
-        if (rho_snow is not None): 
+        if (self.rho_snow_type.lower() == 'grid'): 
             self.rho_snow = rho_snow
+            n_rho_snow  = np.size(rho_snow)
+            size_of_inputs[5] = n_rho_snow
+            size_of_x[5]      = np.shape(rho_snow)[0]
+        elif (self.rho_snow_type.lower() == 'time_series'):
+            self.rho_snow = rho_snow
+        else:
+            n_rho_snow = 1
+            
         #--------------   VEG                         
         Hvgf = self.read_next_modified_KU(self.Hvgf_unit, self.Hvgf_type)
-        if (Hvgf is not None): 
-            self.Hvgf = Hvgf           
+        if (self.Hvgf_type.lower() == 'grid'): 
+            self.Hvgf = Hvgf  
+            n_Hvgf  = np.size(Hvgf)
+            size_of_inputs[6] = n_Hvgf
+            size_of_x[6]      = np.shape(Hvgf)[0]
+        elif (self.Hvgf_type.lower() == 'time_series'): 
+            self.Hvgf = Hvgf  
+        else:
+            n_Hvgf = 1
+            
         Hvgt = self.read_next_modified_KU(self.Hvgt_unit, self.Hvgt_type)
-        if (Hvgt is not None): 
+        if (self.Hvgt_type.lower() == 'grid'): 
             self.Hvgt = Hvgt
+            n_Hvgt  = np.size(Hvgt)
+            size_of_inputs[7] = n_Hvgt
+            size_of_x[7]      = np.shape(Hvgt)[0]
+        elif (self.Hvgt_type.lower() == 'time_series'): 
+            self.Hvgt = Hvgt
+        else:
+            n_Hvgt = 1
+            
         Dvt = self.read_next_modified_KU(self.Dvt_unit, self.Dvt_type)
-        if (Dvt is not None): 
+        if (self.Dvt_type.lower() == 'grid'): 
             self.Dvt = Dvt
+            n_Dvt  = np.size(Dvt)
+            size_of_inputs[8] = n_Dvt
+            size_of_x[8]      = np.shape(Dvt)[0]
+        elif (self.Dvt_type.lower() == 'time_series'): 
+            self.Dvt = Dvt
+        else:
+            n_Dvt = 1
+            
         Dvf = self.read_next_modified_KU(self.Dvf_unit, self.Dvf_type)
-        if (Dvf is not None): 
+        if (self.Dvf_type.lower() == 'grid'): 
             self.Dvf = Dvf
+            n_Dvf  = np.size(Dvf)
+            size_of_inputs[9] = n_Dvf
+            size_of_x[9]      = np.shape(Dvf)[0]
+        elif (self.Dvf_type.lower() == 'time_series'): 
+            self.Dvf = Dvf
+        else:
+            n_Dvf = 1
         #--------------    SOIL
         lh_soil = self.read_next_modified_KU(self.lh_soil_unit, self.lh_soil_type)
-        if (lh_soil is not None): 
+        if (self.lh_soil_type.lower() == 'grid'): 
             self.lh_soil = lh_soil
+            n_lh_soil  = np.size(lh_soil)
+            size_of_inputs[10] = n_lh_soil
+            size_of_x[10]      = np.shape(lh_soil)[0]
+        elif (self.lh_soil_type.lower() == 'time_series'): 
+            self.lh_soil = lh_soil        
+        else:
+            n_lh_soil = 1            
+            
         kt_soil = self.read_next_modified_KU(self.kt_soil_unit, self.kt_soil_type)
-        if (kt_soil is not None): 
+        if (self.kt_soil_type.lower() == 'grid'): 
             self.kt_soil = kt_soil
+            n_kt_soil  = np.size(kt_soil)
+            size_of_inputs[11] = n_kt_soil
+            size_of_x[11]      = np.shape(kt_soil)[0]
+        if (self.kt_soil_type.lower() == 'time_series'): 
+            self.kt_soil = kt_soil
+        else:
+            n_kt_soil = 1 
+            
         kf_soil = self.read_next_modified_KU(self.kf_soil_unit, self.kf_soil_type)
-        if (kf_soil is not None): 
+        if (self.kf_soil_type.lower() == 'grid'): 
             self.kf_soil = kf_soil
+            n_kf_soil  = np.size(kf_soil)
+            size_of_inputs[12] = n_kf_soil
+            size_of_x[12]      = np.shape(kf_soil)[0]
+        elif (self.kf_soil_type.lower() == 'time_series'): 
+            self.kf_soil = kf_soil
+        else:
+            n_kf_soil = 1             
+
         ct_soil = self.read_next_modified_KU(self.ct_soil_unit, self.ct_soil_type)
-        if (ct_soil is not None): 
+        if (self.ct_soil_type.lower() == 'grid'): 
             self.ct_soil = ct_soil
+            n_ct_soil  = np.size(ct_soil)
+            size_of_inputs[13] = n_ct_soil
+            size_of_x[13]      = np.shape(ct_soil)[0]
+        if (self.ct_soil_type.lower() == 'time_series'): 
+            self.ct_soil = ct_soil
+        else:
+            n_ct_soil = 1 
+            
         cf_soil = self.read_next_modified_KU(self.cf_soil_unit, self.cf_soil_type)
-        if (cf_soil is not None): 
+        if (self.cf_soil_type.lower() == 'grid'): 
             self.cf_soil = cf_soil
+            n_cf_soil  = np.size(cf_soil)
+            size_of_inputs[14] = n_cf_soil
+            size_of_x[14]      = np.shape(cf_soil)[0]
+        elif (self.cf_soil_type.lower() == 'time_series'): 
+            self.cf_soil = cf_soil
+        else:
+            n_cf_soil = 1    
+            
+        ## check input shapes:
+        
+        self.n_grids = np.int(np.max(size_of_inputs))  
+        
+        uniq_grids_size = np.unique(size_of_inputs)
+                
+        assert np.size(uniq_grids_size)<=2, 'Error in inputs shapes'
+        assert np.size(np.unique(size_of_x)), 'Error in inputs shapes'
+        
+        self.grid_shape = [np.int(np.max(size_of_x)), np.int(self.n_grids / np.max(size_of_x))]
+        
+        print(self.grid_shape)
+        
+        ## repeat scalers to same grid shape:
+        
+        if n_c_snow ==1:
+            self.c_snow = self.c_snow + np.zeros(self.grid_shape)
 
     #   read_input_files()
     #-------------------------------------------------------------------
@@ -420,11 +558,37 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         self.update_snow_thermal_properties()
         
         tao = self.T_air*0.0 + self.sec_per_year;
+        self.tao1 = tao * 0.
+        self.tao2 = tao * 0.
 
         # Update mean temperatures for warmes and coldest seasons similar to Nelson & Outcalt 87
         # Cold and Warm Season, Page-129, Sazonova, 2003
+        
+        idx_unthaw   = np.where(self.T_air + self.A_air <=0)
+        idx_unfrozen = np.where(self.T_air - self.A_air >=0)
+        
+        idx_others   = np.where((self.T_air + self.A_air >0) & (self.T_air - self.A_air <0))
+        
+        print(idx_others)
+        
+        
+        self.tao1[idx_unthaw] = self.sec_per_year +0.
+        self.tao2[idx_unthaw] = 0.
+        
+        self.tao1[idx_unfrozen] = 0.
+        self.tao2[idx_unfrozen] = self.sec_per_year +0.
+        
+#        print(np.shape(self.T_air))
+#        print(np.shape(self.A_air))
+        
+#        test = tao[idx_others]*(0.5 - 1./np.pi*np.arcsin(self.T_air[idx_others]/self.A_air[idx_others]))
+        
+#        print(self.T_air)
+        
+        
         self.tao1 = tao*(0.5 - 1./np.pi*np.arcsin(self.T_air/self.A_air));
         self.tao2 = tao - self.tao1;
+        
         self.L=self.lh_soil + 0.
 
         self.update_TOP_temperatures()
@@ -624,7 +788,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         if (data is None):
             return
         else:
-            return np.float64( data )
+            return np.float32( data )
 
     def ncread(self, input_file, varname):
 
@@ -689,6 +853,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         # after write_output_files()
         #-----------------------------
         self.update_time( dt )
+        self.cont += 1
         self.status = 'updated'  # (OpenMI)
 
     def close_output_files(self):

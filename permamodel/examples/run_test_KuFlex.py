@@ -16,6 +16,7 @@ import os
 #from permamodel.components import bmi_Ku_component
 from permamodel import examples_directory
 from permamodel.components import KuFlex_method
+import matplotlib.pyplot as plt
 
 ku = KuFlex_method.KuFlex_method()
 
@@ -24,14 +25,19 @@ ku.initialize('KuFlex_method.cfg')
 #ku.T_air = 2
 #ku.A_air = 12
 
-for i in np.arange(4):
+for i in np.arange(3):
 
     ku.update()
     
     #for i in dir(ku): 
     #    print (i)
-    print('Tair=',ku.T_air)
-    print('Aps=',ku.Aps)
-    print('Tps=',ku.Tps)
-    print('Tps_numerator=', ku.Tps_numerator)
-    print('Zal=',ku.Zal)
+    print('Tair=',np.nanmean(ku.T_air))
+    print('Aair=',np.nanmean(ku.A_air))
+    print('Aps=',np.nanmean(ku.Aps))
+#    print('Tps=',ku.Tps)
+#    print('Tps_numerator=', ku.Tps_numerator)
+#    print('Zal=',ku.Zal)
+    
+    plt.imshow(ku.Zal)
+    plt.title(str(i))
+    plt.show()
