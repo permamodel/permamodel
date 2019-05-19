@@ -17,41 +17,50 @@ import os
 from permamodel import examples_directory
 from permamodel.components import KuFlex_method
 import matplotlib.pyplot as plt
+from permamodel.components import bmi_KuFlex_component
 
-ku = KuFlex_method.KuFlex_method()
+KuFlex_method_on = False
 
-ku.initialize('KuFlex_method.cfg')
+kuflex = bmi_KuFlex_component.BmiKuFlexMethod()
 
-#ku.T_air = 2
-#ku.A_air = 12
 
-for i in np.arange(3):
-
-    ku.update()
+#
+if KuFlex_method_on == True:
     
-    #for i in dir(ku): 
-    #    print (i)
-    print('Tair=',np.nanmean(ku.T_air))
-    print('Aair=',np.nanmean(ku.A_air))
-    print('Aps=',np.nanmean(ku.Aps))
-#    print('Tps=',ku.Tps)
-#    print('Tps_numerator=', ku.Tps_numerator)
-#    print('Zal=',ku.Zal)
+    ku = KuFlex_method.KuFlex_method()
     
-    plt.figure(figsize=[7,6])
+    ku.initialize('KuFlex_method.cfg')
     
-    plt.subplot(2,1,1)
-    plt.imshow(ku.Tps)
-    plt.title(str(i))
-    plt.colorbar(orientation='horizontal')
-    cs = plt.contour(ku.Tps, [0])
-    plt.clabel(cs, inline=1, fontsize=10, fmt = '%0d')
+    #ku.T_air = 2
+    #ku.A_air = 12
     
-    plt.subplot(2,1,2)
-    plt.imshow(ku.Zal)
-    plt.title(str(i))
-    plt.colorbar(orientation='horizontal')
-    cs2 = plt.contour(ku.Zal, [0.5, 1.0, 2.0], colors = 'k')
-    plt.clabel(cs2, inline=1, fontsize=10, fmt = '%0.2f')
+    for i in np.arange(3):
     
-    plt.show()
+        ku.update()
+        
+        #for i in dir(ku): 
+        #    print (i)
+        print('Tair=',np.nanmean(ku.T_air))
+        print('Aair=',np.nanmean(ku.A_air))
+        print('Aps=',np.nanmean(ku.Aps))
+    #    print('Tps=',ku.Tps)
+    #    print('Tps_numerator=', ku.Tps_numerator)
+    #    print('Zal=',ku.Zal)
+        
+        plt.figure(figsize=[7,6])
+        
+        plt.subplot(2,1,1)
+        plt.imshow(ku.Tps)
+        plt.title(str(i))
+        plt.colorbar(orientation='horizontal')
+        cs = plt.contour(ku.Tps, [0])
+        plt.clabel(cs, inline=1, fontsize=10, fmt = '%0d')
+        
+        plt.subplot(2,1,2)
+        plt.imshow(ku.Zal)
+        plt.title(str(i))
+        plt.colorbar(orientation='horizontal')
+        cs2 = plt.contour(ku.Zal, [0.5, 1.0, 2.0], colors = 'k')
+        plt.clabel(cs2, inline=1, fontsize=10, fmt = '%0.2f')
+        
+        plt.show()

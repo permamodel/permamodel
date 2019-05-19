@@ -496,8 +496,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #       eq-14, Anisimov et al. 1997
         #--------------------------------------------------
 
-
-
         Tps_numerator = 0.5*Tgs*(self.Kf+self.Kt)\
                             +(Ags*(self.Kt-self.Kf)/np.pi\
                             *(Tgs/Ags*np.arcsin(Tgs/Ags)\
