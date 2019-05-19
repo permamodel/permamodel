@@ -225,13 +225,13 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         gridnumber = 0
         for varname in self._input_var_names:
             self._grids[gridnumber] = varname
-            #self._grid_type[gridnumber] = 'uniform_rectilinear'
-            self._grid_type[gridnumber] = 'scalar'
+            self._grid_type[gridnumber] = 'uniform_rectilinear'
+            #self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
         for varname in self._output_var_names:
             self._grids[gridnumber] = varname
-            #self._grid_type[gridnumber] = 'uniform_rectilinear'
-            self._grid_type[gridnumber] = 'scalar'
+            self._grid_type[gridnumber] = 'uniform_rectilinear'
+            #self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1        
 
         self._values = {
@@ -478,6 +478,10 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         for grid_id, var_name_list in self._grids.items():
             if var_name in var_name_list:
                 return grid_id
+            
+    def get_grid_shape(self, grid_id):
+        
+        return self._model.grid_shape
 
     def get_grid_size(self, grid_id):
         """Size of grid.
@@ -493,7 +497,11 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
             Size of grid.
 
         """
-        return 1
+        grid_size = self.get_grid_shape(grid_id)
+        if grid_size == ():
+            return 1
+        else:
+            return int(np.prod(grid_size))
 
     def get_grid_rank(self, var_id):
         """Rank of grid.
