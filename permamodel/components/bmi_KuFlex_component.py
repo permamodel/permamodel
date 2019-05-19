@@ -98,27 +98,36 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
 
     # This used to be [...] instead of (...)
     _input_var_names = (
-        'latitude',
-        'longitude',
+            
         'datetime__start',
         'datetime__end',
+        
         'atmosphere_bottom_air__temperature',
         'atmosphere_bottom_air__temperature_amplitude',
+        
         'snowpack__depth',
         'snowpack__density',
+        'snow__thermal_conductivity',
+        'snow__volume-specific_isochoric_heat_capacity',
+        
         'water-liquid__volumetric-water-content-soil',
+        'soil-frozen__volume-specific_isochoric_heat_capacity',
+        'soil-thaw__volume-specific_isochoric_heat_capacity',
+        'soil-frozen__thermal_conductivity',
+        'soil-thaw__thermal_conductivity',
+        
         'vegetation__Hvgf',
         'vegetation__Hvgt',
         'vegetation__Dvf',
         'vegetation__Dvt' )
 
     _output_var_names = (
+        'soil_surface__temperature',
+        'soil_surface__temperature_amplitude',
         'soil__temperature',                                  # Tps
         'soil__active_layer_thickness' )                      # Zal
 
     _var_name_map = {
-        'latitude':                                           'lat',
-        'longitude':                                          'lon',
         'datetime__start':                                    'start_year',
         'datetime__end':                                      'end_year',
         'atmosphere_bottom_air__temperature':                 'T_air',
@@ -136,8 +145,6 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
 
     _var_units_map = {
         # These are the links to the model's variables' units
-        'latitude':                                           'degree_north',
-        'longitude':                                          'degree_east',
         'datetime__start':                                    'year',
         'datetime__end':                                      'year',
         'atmosphere_bottom_air__temperature':                 'deg_C',
