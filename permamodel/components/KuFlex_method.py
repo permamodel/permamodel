@@ -194,6 +194,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[0]      = np.shape(T_air)[0]
         elif (self.T_air_type.lower() == 'time_series'):
             self.T_air = T_air
+            n_T_air = 1
         else:
             n_T_air = 1
             
@@ -205,6 +206,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[1]      = np.shape(A_air)[0]
         elif (self.A_air_type.lower() == 'time_series'):
             self.A_air = A_air
+            n_A_air = 1
         else:
             n_A_air = 1
             
@@ -217,6 +219,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[2]      = np.shape(h_snow)[0]
         elif (self.h_snow_type.lower() == 'time_series'):
             self.h_snow = h_snow
+            n_h_snow = 1
         else:
             n_h_snow = 1
             
@@ -228,6 +231,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[3]      = np.shape(k_snow)[0]
         elif (self.k_snow_type.lower() == 'time_series'):
             self.k_snow = k_snow
+            n_k_snow = 1
         else:
             n_k_snow = 1
             
@@ -239,6 +243,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[4]      = np.shape(c_snow)[0]
         elif (self.c_snow_type.lower() == 'time_series'):
             self.c_snow = c_snow
+            n_c_snow = 1
         else:
             n_c_snow = 1
             
@@ -250,6 +255,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[5]      = np.shape(rho_snow)[0]
         elif (self.rho_snow_type.lower() == 'time_series'):
             self.rho_snow = rho_snow
+            n_rho_snow = 1
         else:
             n_rho_snow = 1
             
@@ -262,6 +268,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[6]      = np.shape(Hvgf)[0]
         elif (self.Hvgf_type.lower() == 'time_series'): 
             self.Hvgf = Hvgf  
+            n_Hvgf = 1
         else:
             n_Hvgf = 1
             
@@ -273,6 +280,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[7]      = np.shape(Hvgt)[0]
         elif (self.Hvgt_type.lower() == 'time_series'): 
             self.Hvgt = Hvgt
+            n_Hvgt = 1
         else:
             n_Hvgt = 1
             
@@ -284,6 +292,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[8]      = np.shape(Dvt)[0]
         elif (self.Dvt_type.lower() == 'time_series'): 
             self.Dvt = Dvt
+            n_Dvt = 1
         else:
             n_Dvt = 1
             
@@ -295,8 +304,10 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[9]      = np.shape(Dvf)[0]
         elif (self.Dvf_type.lower() == 'time_series'): 
             self.Dvf = Dvf
+            n_Dvf = 1
         else:
             n_Dvf = 1
+            
         #--------------    SOIL
         lh_soil = self.read_next_modified_KU(self.lh_soil_unit, self.lh_soil_type)
         if (self.lh_soil_type.lower() == 'grid'): 
@@ -305,7 +316,8 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_inputs[10] = n_lh_soil
             size_of_x[10]      = np.shape(lh_soil)[0]
         elif (self.lh_soil_type.lower() == 'time_series'): 
-            self.lh_soil = lh_soil        
+            self.lh_soil = lh_soil   
+            n_lh_soil = 1
         else:
             n_lh_soil = 1            
             
@@ -317,6 +329,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[11]      = np.shape(kt_soil)[0]
         if (self.kt_soil_type.lower() == 'time_series'): 
             self.kt_soil = kt_soil
+            n_kt_soil = 1
         else:
             n_kt_soil = 1 
             
@@ -328,6 +341,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[12]      = np.shape(kf_soil)[0]
         elif (self.kf_soil_type.lower() == 'time_series'): 
             self.kf_soil = kf_soil
+            n_kf_soil = 1
         else:
             n_kf_soil = 1             
 
@@ -339,6 +353,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[13]      = np.shape(ct_soil)[0]
         if (self.ct_soil_type.lower() == 'time_series'): 
             self.ct_soil = ct_soil
+            n_ct_soil = 1 
         else:
             n_ct_soil = 1 
             
@@ -350,6 +365,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             size_of_x[14]      = np.shape(cf_soil)[0]
         elif (self.cf_soil_type.lower() == 'time_series'): 
             self.cf_soil = cf_soil
+            n_cf_soil = 1
         else:
             n_cf_soil = 1    
             
@@ -367,6 +383,9 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         print(self.grid_shape)
         
         ## repeat scalers to same grid shape:
+
+        if n_T_air ==1:
+            self.T_air = self.T_air + np.zeros(self.grid_shape)
         
         if n_c_snow ==1:
             self.c_snow = self.c_snow + np.zeros(self.grid_shape)
@@ -406,7 +425,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #       Avg -- amplitude bellow snow OR top of vegetation
         #--------------------------------------------------
 
-        tao = self.T_air*0.0 + self.sec_per_year;        
+        tao = np.zeros(self.grid_shape) + self.sec_per_year;        
         
         K_diffusivity = self.Ksn/(self.rho_snow*self.Csn)
         
@@ -458,7 +477,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #       Tps -- eq-14 cont., Anisimov et al. 1997
         #--------------------------------------------------
 
-        n_grid = np.size(self.T_air)
+        n_grid = self.n_grids
         
         if n_grid > 1:               
         
@@ -500,9 +519,9 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #       Zal -- eq-3, Romanovsky et al. 1997
         #--------------------------------------------------
 
-        tao = self.T_air*0.0 + self.sec_per_year;
+        tao = np.zeros(self.grid_shape) + self.sec_per_year;
 
-        n_grid = np.size(self.T_air) 
+        n_grid = self.n_grids 
 
         if n_grid > 1:        
 
@@ -557,7 +576,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         self.update_soil_thermal_conductivity()
         self.update_snow_thermal_properties()
         
-        tao = self.T_air*0.0 + self.sec_per_year;
+        tao = np.zeros(self.grid_shape) + self.sec_per_year;
         self.tao1 = tao * 0.
         self.tao2 = tao * 0.
 
