@@ -110,7 +110,7 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         'snow__thermal_conductivity',
         'snow__volume-specific_isochoric_heat_capacity',
         
-        'water-liquid__volumetric-water-content-soil',
+        'water__volume_latent_fusion_heat',
         'soil-frozen__volume-specific_isochoric_heat_capacity',
         'soil-thaw__volume-specific_isochoric_heat_capacity',
         'soil-frozen__thermal_conductivity',
@@ -130,15 +130,29 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
     _var_name_map = {
         'datetime__start':                                    'start_year',
         'datetime__end':                                      'end_year',
+        
         'atmosphere_bottom_air__temperature':                 'T_air',
         'atmosphere_bottom_air__temperature_amplitude':       'A_air',
+        
         'snowpack__depth':                                    'h_snow',
         'snowpack__density':                                  'rho_snow',
-        'water-liquid__volumetric-water-content-soil':        'vwc_H2O',
+        'snow__thermal_conductivity':                         'k_snow',
+        'snow__volume-specific_isochoric_heat_capacity':      'c_snow',
+        
+        'water__volume_latent_fusion_heat':                   'L',
+        'soil-frozen__volume-specific_isochoric_heat_capacity':'Cf',
+        'soil-thaw__volume-specific_isochoric_heat_capacity': 'Ct',
+        'soil-frozen__thermal_conductivity':                  'Kf',
+        'soil-thaw__thermal_conductivity':                    'Kt',
+        
         'vegetation__Hvgf':                                   'Hvgf',
         'vegetation__Hvgt':                                   'Hvgt',
         'vegetation__Dvf':                                    'Dvf',
         'vegetation__Dvt':                                    'Dvt' ,
+        
+
+        'soil_surface__temperature':                          'Tgs',
+        'soil_surface__temperature_amplitude':                'Ags',        
         'soil__temperature':                                  'Tps',
         'soil__active_layer_thickness':                       'Zal'}
 
@@ -147,15 +161,28 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         # These are the links to the model's variables' units
         'datetime__start':                                    'year',
         'datetime__end':                                      'year',
+        
         'atmosphere_bottom_air__temperature':                 'deg_C',
         'atmosphere_bottom_air__temperature_amplitude':       'deg_C',
+        
         'snowpack__depth':                                    'm',
         'snowpack__density':                                  'kg m-3',
-        'water-liquid__volumetric-water-content-soil':        'm3 m-3',
+        'snow__thermal_conductivity':                         'W m-1 K-1',
+        'snow__volume-specific_isochoric_heat_capacity':      'J m-3 K-1',
+        
+        'water__volume_latent_fusion_heat':                   'J m-3',
+        'soil-frozen__volume-specific_isochoric_heat_capacity':'J m-3 K-1',
+        'soil-thaw__volume-specific_isochoric_heat_capacity': 'J m-3 K-1',
+        'soil-frozen__thermal_conductivity':                  'W m-1 K-1',
+        'soil-thaw__thermal_conductivity':                    'W m-1 K-1',
+        
         'vegetation__Hvgf':                                   'm',
         'vegetation__Hvgt':                                   'm',
         'vegetation__Dvf':                                    'm2 s-1',
         'vegetation__Dvt':                                    'm2 s-1'  ,
+
+        'soil_surface__temperature':                          'deg_C',
+        'soil_surface__temperature_amplitude':                'deg_C',         
         'soil__temperature':                                  'deg_C',
         'soil__active_layer_thickness':                       'm'}
 
@@ -175,8 +202,8 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         self._model.initialize(cfg_file=cfg_file)
         
         # make 2 vars to store each results and used for write out.
-        n_lat = np.size(self._model.lat)
-        n_lon = np.size(self._model.lon) 
+        n_lat = self._model.grid_shape[0]
+        n_lon = self._model.grid_shape[1]
         n_time = self._model.end_year-self._model.start_year+1
                 
         self.output_alt = np.zeros((n_time,n_lat,n_lon))*np.nan;
@@ -205,27 +232,38 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
             self._grids[gridnumber] = varname
             #self._grid_type[gridnumber] = 'uniform_rectilinear'
             self._grid_type[gridnumber] = 'scalar'
-            gridnumber += 1
+            gridnumber += 1        
 
         self._values = {
         # These are the links to the model's variables and
         # should be consistent with _var_name_map 
-            'latitude':                                 self._model.lat,
-            'longitude':                                self._model.lon,
-            'datetime__start':                          self._model.start_year,
-            'datetime__end':                                self._model.end_year,
-            # 'atmosphere_bottom_air__temperature': "T_air",
-            'atmosphere_bottom_air__temperature': self._model.T_air,
-            'atmosphere_bottom_air__temperature_amplitude': self._model.A_air,
-            'snowpack__depth':                          self._model.h_snow,
-            'snowpack__density':                        self._model.rho_snow,
-            'water-liquid__volumetric-water-content-soil':    self._model.vwc_H2O,
-            'vegetation__Hvgf': self._model.Hvgf,
-            'vegetation__Hvgt': self._model.Hvgt,
-            'vegetation__Dvf':  self._model.Dvf,
-            'vegetation__Dvt':  self._model.Dvt,
-            'soil__temperature': self._model.Tps,
-            'soil__active_layer_thickness': self._model.Zal}
+
+            'datetime__start':                                             self._model.start_year,
+            'datetime__end':                                               self._model.end_year,
+            
+            'atmosphere_bottom_air__temperature':                          self._model.T_air,
+            'atmosphere_bottom_air__temperature_amplitude':                self._model.A_air,
+            
+            'snowpack__depth':                                             self._model.h_snow,
+            'snowpack__density':                                           self._model.rho_snow,
+            'snow__thermal_conductivity':                                  self._model.k_snow,
+            'snow__volume-specific_isochoric_heat_capacity':               self._model.c_snow,
+            
+            'water__volume_latent_fusion_heat':                            self._model.L,
+            'soil-frozen__volume-specific_isochoric_heat_capacity':        self._model.cf_soil,
+            'soil-thaw__volume-specific_isochoric_heat_capacity':          self._model.ct_soil,
+            'soil-frozen__thermal_conductivity':                           self._model.kf_soil,
+            'soil-thaw__thermal_conductivity':                             self._model.kt_soil,
+            
+            'vegetation__Hvgf':                                            self._model.Hvgf,
+            'vegetation__Hvgt':                                            self._model.Hvgt,
+            'vegetation__Dvf':                                             self._model.Dvf,
+            'vegetation__Dvt':                                             self._model.Dvt,
+
+            'soil_surface__temperature':                                   self._model.Tgs,
+            'soil_surface__temperature_amplitude':                         self._model.Ags,              
+            'soil__temperature':                                           self._model.Tps,
+            'soil__active_layer_thickness':                                self._model.Zal}
         
         # Set the cfg file if it exists, otherwise, a default
 #        if cfg_file==None:  

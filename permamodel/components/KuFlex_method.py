@@ -624,7 +624,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         self.tao1[idx_others] = tao[idx_others]*(0.5 - 1./np.pi*np.arcsin(self.T_air[idx_others]/self.A_air[idx_others]));
         self.tao2[idx_others] = tao[idx_others] - self.tao1[idx_others];
         
-        self.L=self.lh_soil + 0.
+        
 
         self.update_TOP_temperatures()
 
@@ -697,9 +697,12 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 #                    "Default frostnumber config file %s does not exist" %\
 #                    cfg_file))
         # Initialize the output variables (internal names)
+        self.Tgs = np.float32(-999.99)
+        self.Ags = np.float32(-999.99)
         self.Tps = np.float32(-999.99)
         self.Zal = np.float32(-999.99)
         self.cont = 0.0
+        
 
         #-----------------------------------------------
         # Load component parameters from a config file
@@ -759,6 +762,8 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #---------------------------------------------
         self.open_input_files()
         self.read_input_files()
+        
+        self.L=self.lh_soil + 0.
         
         #        self.read_nc_lat_lon(self, file_name, var_type)
 
