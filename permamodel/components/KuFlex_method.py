@@ -495,6 +495,9 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #   3.  Calculates Tps_Numerator;
         #       eq-14, Anisimov et al. 1997
         #--------------------------------------------------
+
+
+
         Tps_numerator = 0.5*Tgs*(self.Kf+self.Kt)\
                             +(Ags*(self.Kt-self.Kf)/np.pi\
                             *(Tgs/Ags*np.arcsin(Tgs/Ags)\
@@ -526,14 +529,14 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
         self.Tps = self.Tps_numerator/K_star
         
-        if n_grid > 1:        
-        
-            self.Tps[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
-            
-        else:
-            
-            if self.Tps_numerator>0.0:
-                self.Tps = np.nan
+#        if n_grid > 1:        
+#        
+#            self.Tps[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
+#            
+#        else:
+#            
+#            if self.Tps_numerator>0.0:
+#                self.Tps = np.nan
 
 
     #   update_TOP_temperatures()
@@ -581,19 +584,17 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
         if n_grid > 1:        
         
-            Zal[np.where(Zal<=0.01)] = np.nan
             Zal[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
             Zal[np.where(np.isnan(Zal))] = np.nan
             
         else:
             
-            if self.Tps_numerator>0.0 or Zal<=0.01 or np.isnan(Zal):
+            if self.Tps_numerator>0.0 or np.isnan(Zal):
                 Zal = np.nan
 
         self.Aps = Aps;
         self.Zc  = Zc;  
-        self.Zal = Zal;
-                
+        self.Zal = Zal;                
         
     #   update_ALT()
     #-------------------------------------------------------------------
@@ -615,10 +616,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         idx_unfrozen = np.where(self.T_air - self.A_air >=0)
         
         idx_others   = np.where((self.T_air + self.A_air >0) & (self.T_air - self.A_air <0))
-        
-        print(idx_others)
-        
-        
+
         self.tao1[idx_unthaw] = self.sec_per_year +0.
         self.tao2[idx_unthaw] = 0.
         

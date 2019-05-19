@@ -38,6 +38,20 @@ for i in np.arange(3):
 #    print('Tps_numerator=', ku.Tps_numerator)
 #    print('Zal=',ku.Zal)
     
+    plt.figure(figsize=[7,6])
+    
+    plt.subplot(2,1,1)
+    plt.imshow(ku.Tps)
+    plt.title(str(i))
+    plt.colorbar(orientation='horizontal')
+    cs = plt.contour(ku.Tps, [0])
+    plt.clabel(cs, inline=1, fontsize=10, fmt = '%0d')
+    
+    plt.subplot(2,1,2)
     plt.imshow(ku.Zal)
     plt.title(str(i))
+    plt.colorbar(orientation='horizontal')
+    cs2 = plt.contour(ku.Zal, [0.5, 1.0, 2.0], colors = 'k')
+    plt.clabel(cs2, inline=1, fontsize=10, fmt = '%0.2f')
+    
     plt.show()
