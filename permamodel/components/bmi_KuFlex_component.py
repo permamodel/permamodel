@@ -482,6 +482,46 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
     def get_grid_shape(self, grid_id):
         
         return self._model.grid_shape
+    
+    def get_grid_spacing(self, grid_id):
+        """Get distance between nodes of the computational grid.
+
+        Parameters
+        ----------
+        grid_id : int
+          A grid identifier.
+
+        Returns
+        -------
+        array_like
+          The grid spacing.
+
+        See Also
+        --------
+        bmi.vars.BmiVars.get_var_grid : Obtain a `grid_id`.
+
+        """
+        return [1,1]
+
+    def get_grid_origin(self, grid_id):
+        """Get coordinates for the origin of the computational grid.
+
+        Parameters
+        ----------
+        grid_id : int
+          A grid identifier.
+
+        Returns
+        -------
+        array_like
+          The coordinates of the lower left corner of the grid.
+
+        See Also
+        --------
+        bmi.vars.BmiVars.get_var_grid : Obtain a `grid_id`.
+
+        """
+        return [0, 0]
 
     def get_grid_size(self, grid_id):
         """Size of grid.
@@ -497,11 +537,8 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
             Size of grid.
 
         """
-        grid_size = self.get_grid_shape(grid_id)
-        if grid_size == ():
-            return 1
-        else:
-            return int(np.prod(grid_size))
+        
+        return self._model.n_grids
 
     def get_grid_rank(self, var_id):
         """Rank of grid.
@@ -516,7 +553,7 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         int
             Rank of grid.
         """
-        return 0
+        return 2
 
     def save_grids(self):
         # Saves the grid values based on the prescribed ones in cfg file
