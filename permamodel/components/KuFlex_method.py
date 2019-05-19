@@ -379,9 +379,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         assert np.size(np.unique(size_of_x)), 'Error in inputs shapes'
         
         self.grid_shape = [np.int(np.max(size_of_x)), np.int(self.n_grids / np.max(size_of_x))]
-        
-        print(self.grid_shape)
-        
+                
         ## repeat scalers to same grid shape:
 
         if n_T_air ==1:
@@ -623,8 +621,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
         self.tao1[idx_others] = tao[idx_others]*(0.5 - 1./np.pi*np.arcsin(self.T_air[idx_others]/self.A_air[idx_others]));
         self.tao2[idx_others] = tao[idx_others] - self.tao1[idx_others];
-        
-        
 
         self.update_TOP_temperatures()
 
@@ -634,15 +630,22 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
         if (self.T_air_type     != 'Scalar'): self.T_air_unit.close()
         if (self.A_air_type     != 'Scalar'): self.A_air_unit.close()
+        
         if (self.h_snow_type    != 'Scalar'): self.h_snow_unit.close()
         if (self.rho_snow_type  != 'Scalar'): self.rho_snow_unit.close()
-        if (self.vwc_H2O_type   != 'Scalar'): self.vwc_H2O_unit.close()
+        if (self.k_snow_type    != 'Scalar'): self.k_snow_unit.close()
+        if (self.c_snow_type    != 'Scalar'): self.c_snow_unit.close()
+        
+        if (self.lh_soil_type   != 'Scalar'): self.lh_soil_unit.close()
+        if (self.kt_soil_type   != 'Scalar'): self.kt_soil_unit.close()
+        if (self.kf_soil_type   != 'Scalar'): self.kf_soil_unit.close()
+        if (self.ct_soil_type   != 'Scalar'): self.ct_soil_unit.close()
+        if (self.cf_soil_type   != 'Scalar'): self.cf_soil_unit.close()
+        
         if (self.Hvgf_type      != 'Scalar'): self.Hvgf_unit.close()
         if (self.Hvgt_type      != 'Scalar'): self.Hvgt_unit.close()
         if (self.Dvf_type       != 'Scalar'): self.Dvf_unit.close()
         if (self.Dvt_type       != 'Scalar'): self.Dvt_unit.close()
-#        if (self.lat_type       != 'Scalar'): self.lat_unit.close()
-#        if (self.lon_type       != 'Scalar'): self.lon_unit.close()    
 
     #   close_input_files()
     #-------------------------------------------------------------------
