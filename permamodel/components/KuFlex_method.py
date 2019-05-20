@@ -181,30 +181,25 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             
             # ==== Latitude ====
     
-            self.out_fid.createDimension('lat', n_lat) # Create Dimension
-            lats = self.out_fid.createVariable('lat',np.dtype('float32').char,('lat',))
-            lats.units = 'degrees_north'
-            lats.standard_name = 'latitude'
-            lats.long_name = 'latitude'
-            lats.axis = 'Y'
+            self.out_fid.createDimension('x', n_lat) # Create Dimension
+            lats = self.out_fid.createVariable('x',np.dtype('float32').char,('x',))
+            lats.axis = 'X'
             lats[:] = self.lat
+            lats._CoordinateAxisType = "X";
             
             # ==== Longitude ====
     
-            self.out_fid.createDimension('lon', n_lon) # Create Dimension
-            lons = self.out_fid.createVariable('lon',np.dtype('float32').char,('lon',))
-            lons.units = 'degrees_east'
-            lons.standard_name = 'longitude'
-            lons.long_name = 'longitude'
-            lons.axis = 'X'
+            self.out_fid.createDimension('y', n_lon) # Create Dimension
+            lons = self.out_fid.createVariable('y',np.dtype('float32').char,('y',))
+            lons.axis = 'Y'
             lons[:] = self.lon
+            lons._CoordinateAxisType = "Y";
             
             # ==== Time ====
     
             self.out_fid.createDimension('time', None) # Create Dimension
             self.out_timeid = self.out_fid.createVariable('time',np.dtype('float32').char,('time',))
             self.out_timeid.units = 'Year'
-            self.out_timeid.axis = 'Z'
                  
         if self.SAVE_ALT_GRIDS:
                 
@@ -213,10 +208,11 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             
             # ==== Data ====
             self.alt_out_varid = self.out_fid.createVariable('ALT',np.dtype('float32').char,
-                                                   ('time','lat','lon'),
+                                                   ('time','x','y'),
                                                    fill_value = -999)
             self.alt_out_varid.units = units
-            self.alt_out_varid.long_name = long_name     
+            self.alt_out_varid.long_name = long_name   
+            self.alt_out_varid.coordinates = "X Y"
     
         if self.SAVE_TPS_GRIDS:
             
@@ -225,7 +221,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
                                
             # ==== Data ====
             self.tps_out_varid = self.out_fid.createVariable('Tps',np.dtype('float32').char,
-                                                   ('time','lat','lon'),
+                                                   ('time','x','y'),
                                                    fill_value = -999)
             self.tps_out_varid.units = units
             self.tps_out_varid.long_name = long_name 
