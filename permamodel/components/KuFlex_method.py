@@ -171,6 +171,67 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         self.ct_soil_unit     = self.open_file_KU(self.ct_soil_type,  self.ct_soil_file)
         self.cf_soil_unit     = self.open_file_KU(self.cf_soil_type,  self.cf_soil_file)
         
+    def open_output_files(self):
+        
+        n_lat = np.size(self.lat)
+        n_lon = np.size(self.lon)
+                        
+        if self.SAVE_ALT_GRIDS:
+            
+            units = 'm'
+            long_name = 'Active Layer Thickness'
+            
+            self.alt_out_fid = Dataset(self.ALT_file+'.nc', 'w', format='NETCDF4')
+            
+            # ==== Latitude ====
+    
+            self.alt_out_fid.createDimension('lat', n_lat) # Create Dimension
+            lats = self.alt_out_fid.createVariable('lat',np.dtype('float32').char,('lat',))
+            lats.units = 'degrees_north'
+            lats.standard_name = 'latitude'
+            lats.long_name = 'latitude'
+            lats.axis = 'Y'
+            lats[:] = self.lat
+            
+            # ==== Longitude ====
+    
+            self.alt_out_fid.createDimension('lon', n_lon) # Create Dimension
+            lons = self.alt_out_fid.createVariable('lon',np.dtype('float32').char,('lon',))
+            lons.units = 'degrees_east'
+            lons.standard_name = 'longitude'
+            lons.long_name = 'longitude'
+            lons.axis = 'X'
+            lons[:] = self.lon
+            
+            # ==== Time ====
+    
+            self.alt_out_fid.createDimension('time', None) # Create Dimension
+            self.alt_out_timeid = self.alt_out_fid.createVariable('time',np.dtype('float32').char,('time',))
+            self.alt_out_timeid.units = 'Year'
+            self.alt_out_timeid.axis = 'Z'
+#            time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
+                   
+            # ==== Data ====
+            self.alt_out_varid = self.alt_out_fid.createVariable('ALT',np.dtype('float32').char,
+                                                   ('time','lat','lon'),
+                                                   fill_value = -999)
+            self.alt_out_varid.units = units
+            self.alt_out_varid.long_name = long_name     
+            
+        
+#        if (output_file[-1-2] == 'T'):
+#            units = 'degree C'
+#            long_name = 'Temperature at top of permafrost'
+#        else:
+#            units = 'm'
+#            long_name = 'Active Layer Thickness'
+        
+        # Open a file to save the final result
+#        w_nc_fid = Dataset(output_file+'.nc', 'w', format='NETCDF4');
+        
+#        
+            
+        
     #   open_input_files()
     #-------------------------------------------------------------------
     def read_input_files(self):
@@ -524,16 +585,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         self.Tps_numerator=Tps_numerator
 
         self.Tps = self.Tps_numerator/K_star
-        
-#        if n_grid > 1:        
-#        
-#            self.Tps[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
-#            
-#        else:
-#            
-#            if self.Tps_numerator>0.0:
-#                self.Tps = np.nan
-
 
     #   update_TOP_temperatures()
     #-------------------------------------------------------------------
@@ -646,26 +697,14 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         if (self.Hvgt_type      != 'Scalar'): self.Hvgt_unit.close()
         if (self.Dvf_type       != 'Scalar'): self.Dvf_unit.close()
         if (self.Dvt_type       != 'Scalar'): self.Dvt_unit.close()
+        
+        
+    def close_output_files(self):
+        if self.SAVE_ALT_GRIDS:
+            self.alt_out_fid.close()
 
     #   close_input_files()
     #-------------------------------------------------------------------
-    
-    def import_ncfile(self, input_file, lonname,  latname,  varname): 
-                                           
-        from netCDF4 import Dataset
-        
-        # Read the nc file 
-        
-        fh = Dataset(input_file, mode='r')
-        
-        # Get the lat and lon
-        
-        lon_grid = fh.variables[lonname][:]; 
-        lat_grid = fh.variables[latname][:];
-        
-        p_data  = fh.variables[varname][:];
-        
-        return lat_grid,lon_grid,p_data
         
     def initialize(self, cfg_file=None, mode="nondriver",
                    SILENT=False):
@@ -704,8 +743,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         self.Ags = np.float32(-999.99)
         self.Tps = np.float32(-999.99)
         self.Zal = np.float32(-999.99)
-        self.cont = 0.0
-        
+        self.time = 0
 
         #-----------------------------------------------
         # Load component parameters from a config file
@@ -738,38 +776,19 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         except AttributeError:
             self.end_year = self.start_year
 
-        if (self.comp_status == 'Disabled'):
-            #########################################
-            #  DOUBLE CHECK THIS; SEE NOTES ABOVE
-            #########################################
-               ####### and (ep.method != 2):  ??????
-            if not(SILENT):
-                print('Permafrost component: Disabled.')
-            self.lat    = self.initialize_scalar(0, dtype='float64')
-            self.lon    = self.initialize_scalar(0, dtype='float64')
-            self.start_year    = self.initialize_scalar(0, dtype='float64')
-            self.end_year    = self.initialize_scalar(0, dtype='float64')
-            self.T_air  = self.initialize_scalar(0, dtype='float64')
-            self.h_snow = self.initialize_scalar(0, dtype='float64')
-            self.vwc_H2O= self.initialize_scalar(0, dtype='float64')
-            self.Hvgf   = self.initialize_scalar(0, dtype='float64')
-            self.Hvgt   = self.initialize_scalar(0, dtype='float64')
-            self.Dvf    = self.initialize_scalar(0, dtype='float64')
-            self.Dvt    = self.initialize_scalar(0, dtype='float64')
-            self.DONE   = True
-            self.status = 'initialized'
-            return
-
         #---------------------------------------------
         # Open input files needed to initialize vars
         #---------------------------------------------
         self.open_input_files()
         self.read_input_files()
         
-        self.L=self.lh_soil + 0.
+        self.L=self.lh_soil + 0.        
         
-        #        self.read_nc_lat_lon(self, file_name, var_type)
-
+        self.lat = np.arange(self.grid_shape[0])
+        self.lon = np.arange(self.grid_shape[1])
+        
+        self.open_output_files()
+        
         self.status = 'initialized'
         
     def read_next_modified_KU(self, file_unit, var_type, \
@@ -832,18 +851,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
             return
         else:
             return np.float32( data )
-
-    def ncread(self, input_file, varname):
-
-#        from netCDF4 import Dataset
-        
-        f = Dataset(input_file, mode='r') # Open the nc file -> handle
-    
-        data  = f.variables[varname][:]
-    
-        f.close()
-    
-        return data
         
      ## def update(self, dt=-1.0, time_seconds=None):
     def update(self, dt=-1.0):
@@ -865,7 +872,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #-------------------------------------------------
         if (self.comp_status == 'Disabled'): return
         self.status = 'updating'  # (OpenMI)
-
         #-------------------------
         # Update computed values
         #-------------------------
@@ -880,38 +886,33 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         # used for "update" calls before reading
         # new ones.
         #-------------------------------------------
-        if (self.time_index > 0):
-            self.read_input_files()
-
         #----------------------------------------------
         # Write user-specified data to output files ?
         #----------------------------------------------
         # Components use own self.time_sec by default.
         #-----------------------------------------------
-        if (self.SAVE_ALT_GRIDS):
-            self.save_grids()
+        
+        self.save_grids()
 
         #-----------------------------
         # Update internal clock
         # after write_output_files()
         #-----------------------------
-        self.update_time( dt )
-        self.cont += 1
-        self.status = 'updated'  # (OpenMI)
-
-    def close_output_files(self):
         
-        tst = 'in progressing';
-
-        #if (self.SAVE_MR_GRIDS): model_output.close_gs_file( self, 'mr')
-#        if (self.SAVE_HS_GRIDS): model_output.close_gs_file( self, 'hs')
-        #if (self.SAVE_SW_GRIDS): model_output.close_gs_file( self, 'sw')
-        #if (self.SAVE_CC_GRIDS): model_output.close_gs_file( self, 'cc')
-        #-----------------------------------------------------------------
-        #if (self.SAVE_MR_PIXELS): model_output.close_ts_file( self, 'mr')
-        #if (self.SAVE_HS_PIXELS): model_output.close_ts_file( self, 'hs')
-        #if (self.SAVE_SW_PIXELS): model_output.close_ts_file( self, 'sw')
-        #if (self.SAVE_CC_PIXELS): model_output.close_ts_file( self, 'cc')
+        self.read_input_files()
+#        self.cont        += 1
+        self.year += self.dt
+        
+        self.update_time(dt)
+        
+        self.status = 'updated'  # (OpenMI)
+        
+        
+    def save_grids(self):
+                
+        if (self.SAVE_ALT_GRIDS):
+            self.alt_out_timeid[self.time]    = self.year
+            self.alt_out_varid[self.time,:,:] = self.Zal
         
     def write_out_ncfile(self, output_file, varname):
 
@@ -977,15 +978,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         temp[:] = ALT;
 #        
         w_nc_fid.close()  # close the new file
-        
-    def write_out_txtfile(self, output_file, varname):
-
-        import numpy as np
-        
-        ALT = self.Zal+0.;
-        
-        # Open a file to save the final result
-        np.savetxt(output_file+'.txt',self.lat);
     
     def open_file_KU(self, var_type, input_file):
     
