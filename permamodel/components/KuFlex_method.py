@@ -147,8 +147,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         
         # Variables for outputs:
 
-        self.ALT_file         = self.out_directory + self.ALT_file
-        self.TPS_file         = self.out_directory + self.TPS_file
+        self.Outfile         = self.out_directory + self.outfile
         
         # File Units for each:
          
@@ -175,63 +174,60 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         
         n_lat = np.size(self.lat)
         n_lon = np.size(self.lon)
-                        
+
+        self.out_fid = Dataset(self.Outfile+'.nc', 'w', format='NETCDF4')
+        
+        # ==== Latitude ====
+
+        self.out_fid.createDimension('lat', n_lat) # Create Dimension
+        lats = self.out_fid.createVariable('lat',np.dtype('float32').char,('lat',))
+        lats.units = 'degrees_north'
+        lats.standard_name = 'latitude'
+        lats.long_name = 'latitude'
+        lats.axis = 'Y'
+        lats[:] = self.lat
+        
+        # ==== Longitude ====
+
+        self.out_fid.createDimension('lon', n_lon) # Create Dimension
+        lons = self.out_fid.createVariable('lon',np.dtype('float32').char,('lon',))
+        lons.units = 'degrees_east'
+        lons.standard_name = 'longitude'
+        lons.long_name = 'longitude'
+        lons.axis = 'X'
+        lons[:] = self.lon
+        
+        # ==== Time ====
+
+        self.out_fid.createDimension('time', None) # Create Dimension
+        self.out_timeid = self.out_fid.createVariable('time',np.dtype('float32').char,('time',))
+        self.out_timeid.units = 'Year'
+        self.out_timeid.axis = 'Z'
+             
         if self.SAVE_ALT_GRIDS:
             
             units = 'm'
             long_name = 'Active Layer Thickness'
             
-            self.alt_out_fid = Dataset(self.ALT_file+'.nc', 'w', format='NETCDF4')
-            
-            # ==== Latitude ====
-    
-            self.alt_out_fid.createDimension('lat', n_lat) # Create Dimension
-            lats = self.alt_out_fid.createVariable('lat',np.dtype('float32').char,('lat',))
-            lats.units = 'degrees_north'
-            lats.standard_name = 'latitude'
-            lats.long_name = 'latitude'
-            lats.axis = 'Y'
-            lats[:] = self.lat
-            
-            # ==== Longitude ====
-    
-            self.alt_out_fid.createDimension('lon', n_lon) # Create Dimension
-            lons = self.alt_out_fid.createVariable('lon',np.dtype('float32').char,('lon',))
-            lons.units = 'degrees_east'
-            lons.standard_name = 'longitude'
-            lons.long_name = 'longitude'
-            lons.axis = 'X'
-            lons[:] = self.lon
-            
-            # ==== Time ====
-    
-            self.alt_out_fid.createDimension('time', None) # Create Dimension
-            self.alt_out_timeid = self.alt_out_fid.createVariable('time',np.dtype('float32').char,('time',))
-            self.alt_out_timeid.units = 'Year'
-            self.alt_out_timeid.axis = 'Z'
-#            time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
-                   
             # ==== Data ====
-            self.alt_out_varid = self.alt_out_fid.createVariable('ALT',np.dtype('float32').char,
+            self.alt_out_varid = self.out_fid.createVariable('ALT',np.dtype('float32').char,
                                                    ('time','lat','lon'),
                                                    fill_value = -999)
             self.alt_out_varid.units = units
             self.alt_out_varid.long_name = long_name     
+
+        if self.SAVE_TPS_GRIDS:
             
-        
-#        if (output_file[-1-2] == 'T'):
-#            units = 'degree C'
-#            long_name = 'Temperature at top of permafrost'
-#        else:
-#            units = 'm'
-#            long_name = 'Active Layer Thickness'
-        
-        # Open a file to save the final result
-#        w_nc_fid = Dataset(output_file+'.nc', 'w', format='NETCDF4');
-        
-#        
-            
-        
+            units = 'deg_C'
+            long_name = 'Mean Annual Temperature at Permafrost Surface'
+                               
+            # ==== Data ====
+            self.tps_out_varid = self.out_fid.createVariable('Tps',np.dtype('float32').char,
+                                                   ('time','lat','lon'),
+                                                   fill_value = -999)
+            self.tps_out_varid.units = units
+            self.tps_out_varid.long_name = long_name 
+  
     #   open_input_files()
     #-------------------------------------------------------------------
     def read_input_files(self):
@@ -565,20 +561,9 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #       Tps -- eq-14 cont., Anisimov et al. 1997
         #--------------------------------------------------
 
-        n_grid = self.n_grids
-        
-        if n_grid > 1:               
-        
-            K_star = self.Kf
+        K_star = self.Kf
             
-            if np.size(self.Kf)>1:
-                K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
-            
-        else:
-            if Tps_numerator<=0.0:
-                K_star = self.Kf
-            else:
-                K_star = self.Kt
+        K_star[np.where(Tps_numerator>0.0)] = self.Kt[np.where(Tps_numerator>0.0)];
        
         self.Tgs=Tgs
         self.Ags=Ags
@@ -599,45 +584,31 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
         tao = np.zeros(self.grid_shape) + self.sec_per_year;
 
-        n_grid = self.n_grids 
-
-        if n_grid > 1:        
-
-            K = self.Kt
-            C = self.Ct       
-            if np.size(self.Kf)>1:
-                K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
-                C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
+        K = self.Kt
+        C = self.Ct       
             
-        else:
-
-            if self.Tps_numerator<=0.0:
-                K = self.Kt
-                C = self.Ct
-            else:
-                K = self.Kf
-                C = self.Cf
-
-        Aps = (self.Ags - abs(self.Tps))/np.log((self.Ags+self.L/(2.*C)) / \
-                    (abs(self.Tps)+self.L/(2.*C))) - self.L/(2.*C);
-
-        Zc = (2.*(self.Ags - abs(self.Tps))*np.sqrt((K*tao*C)/np.pi)) / \
-                    (2.*Aps*C + self.L);
-                    
-        Zal = (2.*(self.Ags - abs(self.Tps))*np.sqrt(K*tao*C/np.pi) \
-                +(2.*Aps*C*Zc+self.L*Zc)*self.L*np.sqrt(K*tao/(np.pi*C)) \
-                /(2.*Aps*C*Zc + self.L*Zc +(2.*Aps*C+self.L)*np.sqrt(K*tao/(np.pi*C)))) \
-                /(2.*Aps*C+ self.L);
-
-        if n_grid > 1:        
+        K[np.where(self.Tps_numerator>0.0)] = self.Kf[np.where(self.Tps_numerator>0.0)]
+        C[np.where(self.Tps_numerator>0.0)] = self.Cf[np.where(self.Tps_numerator>0.0)]
         
-            Zal[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
-            Zal[np.where(np.isnan(Zal))] = np.nan
-            
-        else:
-            
-            if self.Tps_numerator>0.0 or np.isnan(Zal):
-                Zal = np.nan
+        Aps = np.zeros(self.grid_shape) + np.nan
+        Zc  = np.zeros(self.grid_shape) + np.nan
+        Zal = np.zeros(self.grid_shape) + np.nan
+
+        idx_need = np.where((self.Tgs + self.Ags >0) & (self.Tgs - self.Ags <0))
+
+        Aps[idx_need] = (self.Ags[idx_need] - abs(self.Tps[idx_need]))/np.log((self.Ags[idx_need]+self.L[idx_need]/(2.*C[idx_need])) / \
+                    (abs(self.Tps[idx_need])+self.L[idx_need]/(2.*C[idx_need]))) - self.L[idx_need]/(2.*C[idx_need]);
+
+        Zc[idx_need] = (2.*(self.Ags[idx_need] - abs(self.Tps[idx_need]))*np.sqrt((K[idx_need]*tao[idx_need]*C[idx_need])/np.pi)) / \
+                    (2.*Aps[idx_need]*C[idx_need] + self.L[idx_need]);
+                    
+        Zal[idx_need] = (2.*(self.Ags[idx_need] - abs(self.Tps[idx_need]))*np.sqrt(K[idx_need]*tao[idx_need]*C[idx_need]/np.pi) \
+                +(2.*Aps[idx_need]*C[idx_need]*Zc[idx_need]+self.L[idx_need]*Zc[idx_need])*self.L[idx_need]*np.sqrt(K[idx_need]*tao[idx_need]/(np.pi*C[idx_need])) \
+                /(2.*Aps[idx_need]*C[idx_need]*Zc[idx_need] + self.L[idx_need]*Zc[idx_need] +(2.*Aps[idx_need]*C[idx_need]+self.L[idx_need])*np.sqrt(K[idx_need]*tao[idx_need]/(np.pi*C[idx_need])))) \
+                /(2.*Aps[idx_need]*C[idx_need]+ self.L[idx_need]);
+
+        Zal[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
+        Zal[Zal <=0 ]                = 0
 
         self.Aps = Aps;
         self.Zc  = Zc;  
@@ -700,8 +671,8 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         
         
     def close_output_files(self):
-        if self.SAVE_ALT_GRIDS:
-            self.alt_out_fid.close()
+        if self.SAVE_ALT_GRIDS or self.SAVE_TPS_GRIDS:
+            self.out_fid.close()
 
     #   close_input_files()
     #-------------------------------------------------------------------
@@ -830,7 +801,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 #            print self.cont
             for var in file_unit.variables.keys():
                 if (var != 'time' and var[0:3] !='lat' and var[0:3] != 'lon'):
-                    data  = file_unit.variables[var][self.cont,:,:]
+                    data  = file_unit.variables[var][self.time,:,:]
                                    
         else:
             raise RuntimeError('No match found for "var_type".')
@@ -900,7 +871,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         #-----------------------------
         
         self.read_input_files()
-#        self.cont        += 1
         self.year += self.dt
         
         self.update_time(dt)
@@ -909,10 +879,15 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         
         
     def save_grids(self):
+        
+        if self.SAVE_ALT_GRIDS or self.SAVE_TPS_GRIDS:
+            self.out_timeid[self.time]    = self.year
                 
         if (self.SAVE_ALT_GRIDS):
-            self.alt_out_timeid[self.time]    = self.year
             self.alt_out_varid[self.time,:,:] = self.Zal
+
+        if (self.SAVE_TPS_GRIDS):
+            self.tps_out_varid[self.time,:,:] = self.Tps
         
     def write_out_ncfile(self, output_file, varname):
 
