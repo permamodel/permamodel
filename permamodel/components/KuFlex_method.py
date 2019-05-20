@@ -757,12 +757,12 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         
         self.lat = np.arange(self.grid_shape[0])
         self.lon = np.arange(self.grid_shape[1])
-        
-        print(self.SAVE_ALT_GRIDS)
-        
+                
         self.open_output_files()
         
-        self.status = 'initialized'
+        self.status = 'Initialized'
+        
+        print(self.status)
         
     def read_next_modified_KU(self, file_unit, var_type, \
                   dtype='Float32', factor=1.0):
