@@ -174,38 +174,40 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         
         n_lat = np.size(self.lat)
         n_lon = np.size(self.lon)
+                
+        if self.SAVE_ALT_GRIDS or self.SAVE_TPS_GRIDS:
 
-        self.out_fid = Dataset(self.Outfile+'.nc', 'w', format='NETCDF4')
-        
-        # ==== Latitude ====
-
-        self.out_fid.createDimension('lat', n_lat) # Create Dimension
-        lats = self.out_fid.createVariable('lat',np.dtype('float32').char,('lat',))
-        lats.units = 'degrees_north'
-        lats.standard_name = 'latitude'
-        lats.long_name = 'latitude'
-        lats.axis = 'Y'
-        lats[:] = self.lat
-        
-        # ==== Longitude ====
-
-        self.out_fid.createDimension('lon', n_lon) # Create Dimension
-        lons = self.out_fid.createVariable('lon',np.dtype('float32').char,('lon',))
-        lons.units = 'degrees_east'
-        lons.standard_name = 'longitude'
-        lons.long_name = 'longitude'
-        lons.axis = 'X'
-        lons[:] = self.lon
-        
-        # ==== Time ====
-
-        self.out_fid.createDimension('time', None) # Create Dimension
-        self.out_timeid = self.out_fid.createVariable('time',np.dtype('float32').char,('time',))
-        self.out_timeid.units = 'Year'
-        self.out_timeid.axis = 'Z'
-             
-        if self.SAVE_ALT_GRIDS:
+            self.out_fid = Dataset(self.Outfile+'.nc', 'w', format='NETCDF4')
             
+            # ==== Latitude ====
+    
+            self.out_fid.createDimension('lat', n_lat) # Create Dimension
+            lats = self.out_fid.createVariable('lat',np.dtype('float32').char,('lat',))
+            lats.units = 'degrees_north'
+            lats.standard_name = 'latitude'
+            lats.long_name = 'latitude'
+            lats.axis = 'Y'
+            lats[:] = self.lat
+            
+            # ==== Longitude ====
+    
+            self.out_fid.createDimension('lon', n_lon) # Create Dimension
+            lons = self.out_fid.createVariable('lon',np.dtype('float32').char,('lon',))
+            lons.units = 'degrees_east'
+            lons.standard_name = 'longitude'
+            lons.long_name = 'longitude'
+            lons.axis = 'X'
+            lons[:] = self.lon
+            
+            # ==== Time ====
+    
+            self.out_fid.createDimension('time', None) # Create Dimension
+            self.out_timeid = self.out_fid.createVariable('time',np.dtype('float32').char,('time',))
+            self.out_timeid.units = 'Year'
+            self.out_timeid.axis = 'Z'
+                 
+        if self.SAVE_ALT_GRIDS:
+                
             units = 'm'
             long_name = 'Active Layer Thickness'
             
@@ -215,7 +217,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
                                                    fill_value = -999)
             self.alt_out_varid.units = units
             self.alt_out_varid.long_name = long_name     
-
+    
         if self.SAVE_TPS_GRIDS:
             
             units = 'deg_C'
@@ -760,6 +762,8 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         self.lat = np.arange(self.grid_shape[0])
         self.lon = np.arange(self.grid_shape[1])
         
+        print(self.SAVE_ALT_GRIDS)
+        
         self.open_output_files()
         
         self.status = 'initialized'
@@ -877,18 +881,17 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         
         self.update_time(dt)
         
-        self.status = 'updated'  # (OpenMI)
-        
+        self.status = 'updated'  # (OpenMI)        
         
     def save_grids(self):
         
         if self.SAVE_ALT_GRIDS or self.SAVE_TPS_GRIDS:
             self.out_timeid[self.time]    = self.year
                 
-        if (self.SAVE_ALT_GRIDS):
+        if self.SAVE_ALT_GRIDS:
             self.alt_out_varid[self.time,:,:] = self.Zal
 
-        if (self.SAVE_TPS_GRIDS):
+        if self.SAVE_TPS_GRIDS:
             self.tps_out_varid[self.time,:,:] = self.Tps
     
     def open_file_KU(self, var_type, input_file):
