@@ -77,6 +77,7 @@ import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 from netCDF4 import Dataset
+import time
 from .. import data_directory
 # from permamodel.tests import examples_directory
 
@@ -689,6 +690,9 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         # there is no snowmelt method because the snow depth
         # affects the ET rate.  Otherwise, return to caller.
         #---------------------------------------------------------
+        
+        ini_time_start = time.clock()
+        
         if not(SILENT):
             print(' ')
             print('KuFlex model component: Initializing...')
@@ -760,9 +764,11 @@ class KuFlex_method( perma_base.PermafrostComponent ):
                 
         self.open_output_files()
         
+        ini_time_start = time.clock() - ini_time_start;
+        
         self.status = 'Initialized'
         
-        print(self.status)
+        print(self.status+', '+np.str(ini_time_start)+' sec')
         
     def read_next_modified_KU(self, file_unit, var_type, \
                   dtype='Float32', factor=1.0):
