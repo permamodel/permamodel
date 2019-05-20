@@ -604,7 +604,9 @@ class KuFlex_method( perma_base.PermafrostComponent ):
                     
         Zal[idx_need] = (2.*(self.Ags[idx_need] - abs(self.Tps[idx_need]))*np.sqrt(K[idx_need]*tao[idx_need]*C[idx_need]/np.pi) \
                 +(2.*Aps[idx_need]*C[idx_need]*Zc[idx_need]+self.L[idx_need]*Zc[idx_need])*self.L[idx_need]*np.sqrt(K[idx_need]*tao[idx_need]/(np.pi*C[idx_need])) \
-                /(2.*Aps[idx_need]*C[idx_need]*Zc[idx_need] + self.L[idx_need]*Zc[idx_need] +(2.*Aps[idx_need]*C[idx_need]+self.L[idx_need])*np.sqrt(K[idx_need]*tao[idx_need]/(np.pi*C[idx_need])))) \
+                /(2.*Aps[idx_need]*C[idx_need]*Zc[idx_need] + self.L[idx_need]*Zc[idx_need] +\
+                  (2.*Aps[idx_need]*C[idx_need]+self.L[idx_need])*\
+                  np.sqrt(K[idx_need]*tao[idx_need]/(np.pi*C[idx_need])))) \
                 /(2.*Aps[idx_need]*C[idx_need]+ self.L[idx_need]);
 
         Zal[np.where(self.Tps_numerator>0.0)] = np.nan # Seasonal Frozen Ground
@@ -888,71 +890,6 @@ class KuFlex_method( perma_base.PermafrostComponent ):
 
         if (self.SAVE_TPS_GRIDS):
             self.tps_out_varid[self.time,:,:] = self.Tps
-        
-    def write_out_ncfile(self, output_file, varname):
-
-        from netCDF4 import Dataset
-        import numpy as np
-        
-        n_lat = np.size(self.lat)
-        n_lon = np.size(self.lon)
-        
-#        print np.shape(varname)
-        
-        ALT = varname + 0.0 #self.mask;
-        idx = np.where(np.isnan(ALT))
-        ALT[idx] = -999.99;
-        
-        #print output_file[-1-2]
-        
-        if (output_file[-1-2] == 'T'):
-            units = 'degree C'
-            long_name = 'Temperature at top of permafrost'
-        else:
-            units = 'm'
-            long_name = 'Active Layer Thickness'
-        
-        # Open a file to save the final result
-        w_nc_fid = Dataset(output_file+'.nc', 'w', format='NETCDF4');
-        
-        # ==== Latitude ====
-
-        w_nc_fid.createDimension('lat', n_lat) # Create Dimension
-        lats = w_nc_fid.createVariable('lat',np.dtype('float32').char,('lat',))
-        lats.units = 'degrees_north'
-        lats.standard_name = 'latitude'
-        lats.long_name = 'latitude'
-        lats.axis = 'Y'
-        lats[:] = self.lat
-        
-        # ==== Longitude ====
-
-        w_nc_fid.createDimension('lon', n_lon) # Create Dimension
-        lons = w_nc_fid.createVariable('lon',np.dtype('float32').char,('lon',))
-        lons.units = 'degrees_east'
-        lons.standard_name = 'longitude'
-        lons.long_name = 'longitude'
-        lons.axis = 'X'
-        lons[:] = self.lon
-        
-        # ==== Time ====
-
-        w_nc_fid.createDimension('time', self.end_year-self.start_year+1.0) # Create Dimension
-        time = w_nc_fid.createVariable('time',np.dtype('float32').char,('time',))
-        time.units = 'Year'
-#         time.standard_name = 'longitude'
-#         time.long_name = 'longitude'
-        time.axis = 'Z'
-        time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
-               
-        # ==== Data ====
-        temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('time','lat','lon'))
-        temp.units = units
-        temp.missing_value = -999.99
-        temp.long_name = long_name
-        temp[:] = ALT;
-#        
-        w_nc_fid.close()  # close the new file
     
     def open_file_KU(self, var_type, input_file):
     
