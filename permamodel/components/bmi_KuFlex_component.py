@@ -545,16 +545,3 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
             Rank of grid.
         """
         return 2
-
-    def save_grids(self):
-        
-        # Saves the grid values based on the prescribed ones in cfg file
-            
-        if (self._model.SAVE_ALT_GRIDS):            
-            self._model.write_out_ncfile(self._model.ALT_file, self.output_alt+'.nc')
-            print("Please look at"+self._model.ALT_file)
-            
-        
-        if (self._model.SAVE_TPS_GRIDS):
-            self._model.write_out_ncfile(self._model.TPS_file,self.output_tps)
-            print("Please look at"+self._model.TPS_file+'.nc')
