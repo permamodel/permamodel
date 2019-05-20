@@ -202,8 +202,8 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         self._model.initialize(cfg_file=cfg_file)
         
         # make 2 vars to store each results and used for write out.
-        n_lat = self._model.grid_shape[0]
-        n_lon = self._model.grid_shape[1]
+        n_lat  = self._model.grid_shape[0]
+        n_lon  = self._model.grid_shape[1]
         n_time = self._model.end_year-self._model.start_year+1
                 
         self.output_alt = np.zeros((n_time,n_lat,n_lon))*np.nan;
@@ -222,7 +222,7 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
             assert(varname in self._var_name_map)
             assert(varname in self._var_units_map)
             
-        self._model.cont = -1
+#        self._model.cont = -1
 
         gridnumber = 0
         for varname in self._input_var_names:
@@ -237,6 +237,7 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
             gridnumber += 1        
 
         self._values = {
+                
         # These are the links to the model's variables and
         # should be consistent with _var_name_map 
 
@@ -266,11 +267,6 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
             'soil_surface__temperature_amplitude':                         self._model.Ags,              
             'soil__temperature':                                           self._model.Tps,
             'soil__active_layer_thickness':                                self._model.Zal}
-        
-        # Set the cfg file if it exists, otherwise, a default
-#        if cfg_file==None:  
-#        
-#        print self.cfg_file
         
     def get_attribute(self, att_name):
 
@@ -317,29 +313,34 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
     def update(self):
 #        self._model.update(self._model.dt)
             # Ensure that we've already initialized the run
-        assert(self._model.status == 'initialized')
+#        assert(self._model.status == 'initialized')
+        
+        self._model.update()
 
-        # Calculate the new frost number values
-        self._model.update_ground_temperatures()
-        self._model.update_ALT()
+#        # Calculate the new frost number values
+#        self._model.update_ground_temperatures()
+#        self._model.update_ALT()
         
-        self._values['soil__active_layer_thickness'] = self._model.Zal
-        self._values['soil__temperature'] = self._model.Tps
-        self._values['soil_surface__temperature'] = self._model.Tgs
+        for iss in self._values:
+            
+            self._values
+#        
+        self._values['soil__active_layer_thickness']        = self._model.Zal
+        self._values['soil__temperature']                   = self._model.Tps
+        self._values['soil_surface__temperature']           = self._model.Tgs
         self._values['soil_surface__temperature_amplitude'] = self._model.Ags
+#        
+#        # Update the time
         
-        # Update the time
-        self._model.year += self._model.dt
-                
-#        self.output_alt = np.append(self.output_alt, self._model.Zal)
-#        self.output_tps = np.append(self.output_tps, self._model.Tps)
-        self.output_alt[self._model.cont,:,:] = self._model.Zal
-        self.output_tps[self._model.cont,:,:] = self._model.Tps
-        self.output_tgs[self._model.cont,:,:] = self._model.Tgs
-        self.output_ags[self._model.cont,:,:] = self._model.Ags
-        
-        # Get new input values
-        self._model.read_input_files()
+#       
+#        self.update_time()         
+#        self.output_alt[self._model.cont,:,:] = self._model.Zal
+#        self.output_tps[self._model.cont,:,:] = self._model.Tps
+#        self.output_tgs[self._model.cont,:,:] = self._model.Tgs
+#        self.output_ags[self._model.cont,:,:] = self._model.Ags
+#        
+#        # Get new input values
+#        self._model.read_input_files()
         
     def update_frac(self, time_fraction):
         time_step = self.get_time_step()
@@ -348,6 +349,9 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         self._model.dt = time_step
     
     def update_until(self, then):
+        
+        assert then <= self.get_end_time(), 'Exceed time end'
+            
         n_steps = (then - self.get_current_time()) / self.get_time_step()
         for _ in range(int(n_steps)):
             self.update()
@@ -360,6 +364,7 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
 
         # Close the input files
         self._model.close_input_files()   # Close any input files
+        self._model.close_output_files()
 
         # Done finalizing  
         self._model.status = 'finalized'  # (OpenMI)
@@ -399,7 +404,7 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
         array_like
             Value array.
         """
-        return self._values[var_name]
+        return getattr(self._model, self._var_name_map[var_name]) 
 
     def set_value(self, var_name, new_var_values):
         assert np.size(new_var_values) == 1 or np.shape(new_var_values) == self._model.grid_shape, 'inconsistent array shape' 
