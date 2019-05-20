@@ -316,31 +316,11 @@ class BmiKuFlexMethod( perma_base.PermafrostComponent ):
 #        assert(self._model.status == 'initialized')
         
         self._model.update()
-
-#        # Calculate the new frost number values
-#        self._model.update_ground_temperatures()
-#        self._model.update_ALT()
-        
-        for iss in self._values:
-            
-            self._values
-#        
+       
         self._values['soil__active_layer_thickness']        = self._model.Zal
         self._values['soil__temperature']                   = self._model.Tps
         self._values['soil_surface__temperature']           = self._model.Tgs
         self._values['soil_surface__temperature_amplitude'] = self._model.Ags
-#        
-#        # Update the time
-        
-#       
-#        self.update_time()         
-#        self.output_alt[self._model.cont,:,:] = self._model.Zal
-#        self.output_tps[self._model.cont,:,:] = self._model.Tps
-#        self.output_tgs[self._model.cont,:,:] = self._model.Tgs
-#        self.output_ags[self._model.cont,:,:] = self._model.Ags
-#        
-#        # Get new input values
-#        self._model.read_input_files()
         
     def update_frac(self, time_fraction):
         time_step = self.get_time_step()
