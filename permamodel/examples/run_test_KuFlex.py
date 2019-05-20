@@ -23,6 +23,43 @@ KuFlex_method_on = False
 
 kuflex = bmi_KuFlex_component.BmiKuFlexMethod()
 
+kuflex.initialize('KuFlex_method.cfg')
+
+#print(kuflex._model)
+
+#for lst in kuflex.get_input_var_names():
+#    
+#    print(lst,':---')
+#    print(kuflex.get_value(lst))
+#    print(kuflex.get_var_grid(lst))
+#    print(kuflex.get_grid_type(kuflex.get_var_grid(lst)))
+#    print('rank=',kuflex.get_grid_rank(kuflex.get_var_grid(lst)))
+#    print(kuflex.get_grid_shape(kuflex.get_var_grid(lst)))
+#    print(kuflex.get_grid_size(kuflex.get_var_grid(lst)))
+#    print(kuflex.get_grid_spacing(kuflex.get_var_grid(lst)))
+#    print(kuflex.get_grid_origin(kuflex.get_var_grid(lst)))
+
+for i in np.arange(3):
+    
+#    kuflex.set_value_at_indices('atmosphere_bottom_air__temperature', -3, 0)
+#    kuflex.set_value('atmosphere_bottom_air__temperature', -3)
+    print('t=',kuflex.get_current_time())
+    print('MAAT=',kuflex.get_value('atmosphere_bottom_air__temperature')) 
+#    print(kuflex.get_var_itemsize('atmosphere_bottom_air__temperature'))
+        
+    kuflex.update()
+    
+    for lst in kuflex.get_output_var_names():
+        print(lst,':---')
+        print(np.nanmin(kuflex.get_value(lst)))
+        
+kuflex.finalize()
+
+#kuflex.initialize('KuFlex_method_ts.cfg')
+#
+#kuflex.update_until(7)
+##
+#kuflex.finalize()
 
 #
 if KuFlex_method_on == True:
@@ -30,10 +67,7 @@ if KuFlex_method_on == True:
     ku = KuFlex_method.KuFlex_method()
     
     ku.initialize('KuFlex_method.cfg')
-    
-    #ku.T_air = 2
-    #ku.A_air = 12
-    
+        
     for i in np.arange(3):
     
         ku.update()
