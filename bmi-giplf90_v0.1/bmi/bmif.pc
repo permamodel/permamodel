@@ -1,5 +1,0 @@
-Name: BMI
-Description: Basic Modeling Interface
-Version: 0.1
-Libs: -L/usr/local/lib -lbmif
-Cflags: -I/usr/local/include
