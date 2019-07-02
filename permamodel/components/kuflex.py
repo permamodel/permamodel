@@ -226,7 +226,7 @@ class KuFlex(Bmi):
         """
         raise NotImplementedError("get_grid_nodes_per_face")
 
-    def get_grid_origin(self, grid, origin):
+    def get_grid_origin(self, grid, origin): # pragma pylint: disable=no-self-use
         """Get coordinates for the lower-left corner of the computational grid.
 
         Parameters
@@ -246,7 +246,7 @@ class KuFlex(Bmi):
         origin[:] = 0.0
         return origin
 
-    def get_grid_rank(self, grid):
+    def get_grid_rank(self, grid): # pragma pylint: disable=no-self-use
         """Get number of dimensions of the computational grid.
 
         Parameters
@@ -261,8 +261,7 @@ class KuFlex(Bmi):
         """
         if grid == 0:
             return 0
-        else:
-            return 2
+        return 2
 
     def get_grid_shape(self, grid, shape):
         """Get dimensions of the computational grid.
@@ -297,7 +296,7 @@ class KuFlex(Bmi):
         """
         return np.prod(self._model.grid_shape)
 
-    def get_grid_spacing(self, grid, spacing):
+    def get_grid_spacing(self, grid, spacing): # pragma pylint: disable=no-self-use
         """Get distance between nodes of the computational grid.
 
         Parameters
@@ -315,7 +314,7 @@ class KuFlex(Bmi):
         spacing[:] = 1.0
         return spacing
 
-    def get_grid_type(self, grid):
+    def get_grid_type(self, grid): # pragma pylint: disable=no-self-use
         """Get the grid type as a string.
 
         Parameters
@@ -330,8 +329,7 @@ class KuFlex(Bmi):
         """
         if grid == 0:
             return "none"
-        else:
-            return "uniform_rectilinear"
+        return "uniform_rectilinear"
 
     def get_grid_x(self, grid, x):
         """Get coordinates of grid nodes in the x direction.
@@ -419,7 +417,7 @@ class KuFlex(Bmi):
         """
         return self._output_var_names
 
-    def get_start_time(self):
+    def get_start_time(self): # pragma pylint: disable=no-self-use
         """Start time of the model.
 
         Model times should be of type float.
@@ -443,7 +441,7 @@ class KuFlex(Bmi):
         """
         return self._model.dt
 
-    def get_time_units(self):
+    def get_time_units(self): # pragma pylint: disable=no-self-use
         """Time units of the model.
 
         Returns
@@ -557,9 +555,9 @@ class KuFlex(Bmi):
         int
             Item size in bytes.
         """
-        return self.get_value_ref(name).itemsize
+        return self.get_value_ptr(name).itemsize
 
-    def get_var_location(self, name):
+    def get_var_location(self, name): # pragma pylint: disable=no-self-use
         """Get the grid element type that the a given variable is defined on.
 
         The grid topology can be composed of *nodes*, *edges*, and *faces*.
@@ -608,7 +606,7 @@ class KuFlex(Bmi):
         int
             The size of the variable, counted in bytes.
         """
-        return self.get_value_ref(name).nbytes
+        return self.get_value_ptr(name).nbytes
 
     def get_var_type(self, name):
         """Get data type of the given variable.
@@ -623,7 +621,7 @@ class KuFlex(Bmi):
         str
             The Python variable type; e.g., ``str``, ``int``, ``float``.
         """
-        return str(self.get_value_ref(name).dtype)
+        return str(self.get_value_ptr(name).dtype)
 
     def get_var_units(self, name):
         """Get units of the given variable.
@@ -696,13 +694,13 @@ class KuFlex(Bmi):
         missing = var_names - set(self._var_name)
         if missing:
             raise ValueError(
-                "_var_name is missing {missing}".format(", ".join(missing=missing))
+                "_var_name is missing {missing}".format(missing=", ".join(missing))
             )
 
         missing = var_names - set(self._var_units)
         if missing:
             raise ValueError(
-                "_var_units is missing {missing}".format(", ".join(missing=missing))
+                "_var_units is missing {missing}".format(missing=", ".join(missing))
             )
 
     def set_value(self, name, values):
