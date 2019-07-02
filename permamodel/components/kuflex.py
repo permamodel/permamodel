@@ -259,7 +259,10 @@ class KuFlex(Bmi):
         int
             Rank of the grid.
         """
-        return 2
+        if grid == 0:
+            return 0
+        else:
+            return 2
 
     def get_grid_shape(self, grid, shape):
         """Get dimensions of the computational grid.
@@ -325,7 +328,10 @@ class KuFlex(Bmi):
         str
             Type of grid as a string.
         """
-        return "uniform_rectilinear"
+        if grid == 0:
+            return "none"
+        else:
+            return "uniform_rectilinear"
 
     def get_grid_x(self, grid, x):
         """Get coordinates of grid nodes in the x direction.
@@ -527,7 +533,16 @@ class KuFlex(Bmi):
         int
           The grid identifier.
         """
-        return 0
+        try:
+            array = self.get_value_ptr(name)
+        except AttributeError:
+            raise RuntimeError("no grid for {name}".format(name=name))
+        else:
+            if array.size > 1:
+                grid = 1
+            else:
+                grid = 0
+        return grid
 
     def get_var_itemsize(self, name):
         """Get memory use for each array element in bytes.
