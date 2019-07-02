@@ -498,7 +498,7 @@ class KuFlex(Bmi):
             Value of the model variable at the given location.
         """
         array = self.get_value_ptr(name)
-        dest[:] = array[indices]
+        dest[:] = array[inds]
         return dest
 
     def get_value_ptr(self, name):
@@ -696,13 +696,13 @@ class KuFlex(Bmi):
         missing = var_names - set(self._var_name)
         if missing:
             raise ValueError(
-                "_var_name is missing {missing}".format(", ".join(missing))
+                "_var_name is missing {missing}".format(", ".join(missing=missing))
             )
 
         missing = var_names - set(self._var_units)
         if missing:
             raise ValueError(
-                "_var_units is missing {missing}".format(", ".join(missing))
+                "_var_units is missing {missing}".format(", ".join(missing=missing))
             )
 
     def set_value(self, name, values):
@@ -734,7 +734,7 @@ class KuFlex(Bmi):
         src : array_like
             The new value for the specified variable.
         """
-        self.get_value_ptr(name)[indices] = src
+        self.get_value_ptr(name)[inds] = src
 
     def update(self):
         """Advance model state by one time step.
