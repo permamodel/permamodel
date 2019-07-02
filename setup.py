@@ -13,11 +13,12 @@ setup(
     # install_requires=('numpy', 'gdal', 'pyproj'),
     install_requires=(
         "affine",
+        "bmipy",
         "netCDF4",
-        "scipy",
         "numpy",
-        "pyyaml",
         "python-dateutil",
+        "pyyaml",
+        "scipy",
     ),
     package_data={"": ["examples/*.cfg", "examples/*.dat", "data/*"]},
 )
