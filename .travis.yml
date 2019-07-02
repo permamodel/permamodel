@@ -1,19 +1,16 @@
 language: python
 python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
+- "3.7"
+- "3.6"
+- "2.7"
+os:
+- linux
+- osx
 before_install:
-  - pip install --upgrade pip setuptools wheel
-  - pip install coveralls
-  - pip install pytest pytest-cov
-  - pip install --only-binary=numpy numpy
-  - pip install --only-binary=scipy scipy
-  - pip install --only-binary=netcdf4 netcdf4
-  - pip install affine
+- pip install pytest pytest-cov coveralls
 install:
-  - python setup.py install
+- pip install -e .
 script:
-  - pytest --cov --cov-report=xml:$(pwd)/coverage.xml
+- pytest --cov --cov-report=xml:$(pwd)/coverage.xml
 after_success:
-  - coveralls
+- coveralls
