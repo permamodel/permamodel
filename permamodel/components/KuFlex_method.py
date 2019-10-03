@@ -434,7 +434,7 @@ class KuFlex_method( perma_base.PermafrostComponent ):
         assert np.size(uniq_grids_size)<=2, 'Error in inputs shapes'
         assert np.size(np.unique(size_of_x)), 'Error in inputs shapes'
         
-        self.grid_shape = [np.int(np.max(size_of_x)), np.int(self.n_grids / np.max(size_of_x))]
+        self.grid_shape = (np.int(np.max(size_of_x)), np.int(self.n_grids / np.max(size_of_x)))
                 
         ## repeat scalers to same grid shape:
 
