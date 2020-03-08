@@ -36,8 +36,11 @@ recommendations for version control, documentation, or testing.
 Ku
 --
 
-Implements a semi-empirical/analytical solution to soil conditions 
+Implements a semi-empirical/analytical solution to soil conditions, please cite:
 
+Wang, K., Jafarov, E., & Overeem, I. (2020). Sensitivity evaluation of the Kudryavtsev permafrost model. Science of The Total Environment, 137538. https://doi.org/10.1016/j.scitotenv.2020.137538
+
+Overeem, I., E. Jafarov, K. Wang, K. Schaefer, S. Stewart, G. Clow, M. Piper, and Y. Elshorbany (2018). A modeling toolbox for permafrost landscapes. Eos. https://doi.org/10.1029/2018EO105155.
 
 GIPL
 ----
