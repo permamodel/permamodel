@@ -1,0 +1,21 @@
+# A conda env for permamodel
+#
+# Install with:
+#
+#    $ conda env create --file=environment.yml
+
+name: permamodel
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - affine
+  - bmipy
+  - matplotlib
+  - netcdf4
+  - notebook
+  - numpy
+  - pytest
+  - python-dateutil
+  - pyyaml
+  - scipy
