@@ -1258,7 +1258,7 @@ class Ku_method( perma_base.PermafrostComponent ):
 #         time.standard_name = 'longitude'
 #         time.long_name = 'longitude'
         time.axis = 'Z'
-        time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1.0)
+        time[:] = np.linspace(self.start_year, self.end_year, self.end_year-self.start_year+1)
                
         # ==== Data ====
         temp = w_nc_fid.createVariable('data',np.dtype('float32').char,('time','lat','lon'))
