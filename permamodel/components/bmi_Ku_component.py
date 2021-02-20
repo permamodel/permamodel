@@ -191,14 +191,15 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         gridnumber = 0
         for varname in self._input_var_names:
             self._grids[gridnumber] = varname
-            #self._grid_type[gridnumber] = 'uniform_rectilinear'
-            self._grid_type[gridnumber] = 'scalar'
+            self._grid_type[gridnumber] = 'points'
+            #self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
         for varname in self._output_var_names:
             self._grids[gridnumber] = varname
-            #self._grid_type[gridnumber] = 'uniform_rectilinear'
-            self._grid_type[gridnumber] = 'scalar'
+            self._grid_type[gridnumber] = 'points'
+            #self._grid_type[gridnumber] = 'scalar'
             gridnumber += 1
+        self.ngrids = gridnumber
 
         self._values = {
         # These are the links to the model's variables and
@@ -395,7 +396,15 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         if out is None:
             out = self.get_value_ref(var_name).copy()
         else:
-            out[...] = self.get_value_ref(var_name)
+            d0 = self.get_value_ref(var_name)
+            if np.ma.is_masked(d0):
+               mask0 = np.ravel(d0.mask)
+               print(mask0)
+               d1  = np.ravel(d0)
+               d1[mask0] = np.nan
+            else:
+               d1 = np.ravel(d0)
+            out[...] = d1
         return out
 
     def get_var_type(self, var_name):
@@ -416,6 +425,9 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     def get_component_name(self):
         return self._name
 
+    def get_grid_type(self, grid_number):
+        return self._grid_type[grid_number]
+
     # Copied from bmi_heat.py
     def get_var_grid(self, var_name):
         """Grid id for a variable.
@@ -433,7 +445,89 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         for grid_id, var_name_list in self._grids.items():
             if var_name in var_name_list:
                 return grid_id
-
+                
+    def get_grid_shape(self, grid_id, out=None):
+        var_name = self._grids[grid_id]
+        grid_shape = np.array(self.get_value_ref(var_name)).shape
+        if out is None:
+        	if np.prod(grid_shape) == 1:
+        	     out = [1,1]
+        	else:
+                 out = grid_shape
+        else:
+             if np.prod(grid_shape) == 1:
+                  out[...] = [1,1]
+             else:
+                  out[...] = grid_shape
+        return out
+        
+    def get_grid_origin(self, grid_id, out=None):
+        var_name = self._grids[grid_id]
+        if out is None:
+            ndim = np.array(self.get_value_ref(var_name)).ndim
+            if self.get_grid_size(grid_id) == 1:
+                 out = [0,0]
+            else:
+                 out = np.full(ndim, 0.)
+        else:
+            out[...] = 0.
+        return out
+        
+    def get_grid_spacing(self, grid_id, out=None):
+        assert grid_id < self.ngrids
+        var_name = self._grids[grid_id]
+        if out is None:
+            ndim = np.array(self.get_value_ref(var_name)).ndim
+            if self.get_grid_size(grid_id)==1:
+                 out = [1.,1.]
+            else:
+                 out = np.full(ndim, 1.)            
+        else:
+            out[...] = 1.
+        return out
+        
+    def get_grid_x(self, grid_id, out=None):
+    
+    	n_dim = len(self.get_grid_shape(grid_id))
+    	
+    	if n_dim ==2:
+    
+    		xxx = np.arange(self.get_grid_shape(grid_id)[0])
+    		yyy = np.arange(self.get_grid_shape(grid_id)[1])
+    	
+    		[x2d, y2d] = np.meshgrid(xxx,yyy)
+    		
+    	else:
+    	
+    		x2d = np.arange(self.get_grid_shape(grid_id)[0])
+    	
+    	if out is None:
+    		out =  x2d
+    	else:
+    	    out[...] = np.ravel(x2d)
+    	return out
+    	    	
+    def get_grid_y(self, grid_id, out=None):
+    	n_dim = len(self.get_grid_shape(grid_id))
+    	
+    	if n_dim ==2:
+    
+    		xxx = np.arange(self.get_grid_shape(grid_id)[0])
+    		yyy = np.arange(self.get_grid_shape(grid_id)[1])
+    	
+    		[x2d, y2d] = np.meshgrid(xxx,yyy)
+    		
+    	else:
+    	
+    		y2d = 1
+    	
+    	if out is None:
+    		out =  y2d
+    	else:
+    	    out[...] = np.ravel(y2d)
+    		
+    	return out
+    	    	        
     def get_grid_size(self, grid_id):
         """Size of grid.
 
@@ -448,7 +542,11 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             Size of grid.
 
         """
-        return 1
+        grid_size = self.get_grid_shape(grid_id)
+        if grid_size == ():
+            return 1
+        else:
+            return int(np.prod(grid_size))
 
     def get_grid_rank(self, var_id):
         """Rank of grid.
@@ -463,7 +561,11 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         int
             Rank of grid.
         """
-        return 0
+
+        if len(self.get_grid_shape(var_id)) == 0:
+             return 1
+        else:
+             return len(self.get_grid_shape(var_id))
 
     def save_grids(self):
         # Saves the grid values based on the prescribed ones in cfg file
