@@ -12,16 +12,15 @@ from permamodel.components import frost_number_Geo, perma_base
 
 
 class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
-    """ Implement the Nelson-Outcalt Frost numbers
-        for a geographic region"""
+    """Implement the Nelson-Outcalt Frost numbers
+    for a geographic region"""
 
     # Note: The definitions of _att_map, _var_name_map, etc.
     # have been moved inside the __init__(self) function because
     # otherwise changing thme once changes them for future
     # instantiations, .e.g during testing!
 
-
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def __init__(self):
         self._model = None
         self._values = {}
@@ -30,53 +29,56 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         self._grid_type = {}
         self.ngrids = 0
         # Set up the name of this permafrost module
-        self._name = 'Frost number module, Geo version'
+        self._name = "Frost number module, Geo version"
 
-        #-------------------------------------------------------------------
+        # -------------------------------------------------------------------
         self._att_map = {
-            'model_name':         'PermaModel_frostnumber_Geo_method',
-            'version':            '0.1',
-            'author_name':        'J. Scott Stewart',
-            'grid_type':          'rectilinear',
-            'time_step_type':     'fixed',
-            'step_method':        'explicit',
-            #-------------------------------------------------------------
-            'comp_name':          'frostnumberGeo',
-            'model_family':       'PermaModel',
-            'time_units':         'years'}
+            "model_name": "PermaModel_frostnumber_Geo_method",
+            "version": "0.1",
+            "author_name": "J. Scott Stewart",
+            "grid_type": "rectilinear",
+            "time_step_type": "fixed",
+            "step_method": "explicit",
+            # -------------------------------------------------------------
+            "comp_name": "frostnumberGeo",
+            "model_family": "PermaModel",
+            "time_units": "years",
+        }
 
         self._input_var_names = (
-            'atmosphere_bottom_air__temperature',
-            'atmosphere_bottom_air__temperature_mean_jan',
-            'atmosphere_bottom_air__temperature_mean_jul',
-            )
+            "atmosphere_bottom_air__temperature",
+            "atmosphere_bottom_air__temperature_mean_jan",
+            "atmosphere_bottom_air__temperature_mean_jul",
+        )
 
         self._output_var_names = (
-            'frostnumber__air',            # Air Frost number
-            'frostnumber__surface',        # Surface Frost number
-            'frostnumber__stefan')         # Stefan Frost number
+            "frostnumber__air",  # Air Frost number
+            "frostnumber__surface",  # Surface Frost number
+            "frostnumber__stefan",
+        )  # Stefan Frost number
 
         self._var_name_map = {
             # These are the corresponding CSDMS standard names
             # NOTE: we need to look up for the corresponding standard names
-            'atmosphere_bottom_air__temperature': '_temperature_current',
-            'atmosphere_bottom_air__temperature_mean_jan': '_temperature_jan',
-            'atmosphere_bottom_air__temperature_mean_jul': '_temperature_jul',
-            'datetime__start':                    '_start_date',
-            'datetime__end':                      '_end_date',
-            'frostnumber__air':                   'air_frost_number_Geo',
-            'frostnumber__surface':               'surface_frost_number_Geo',
-            'frostnumber__stefan':                'stefan_frost_number_Geo'}
-
+            "atmosphere_bottom_air__temperature": "_temperature_current",
+            "atmosphere_bottom_air__temperature_mean_jan": "_temperature_jan",
+            "atmosphere_bottom_air__temperature_mean_jul": "_temperature_jul",
+            "datetime__start": "_start_date",
+            "datetime__end": "_end_date",
+            "frostnumber__air": "air_frost_number_Geo",
+            "frostnumber__surface": "surface_frost_number_Geo",
+            "frostnumber__stefan": "stefan_frost_number_Geo",
+        }
 
         self._var_units_map = {
             # These are the links to the model's variables' units
-            'atmosphere_bottom_air__temperature':                 'deg_C',
-            'atmosphere_bottom_air__temperature_mean_jan':          'deg_C',
-            'atmosphere_bottom_air__temperature_mean_jul':          'deg_C',
-            'frostnumber__air':                                   '1',
-            'frostnumber__surface':                               '1',
-            'frostnumber__stefan':                                '1'}
+            "atmosphere_bottom_air__temperature": "deg_C",
+            "atmosphere_bottom_air__temperature_mean_jan": "deg_C",
+            "atmosphere_bottom_air__temperature_mean_jul": "deg_C",
+            "frostnumber__air": "1",
+            "frostnumber__surface": "1",
+            "frostnumber__stefan": "1",
+        }
 
     def initialize(self, cfg_file=None):
         self._model = frost_number_Geo.FrostnumberGeoMethod(cfg_file)
@@ -92,35 +94,39 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         self._values = {
             # These are the links to the model's variables and
             # should be consistent with _var_name_map
-            'atmosphere_bottom_air__temperature':
-            self._model._temperature_current,
-            'atmosphere_bottom_air__temperature_mean_jan':
-            self._model._temperature_jan,
-            'atmosphere_bottom_air__temperature_mean_jul':
-            self._model._temperature_jul,
-            'datetime__start':          self._model._start_date,
-            'datetime__end':            self._model._end_date,
-            'frostnumber__air':         self._model.air_frost_number_Geo,
-            'frostnumber__surface':     self._model.surface_frost_number_Geo,
-            'frostnumber__stefan':      self._model.stefan_frost_number_Geo}
+            "atmosphere_bottom_air__temperature": self._model._temperature_current,
+            "atmosphere_bottom_air__temperature_mean_jan": self._model._temperature_jan,
+            "atmosphere_bottom_air__temperature_mean_jul": self._model._temperature_jul,
+            "datetime__start": self._model._start_date,
+            "datetime__end": self._model._end_date,
+            "frostnumber__air": self._model.air_frost_number_Geo,
+            "frostnumber__surface": self._model.surface_frost_number_Geo,
+            "frostnumber__stefan": self._model.stefan_frost_number_Geo,
+        }
 
         # Surface and Stefan numbers are not necessarily calculated
-        if not self._model._calc_surface_fn and \
-                'frostnumber__surface' in self._values.keys():
-            del self._var_name_map['frostnumber__surface']
-            del self._var_units_map['frostnumber__surface']
-            del self._values['frostnumber__surface']
+        if (
+            not self._model._calc_surface_fn
+            and "frostnumber__surface" in self._values.keys()
+        ):
+            del self._var_name_map["frostnumber__surface"]
+            del self._var_units_map["frostnumber__surface"]
+            del self._values["frostnumber__surface"]
             # _output_var_names is an (immutable)
-            self._output_var_names = tuple(v for v in self._output_var_names
-                                           if v != 'frostnumber__surface')
+            self._output_var_names = tuple(
+                v for v in self._output_var_names if v != "frostnumber__surface"
+            )
 
-        if not self._model._calc_stefan_fn and \
-                'frostnumber__stefan' in self._values.keys():
-            del self._var_name_map['frostnumber__stefan']
-            del self._var_units_map['frostnumber__stefan']
-            del self._values['frostnumber__stefan']
-            self._output_var_names = tuple(v for v in self._output_var_names
-                                           if v != 'frostnumber__stefan')
+        if (
+            not self._model._calc_stefan_fn
+            and "frostnumber__stefan" in self._values.keys()
+        ):
+            del self._var_name_map["frostnumber__stefan"]
+            del self._var_units_map["frostnumber__stefan"]
+            del self._values["frostnumber__stefan"]
+            self._output_var_names = tuple(
+                v for v in self._output_var_names if v != "frostnumber__stefan"
+            )
 
         # Verify that all input and output variable names are in the
         # variable name and the units map
@@ -137,16 +143,15 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         gridnumber = 0
         for varname in self._input_var_names:
             self._grids[gridnumber] = varname
-            self._grid_type[gridnumber] = 'uniform_rectilinear'
+            self._grid_type[gridnumber] = "uniform_rectilinear"
             gridnumber += 1
         for varname in self._output_var_names:
             self._grids[gridnumber] = varname
-            self._grid_type[gridnumber] = 'uniform_rectilinear'
+            self._grid_type[gridnumber] = "uniform_rectilinear"
             gridnumber += 1
         self.ngrids = gridnumber
 
     def get_attribute(self, att_name):
-
         try:
             return self._att_map[att_name.lower()]
         except KeyError:
@@ -169,13 +174,13 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     def update(self):
         self._model.update()
-        self._values['frostnumber__air'] = self._model.air_frost_number_Geo
+        self._values["frostnumber__air"] = self._model.air_frost_number_Geo
 
     def update_frac(self, time_fraction):
         # Only increment the time by a partial time step
         # Currently, only integer times are permitted
         self._model.update(frac=time_fraction)
-        self._values['frostnumber__air'] = self._model.air_frost_number_Geo
+        self._values["frostnumber__air"] = self._model.air_frost_number_Geo
 
     def update_until(self, time):
         """Advance model state until the given time.
@@ -205,19 +210,17 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
 
     def finalize(self):
         # frost_number_Geo has a finalize() method
-        self._model.finalize()   # Close any input files
+        self._model.finalize()  # Close any input files
 
     def get_start_time(self):
         return 0.0
 
     def get_current_time(self):
-        """ Am assuming current time is number of timesteps since start """
-        return self._model._date_current.year - \
-               self._model._start_date.year
+        """Am assuming current time is number of timesteps since start"""
+        return self._model._date_current.year - self._model._start_date.year
 
     def get_end_time(self):
-        return self._model._end_date.year - \
-               self._model._start_date.year
+        return self._model._end_date.year - self._model._start_date.year
 
     # ----------------------------------
     # Functions added to pass bmi-tester
@@ -248,7 +251,7 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
     def get_value(self, var_name, out=None):
-        value = self.get_value_ref(var_name).reshape((-1, ))
+        value = self.get_value_ref(var_name).reshape((-1,))
         if out is None:
             out = value.copy()
         else:
@@ -287,9 +290,9 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         var_name = self._grids[grid_id]
         if out is None:
             ndim = np.array(self.get_value_ref(var_name)).ndim
-            out = np.full(ndim, 1.)
+            out = np.full(ndim, 1.0)
         else:
-            out[:] = 1.
+            out[:] = 1.0
         return out
 
     # Todo: Revise once we can work with georeferenced data in the CMF.
@@ -297,9 +300,9 @@ class BmiFrostnumberGeoMethod(perma_base.PermafrostComponent):
         var_name = self._grids[grid_id]
         if out is None:
             ndim = np.array(self.get_value_ref(var_name)).ndim
-            out = np.full(ndim, 0.)
+            out = np.full(ndim, 0.0)
         else:
-            out[:] = 0.
+            out[:] = 0.0
         return out
 
     def get_grid_rank(self, var_id):

@@ -15,7 +15,7 @@ from permamodel.components import bmi_Ku_component
 from permamodel import examples_directory
 
 
-cfg_file = os.path.join(examples_directory, 'Ku_method.cfg')
+cfg_file = os.path.join(examples_directory, "Ku_method.cfg")
 x = bmi_Ku_component.BmiKuMethod()
 
 x.initialize(cfg_file)
@@ -23,4 +23,4 @@ x.update()
 x.finalize()
 
 # print x._values["ALT"][:]
-print(x.get_value('soil__active_layer_thickness'))
+print(x.get_value("soil__active_layer_thickness"))
