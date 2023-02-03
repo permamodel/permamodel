@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/permamodel/permamodel.svg?branch=master)](https://travis-ci.org/permamodel/permamodel)
-[![Code Health](https://landscape.io/github/permamodel/permamodel/master/landscape.svg?style=flat)](https://landscape.io/github/permamodel/permamodel/master)
 [![Coverage Status](https://coveralls.io/repos/permamodel/permamodel/badge.svg?branch=master)](https://coveralls.io/r/permamodel/permamodel?branch=master)
 
 # permamodel
