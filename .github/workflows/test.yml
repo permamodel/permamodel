@@ -43,17 +43,13 @@ jobs:
 
       - name: Test
         run: |
-          pytest --cov=permamodel --cov-report=xml:./coverage.xml -vvv
-
-      # - name: Test
-      #   run: |
-      #     pytest --cov=bmi_geotiff --cov-report=xml:./coverage.xml --cov-config=./setup.cfg -vvv
+          pytest --cov=permamodel --cov-report=xml:./coverage.xml --cov-config=./setup.cfg -vvv
 
       # - name: Test BMI
       #   if: ${{ matrix.python-version == '3.9' }}  # stuck at py39 pending pymt update
       #   run: |
       #     bmi-test bmi_topography:BmiTopography --config-file=./examples/config.yaml --root-dir=./examples -vvv
 
-      # - name: Coveralls
-      #   if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
-      #   uses: AndreMiras/coveralls-python-action@v20201129
+      - name: Coveralls
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: AndreMiras/coveralls-python-action@v20201129
