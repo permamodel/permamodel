@@ -28,14 +28,16 @@ SOFTWARE.
 from __future__ import print_function
 
 import warnings
-warnings.filterwarnings("ignore",category =RuntimeWarning) 
+
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 import numpy as np
 from permamodel.utils import model_input
 from permamodel.components import perma_base
 from permamodel.components import Ku_method
-#from permamodel.components.perma_base import *
-#from permamodel.tests import examples_directory
+
+# from permamodel.components.perma_base import *
+# from permamodel.tests import examples_directory
 import os
 
 
@@ -44,12 +46,13 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     _thisname = 'this name'
 """
 
-class BmiKuMethod( perma_base.PermafrostComponent ):
 
-    """ Implement the Ku model """
+class BmiKuMethod(perma_base.PermafrostComponent):
+
+    """Implement the Ku model"""
 
     # Set up the name of this permafrost module
-    _name = 'Ku module'
+    _name = "Ku module"
 
     """ Note: all of these are defined below instead!
     # Indicate the CSDMS standard names of input and output variables
@@ -79,80 +82,84 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
                         # soil_permafrost_bottom__depth
     """
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     _att_map = {
-    # NOTE: this will change in the future
-        'model_name':         'PermaModel_Kudryavtsev_method',
-        'version':            '0.1',
-        'author_name':        'Kang Wang and Elchin Jafarov',
-        'grid_type':          'none',
-        'time_step_type':     'fixed',
-        'step_method':        'explicit',
-        #-------------------------------------------------------------
-        'comp_name':          'Ku_model',
-        'model_family':       'PermaModel',
-        'cfg_extension':      '_ku_model.cfg',
-        'cmt_var_prefix':     '/input/',
-        'gui_yaml_file':      '/input/ku_model.yaml',
-        'time_units':         'years' }
+        # NOTE: this will change in the future
+        "model_name": "PermaModel_Kudryavtsev_method",
+        "version": "0.1",
+        "author_name": "Kang Wang and Elchin Jafarov",
+        "grid_type": "none",
+        "time_step_type": "fixed",
+        "step_method": "explicit",
+        # -------------------------------------------------------------
+        "comp_name": "Ku_model",
+        "model_family": "PermaModel",
+        "cfg_extension": "_ku_model.cfg",
+        "cmt_var_prefix": "/input/",
+        "gui_yaml_file": "/input/ku_model.yaml",
+        "time_units": "years",
+    }
 
     # This used to be [...] instead of (...)
     _input_var_names = (
-        'latitude',
-        'longitude',
-        'datetime__start',
-        'datetime__end',
-        'atmosphere_bottom_air__temperature',
-        'atmosphere_bottom_air__temperature_amplitude',
-        'snowpack__depth',
-        'snowpack__density',
-        'water-liquid__volumetric-water-content-soil',
-        'vegetation__Hvgf',
-        'vegetation__Hvgt',
-        'vegetation__Dvf',
-        'vegetation__Dvt' )
+        "latitude",
+        "longitude",
+        "datetime__start",
+        "datetime__end",
+        "atmosphere_bottom_air__temperature",
+        "atmosphere_bottom_air__temperature_amplitude",
+        "snowpack__depth",
+        "snowpack__density",
+        "water-liquid__volumetric-water-content-soil",
+        "vegetation__Hvgf",
+        "vegetation__Hvgt",
+        "vegetation__Dvf",
+        "vegetation__Dvt",
+    )
 
     _output_var_names = (
-        'soil__temperature',                                  # Tps
-        'soil__active_layer_thickness' )                      # Zal
+        "soil__temperature",  # Tps
+        "soil__active_layer_thickness",
+    )  # Zal
 
     _var_name_map = {
-        'latitude':                                           'lat',
-        'longitude':                                          'lon',
-        'datetime__start':                                    'start_year',
-        'datetime__end':                                      'end_year',
-        'atmosphere_bottom_air__temperature':                 'T_air',
-        'atmosphere_bottom_air__temperature_amplitude':       'A_air',
-        'snowpack__depth':                                    'h_snow',
-        'snowpack__density':                                  'rho_snow',
-        'water-liquid__volumetric-water-content-soil':        'vwc_H2O',
-        'vegetation__Hvgf':                                   'Hvgf',
-        'vegetation__Hvgt':                                   'Hvgt',
-        'vegetation__Dvf':                                    'Dvf',
-        'vegetation__Dvt':                                    'Dvt' ,
-        'soil__temperature':                                  'Tps',
-        'soil__active_layer_thickness':                       'Zal'}
-
+        "latitude": "lat",
+        "longitude": "lon",
+        "datetime__start": "start_year",
+        "datetime__end": "end_year",
+        "atmosphere_bottom_air__temperature": "T_air",
+        "atmosphere_bottom_air__temperature_amplitude": "A_air",
+        "snowpack__depth": "h_snow",
+        "snowpack__density": "rho_snow",
+        "water-liquid__volumetric-water-content-soil": "vwc_H2O",
+        "vegetation__Hvgf": "Hvgf",
+        "vegetation__Hvgt": "Hvgt",
+        "vegetation__Dvf": "Dvf",
+        "vegetation__Dvt": "Dvt",
+        "soil__temperature": "Tps",
+        "soil__active_layer_thickness": "Zal",
+    }
 
     _var_units_map = {
         # These are the links to the model's variables' units
-        'latitude':                                           'degree_north',
-        'longitude':                                          'degree_east',
-        'datetime__start':                                    'year',
-        'datetime__end':                                      'year',
-        'atmosphere_bottom_air__temperature':                 'deg_C',
-        'atmosphere_bottom_air__temperature_amplitude':       'deg_C',
-        'snowpack__depth':                                    'm',
-        'snowpack__density':                                  'kg m-3',
-        'water-liquid__volumetric-water-content-soil':        'm3 m-3',
-        'vegetation__Hvgf':                                   'm',
-        'vegetation__Hvgt':                                   'm',
-        'vegetation__Dvf':                                    'm2 s-1',
-        'vegetation__Dvt':                                    'm2 s-1'  ,
-        'soil__temperature':                                  'deg_C',
-        'soil__active_layer_thickness':                       'm'}
+        "latitude": "degree_north",
+        "longitude": "degree_east",
+        "datetime__start": "year",
+        "datetime__end": "year",
+        "atmosphere_bottom_air__temperature": "deg_C",
+        "atmosphere_bottom_air__temperature_amplitude": "deg_C",
+        "snowpack__depth": "m",
+        "snowpack__density": "kg m-3",
+        "water-liquid__volumetric-water-content-soil": "m3 m-3",
+        "vegetation__Hvgf": "m",
+        "vegetation__Hvgt": "m",
+        "vegetation__Dvf": "m2 s-1",
+        "vegetation__Dvt": "m2 s-1",
+        "soil__temperature": "deg_C",
+        "soil__active_layer_thickness": "m",
+    }
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def __init__(self):
         self._model = None
         self._values = {}
@@ -161,143 +168,139 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         self._grid_type = {}
 
     def initialize(self, cfg_file=None):
-        
         self._model = Ku_method.Ku_method()
-        
+
         self._name = "Permamodel Ku Component"
         self._model.initialize(cfg_file=cfg_file)
-        
+
         # make 2 vars to store each results and used for write out.
         n_lat = np.size(self._model.lat)
-        n_lon = np.size(self._model.lon) 
-        n_time = self._model.end_year-self._model.start_year+1
-                
-        self.output_alt = np.zeros((n_time,n_lat,n_lon))*np.nan;
-        self.output_tps = np.zeros((n_time,n_lat,n_lon))*np.nan;
+        n_lon = np.size(self._model.lon)
+        n_time = self._model.end_year - self._model.start_year + 1
+
+        self.output_alt = np.zeros((n_time, n_lat, n_lon)) * np.nan
+        self.output_tps = np.zeros((n_time, n_lat, n_lon)) * np.nan
 
         # Verify that all input and output variable names are in the
         # variable name and the units map
         for varname in self._input_var_names:
-            assert(varname in self._var_name_map)
-            assert(varname in self._var_units_map)
-            #print("Input var %s is in the name map and the units map"\
+            assert varname in self._var_name_map
+            assert varname in self._var_units_map
+            # print("Input var %s is in the name map and the units map"\
             #      % varname)
         for varname in self._output_var_names:
-            assert(varname in self._var_name_map)
-            assert(varname in self._var_units_map)
-            
+            assert varname in self._var_name_map
+            assert varname in self._var_units_map
+
         self._model.cont = -1
 
         gridnumber = 0
         for varname in self._input_var_names:
             self._grids[gridnumber] = varname
-            #self._grid_type[gridnumber] = 'uniform_rectilinear'
-            self._grid_type[gridnumber] = 'scalar'
+            # self._grid_type[gridnumber] = 'uniform_rectilinear'
+            self._grid_type[gridnumber] = "scalar"
             gridnumber += 1
         for varname in self._output_var_names:
             self._grids[gridnumber] = varname
-            #self._grid_type[gridnumber] = 'uniform_rectilinear'
-            self._grid_type[gridnumber] = 'scalar'
+            # self._grid_type[gridnumber] = 'uniform_rectilinear'
+            self._grid_type[gridnumber] = "scalar"
             gridnumber += 1
 
         self._values = {
-        # These are the links to the model's variables and
-        # should be consistent with _var_name_map 
-            'latitude':                                 self._model.lat,
-            'longitude':                                self._model.lon,
-            'datetime__start':                          self._model.start_year,
-            'datetime__end':                                self._model.end_year,
+            # These are the links to the model's variables and
+            # should be consistent with _var_name_map
+            "latitude": self._model.lat,
+            "longitude": self._model.lon,
+            "datetime__start": self._model.start_year,
+            "datetime__end": self._model.end_year,
             # 'atmosphere_bottom_air__temperature': "T_air",
-            'atmosphere_bottom_air__temperature': self._model.T_air,
-            'atmosphere_bottom_air__temperature_amplitude': self._model.A_air,
-            'snowpack__depth':                          self._model.h_snow,
-            'snowpack__density':                        self._model.rho_snow,
-            'water-liquid__volumetric-water-content-soil':    self._model.vwc_H2O,
-            'vegetation__Hvgf': self._model.Hvgf,
-            'vegetation__Hvgt': self._model.Hvgt,
-            'vegetation__Dvf':  self._model.Dvf,
-            'vegetation__Dvt':  self._model.Dvt,
-            'soil__temperature': self._model.Tps,
-            'soil__active_layer_thickness': self._model.Zal}
-        
-        # Set the cfg file if it exists, otherwise, a default
-#        if cfg_file==None:  
-#        
-#        print self.cfg_file
-        
-    def get_attribute(self, att_name):
+            "atmosphere_bottom_air__temperature": self._model.T_air,
+            "atmosphere_bottom_air__temperature_amplitude": self._model.A_air,
+            "snowpack__depth": self._model.h_snow,
+            "snowpack__density": self._model.rho_snow,
+            "water-liquid__volumetric-water-content-soil": self._model.vwc_H2O,
+            "vegetation__Hvgf": self._model.Hvgf,
+            "vegetation__Hvgt": self._model.Hvgt,
+            "vegetation__Dvf": self._model.Dvf,
+            "vegetation__Dvt": self._model.Dvt,
+            "soil__temperature": self._model.Tps,
+            "soil__active_layer_thickness": self._model.Zal,
+        }
 
+        # Set the cfg file if it exists, otherwise, a default
+
+    #        if cfg_file==None:
+    #
+    #        print self.cfg_file
+
+    def get_attribute(self, att_name):
         try:
-            return self._att_map[ att_name.lower() ]
+            return self._att_map[att_name.lower()]
         except:
-            print('###################################################')
-            print(' ERROR: Could not find attribute: ' + att_name)
-            print('###################################################')
-            print(' ')
+            print("###################################################")
+            print(" ERROR: Could not find attribute: " + att_name)
+            print("###################################################")
+            print(" ")
 
     #   get_attribute()
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def get_input_var_names(self):
-
-        #--------------------------------------------------------
+        # --------------------------------------------------------
         # Note: These are currently variables needed from other
         #       components vs. those read from files or GUI.
-        #--------------------------------------------------------
+        # --------------------------------------------------------
         return self._input_var_names
 
     #   get_input_var_names()
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def get_output_var_names(self):
-
         return self._output_var_names
 
     #   get_output_var_names()
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def get_var_name(self, long_var_name):
-
-        return self._var_name_map[ long_var_name ]
+        return self._var_name_map[long_var_name]
 
     #   get_var_name()
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
 
     def get_var_units(self, long_var_name):
-
-        return self._var_units_map[ long_var_name ]
+        return self._var_units_map[long_var_name]
 
     def get_var_location(self, long_var_name):
         return "node"
 
     def update(self):
-#        self._model.update(self._model.dt)
-            # Ensure that we've already initialized the run
-        assert(self._model.status == 'initialized')
+        #        self._model.update(self._model.dt)
+        # Ensure that we've already initialized the run
+        assert self._model.status == "initialized"
 
         # Calculate the new frost number values
         self._model.update_ground_temperatures()
         self._model.update_ALT()
-        
-        self._values['soil__active_layer_thickness'] = self._model.Zal
-        self._values['soil__temperature'] = self._model.Tps
-        
+
+        self._values["soil__active_layer_thickness"] = self._model.Zal
+        self._values["soil__temperature"] = self._model.Tps
+
         # Update the time
         self._model.year += self._model.dt
-        
+
         self._model.cont = self._model.cont + 1
-        
-#        self.output_alt = np.append(self.output_alt, self._model.Zal)
-#        self.output_tps = np.append(self.output_tps, self._model.Tps)
-        self.output_alt[self._model.cont,:,:] = self._model.Zal
-        self.output_tps[self._model.cont,:,:] = self._model.Tps
-        
+
+        #        self.output_alt = np.append(self.output_alt, self._model.Zal)
+        #        self.output_tps = np.append(self.output_tps, self._model.Tps)
+        self.output_alt[self._model.cont, :, :] = self._model.Zal
+        self.output_tps[self._model.cont, :, :] = self._model.Tps
+
         # Get new input values
         self._model.read_input_files()
-        
+
     def update_frac(self, time_fraction):
         time_step = self.get_time_step()
         self._model.dt = time_fraction * time_step
         self.update()
         self._model.dt = time_step
-    
+
     def update_until(self, then):
         n_steps = (then - self.get_current_time()) / self.get_time_step()
         for _ in range(int(n_steps)):
@@ -308,17 +311,17 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
         SILENT = True
 
         # Finish with the run
-        self._model.status = 'finalizing'  # (OpenMI)
+        self._model.status = "finalizing"  # (OpenMI)
 
         # Close the input files
-        self._model.close_input_files()   # Close any input files
+        self._model.close_input_files()  # Close any input files
 
         # Write output last output
         self.save_grids()
-        
-        # Done finalizing  
-        self._model.status = 'finalized'  # (OpenMI)
-        
+
+        # Done finalizing
+        self._model.status = "finalized"  # (OpenMI)
+
     def get_start_time(self):
         return 0.0
 
@@ -383,14 +386,14 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
             Copy of values.
         """
         # Original version: from bmi_heat.py
-        #return self.get_value_ref(var_name).copy()
+        # return self.get_value_ref(var_name).copy()
 
         # Version to convert to numpy array for bmi-tester compliance
         # Note: converting to np arrays on the fly here
         # Note: float values don't have a copy() function
-        #try:
+        # try:
         #    return np.array(self.get_value_ref(var_name).copy())
-        #except AttributeError:
+        # except AttributeError:
         #    return np.array(self.get_value_ref(var_name))
         if out is None:
             out = self.get_value_ref(var_name).copy()
@@ -468,27 +471,32 @@ class BmiKuMethod( perma_base.PermafrostComponent ):
     def save_grids(self):
         # Saves the grid values based on the prescribed ones in cfg file
 
-        #if (self.SAVE_MR_GRIDS):
+        # if (self.SAVE_MR_GRIDS):
         #    model_output.add_grid( self, self.T_air, 'T_air', self.time_min )
-#        self.ALT_file  = self.out_directory + self.ALT_file
-        try:        
+        #        self.ALT_file  = self.out_directory + self.ALT_file
+        try:
             assert self._model.SAVE_ALT_GRIDS
         except:
-            print('NO OUTPUT of ALT')
+            print("NO OUTPUT of ALT")
         try:
             assert self._model.SAVE_TPS_GRIDS
         except:
-            print('NO OUTPUT of TPS')
-            
-        if (self._model.SAVE_ALT_GRIDS):
-            
+            print("NO OUTPUT of TPS")
+
+        if self._model.SAVE_ALT_GRIDS:
             self._model.write_out_ncfile(self._model.ALT_file, self.output_alt)
-            
-#        self.TPS_file  = self.out_directory + self.TPS_file
-        
-        if (self._model.SAVE_TPS_GRIDS):
-            self._model.write_out_ncfile(self._model.TPS_file,self.output_tps)
-        
+
+        #        self.TPS_file  = self.out_directory + self.TPS_file
+
+        if self._model.SAVE_TPS_GRIDS:
+            self._model.write_out_ncfile(self._model.TPS_file, self.output_tps)
+
         print("***")
         print("Writing output finished!")
-        print("Please look at"+self._model.ALT_file+'.nc and '+self._model.TPS_file+'.nc')
+        print(
+            "Please look at"
+            + self._model.ALT_file
+            + ".nc and "
+            + self._model.TPS_file
+            + ".nc"
+        )

@@ -1,0 +1,59 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    if:
+      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
+      github.repository
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package and testing dependencies
+        run: |
+          mamba install --file requirements.txt
+          mamba install pytest pytest-cov coveralls
+
+      - name: Show conda installation info
+        run: |
+          mamba info
+          mamba list
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Test
+        run: |
+          pytest --cov=permamodel --cov-report=xml:./coverage.xml -vvv
+
+      # - name: Test
+      #   run: |
+      #     pytest --cov=bmi_geotiff --cov-report=xml:./coverage.xml --cov-config=./setup.cfg -vvv
+
+      # - name: Test BMI
+      #   if: ${{ matrix.python-version == '3.9' }}  # stuck at py39 pending pymt update
+      #   run: |
+      #     bmi-test bmi_topography:BmiTopography --config-file=./examples/config.yaml --root-dir=./examples -vvv
+
+      # - name: Coveralls
+      #   if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      #   uses: AndreMiras/coveralls-python-action@v20201129

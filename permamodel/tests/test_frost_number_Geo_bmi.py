@@ -23,12 +23,12 @@ files_to_remove = []
 
 
 def setup_module():
-    """ Standard fixture called before any tests in this file are performed """
+    """Standard fixture called before any tests in this file are performed"""
     pass
 
 
 def teardown_module():
-    """ Standard fixture called after all tests in this file are performed """
+    """Standard fixture called after all tests in this file are performed"""
     # If need to remove files that are created:
     # for f in files_to_remove:
     #    if os.path.exists(f):
@@ -232,7 +232,7 @@ def test_FNGeo_get_grid_spacing(tmpdir):
 
 
 def test_FNGeo_jan_and_jul_temperatures_are_grids(tmpdir):
-    """ Test that FNGeo BMI has input variables for jan and jul data """
+    """Test that FNGeo BMI has input variables for jan and jul data"""
     with tmpdir.as_cwd():
         fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
         fng.initialize()
@@ -251,7 +251,7 @@ def test_FNGeo_jan_and_jul_temperatures_are_grids(tmpdir):
 
 
 def test_FNGeo_can_set_current_and_jan_temperatures(tmpdir):
-    """ Test that FNGeo BMI can set jan temperature field """
+    """Test that FNGeo BMI can set jan temperature field"""
     with tmpdir.as_cwd():
         fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
         fng.initialize()
@@ -274,7 +274,7 @@ def test_FNGeo_can_set_current_and_jan_temperatures(tmpdir):
 
 
 def test_FNGeo_update_zero_fraction_does_not_change_time(tmpdir):
-    """ Test that running update_frac(0) does not change the time """
+    """Test that running update_frac(0) does not change the time"""
     with tmpdir.as_cwd():
         fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
         fng.initialize()
@@ -290,7 +290,7 @@ def test_FNGeo_update_zero_fraction_does_not_change_time(tmpdir):
 
 
 def test_FNGeo_simulate_WMT_run(tmpdir):
-    """ Test that we can set values as if running in WMT """
+    """Test that we can set values as if running in WMT"""
     with tmpdir.as_cwd():
         fng = bmi_frost_number_Geo.BmiFrostnumberGeoMethod()
         wmt_cfg_file = os.path.join(examples_directory, "FNGeo_WMT_testing.cfg")
