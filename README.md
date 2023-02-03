@@ -1,3 +1,4 @@
+[![Test](https://github.com/permamodel/permamodel/actions/workflows/test.yml/badge.svg)](https://github.com/permamodel/permamodel/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/permamodel/permamodel/badge.svg?branch=master)](https://coveralls.io/r/permamodel/permamodel?branch=master)
 
 # permamodel
