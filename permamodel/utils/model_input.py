@@ -33,10 +33,10 @@ SOFTWARE.
 # -------------------------------------------------------------------
 from __future__ import print_function
 
-from numpy import *
-import numpy
-
 import os.path
+
+import numpy
+from numpy import *
 
 
 # -------------------------------------------------------------------

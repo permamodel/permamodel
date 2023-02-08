@@ -27,8 +27,9 @@ import glob
 
 ## import os     (for os.remove)
 import os.path
-import numpy
 import time
+
+import numpy
 
 
 # -------------------------------------------------------------------

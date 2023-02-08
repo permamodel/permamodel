@@ -146,11 +146,18 @@ SOFTWARE.
 """
 from __future__ import print_function
 
-import numpy as np
 import os
 import sys
 import time
 import traceback  # (10/10/10)
+
+import numpy as np
+
+from .. import data_directory
+
+# import pixels
+from . import outlets  # # (9/19/14)
+from . import rti_files
 
 # --------------------------------------------
 # (5/14/10. Can't be here because basins.py
@@ -161,12 +168,6 @@ import traceback  # (10/10/10)
 
 ## import cfg_files as cfg   # (not used)
 
-from . import outlets  ## (9/19/14)
-
-# import pixels
-from . import rti_files
-
-from .. import data_directory
 
 # ---------------------------------------------
 # Experiment.  9/19/14

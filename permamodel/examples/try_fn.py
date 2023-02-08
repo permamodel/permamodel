@@ -9,9 +9,9 @@ Usage:
 """
 
 import os
-from permamodel.components import frost_number
-from permamodel.components import bmi_frost_number
+
 from permamodel import examples_directory
+from permamodel.components import bmi_frost_number, frost_number
 
 # Set the file names for the example cfg files
 onesite_singleyear_filename = os.path.join(

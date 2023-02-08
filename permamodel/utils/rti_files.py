@@ -3,8 +3,9 @@
 from __future__ import print_function
 
 import glob  # (for exists())
-import numpy  # (for things like uint8(), int16(), float64())
 import sys  # (for sys.byteorder)
+
+import numpy  # (for things like uint8(), int16(), float64())
 
 """
 *The MIT License (MIT)*

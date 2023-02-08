@@ -10,8 +10,8 @@ from netCDF4 import Dataset
 
 
 def write_out_ncfile(output_file, lon, lat, time0, data, longname, units):
-    from netCDF4 import Dataset
     import numpy as np
+    from netCDF4 import Dataset
 
     n_lat = np.size(lat)
     n_lon = np.size(lon)

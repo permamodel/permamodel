@@ -25,8 +25,8 @@ SOFTWARE.
 from __future__ import print_function
 
 import numpy as np
-from permamodel.components import perma_base
-from permamodel.components import frost_number
+
+from permamodel.components import frost_number, perma_base
 
 
 class BmiFrostnumberMethod(perma_base.PermafrostComponent):

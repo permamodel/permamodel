@@ -11,9 +11,9 @@ Created on Tue Jan 10 10:56:16 2017
 from __future__ import print_function
 
 import os
-from permamodel.components import bmi_frost_number
-from permamodel import examples_directory
 
+from permamodel import examples_directory
+from permamodel.components import bmi_frost_number
 
 cfg_file = os.path.join(
     examples_directory, "Frostnumber_example_singlesite_singleyear.cfg"
