@@ -73,9 +73,12 @@ References:
 from __future__ import print_function
 
 import os
+
 import numpy as np
-from permamodel.utils import model_input
+
 from permamodel.components import perma_base
+from permamodel.utils import model_input
+
 from .. import data_directory
 
 # from permamodel.tests import examples_directory
@@ -1258,8 +1261,8 @@ class Ku_method(perma_base.PermafrostComponent):
     # if (self.SAVE_CC_PIXELS): model_output.close_ts_file( self, 'cc')
 
     def write_out_ncfile(self, output_file, varname):
-        from netCDF4 import Dataset
         import numpy as np
+        from netCDF4 import Dataset
 
         n_lat = np.size(self.lat)
         n_lon = np.size(self.lon)

@@ -11,9 +11,9 @@ Created on Tue Jan 10 10:56:16 2017
 from __future__ import print_function
 
 import os
-from permamodel.components import bmi_Ku_component
-from permamodel import examples_directory
 
+from permamodel import examples_directory
+from permamodel.components import bmi_Ku_component
 
 cfg_file = os.path.join(examples_directory, "Ku_method.cfg")
 x = bmi_Ku_component.BmiKuMethod()

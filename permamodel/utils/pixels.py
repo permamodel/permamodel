@@ -42,8 +42,8 @@ SOFTWARE.
 # -------------------------------------------------------------------
 from __future__ import print_function
 
-from numpy import *
 import numpy
+from numpy import *
 
 
 # -------------------------------------------------------------------

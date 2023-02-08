@@ -64,20 +64,22 @@ SOFTWARE.
 """
 from __future__ import print_function
 
-import numpy as np
 import os
+
+import numpy as np
+
+from permamodel.utils import BMI_base, model_input
+
+from .. import data_directory
 
 # import gdal
 # from gdalconst import *  # Import GDAL constants, eg GA_ReadOnly
 # import osr
 # from pyproj import Proj, transform
 
-from permamodel.utils import BMI_base
-from permamodel.utils import model_input
 
 # from permamodel.utils import model_output
 
-from .. import data_directory
 
 
 # -----------------------------------------------------------------------
@@ -142,7 +144,6 @@ class PermafrostComponent(BMI_base.BMI_component):
         from netCDF4 import Dataset
 
         # import numpy as np
-
         # Read the nc file
 
         fh = Dataset(input_file, mode="r")

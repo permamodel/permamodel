@@ -31,15 +31,14 @@ import warnings
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-import numpy as np
-from permamodel.utils import model_input
-from permamodel.components import perma_base
-from permamodel.components import Ku_method
-
 # from permamodel.components.perma_base import *
 # from permamodel.tests import examples_directory
 import os
 
+import numpy as np
+
+from permamodel.components import Ku_method, perma_base
+from permamodel.utils import model_input
 
 """
 class BmiKuMethod( perma_base.PermafrostComponent ):

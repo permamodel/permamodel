@@ -15,9 +15,10 @@
 # -----------------------------------------------------------------------
 from __future__ import print_function
 
-import numpy as np
 import os
 import os.path
+
+import numpy as np
 
 
 def extract_grid_value(self):

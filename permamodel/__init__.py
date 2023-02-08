@@ -8,8 +8,8 @@ Provides:
 """
 
 import os
-from ._version import __version__
 
+from ._version import __version__
 
 permamodel_directory = os.path.dirname(__file__)
 data_directory = os.path.join(permamodel_directory, "data")
