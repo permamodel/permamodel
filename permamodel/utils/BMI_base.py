@@ -154,6 +154,7 @@ import traceback  # (10/10/10)
 import numpy as np
 
 from .. import data_directory
+
 # import pixels
 from . import outlets  # # (9/19/14)
 from . import rti_files
@@ -166,8 +167,6 @@ from . import rti_files
 # import basins
 
 ## import cfg_files as cfg   # (not used)
-
-
 
 
 # ---------------------------------------------

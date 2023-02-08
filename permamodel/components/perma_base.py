@@ -81,7 +81,6 @@ from .. import data_directory
 # from permamodel.utils import model_output
 
 
-
 # -----------------------------------------------------------------------
 class PermafrostComponent(BMI_base.BMI_component):
     # ------------------------------------------------------------

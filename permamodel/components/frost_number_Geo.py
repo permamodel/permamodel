@@ -14,6 +14,7 @@ from dateutil.relativedelta import relativedelta
 from netCDF4 import Dataset
 
 from permamodel import data_directory, examples_directory
+
 # import yaml  # Used if yaml-style imports are used instead of Topoflow-like
 from permamodel.components import perma_base
 
