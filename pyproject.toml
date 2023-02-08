@@ -1,0 +1,90 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "permamodel"
+description = "Permafrost models with a Basic Model Interface"
+authors = [
+  {name = "Elchin Jafarov", email = "elchin.jafarov@colorado.edu"},
+  {name = "Scott Stewart", email = "scotts@colorado.edu"},
+  {name = "Kang Wang", email = "kang.wang@colorado.edu"},
+  {name = "Irina Overeem", email = "irina.overeem@colorado.edu"},
+]
+maintainers = [
+  {name = "Mark Piper", email = "mark.piper@colorado.edu"},
+  {name = "Eric Hutton", email = "eric.hutton@colorado.edu"},
+]
+keywords = [
+  "bmi",
+  "component modeling",
+  "earth science",
+  "model coupling",
+  "numerical modeling",
+  "permafrost",
+]
+license = {text = "MIT License"}
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Education",
+]
+requires-python = ">=3.7"
+dependencies = [
+  "affine",
+  "netCDF4",
+  "scipy",
+  "numpy",
+  "pyyaml",
+  "python-dateutil",
+]
+dynamic = ["readme", "version"]
+
+[project.urls]
+Homepage = "https://permamodel.github.io"
+Repository = "https://github.com/permamodel/permamodel"
+
+[project.optional-dependencies]
+dev = [
+  "black",
+]
+build = [
+  "build",
+  "twine",
+  "zest.releaser"
+]
+testing = [
+  "pytest",
+  "pytest-cov",
+  "coverage[toml]",
+  "coveralls",
+]
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md", "LICENSE"], content-type = "text/markdown"}
+version = {attr = "permamodel._version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["permamodel*"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["permamodel/tests", "tests"]
+norecursedirs = [".*", "*.egg*", "build", "dist"]
+addopts = """
+  --ignore setup.py
+  --tb native
+  --strict
+  --durations 16
+  --doctest-modules
+  -vvv
+"""
+doctest_optionflags = [
+  "NORMALIZE_WHITESPACE",
+  "IGNORE_EXCEPTION_DETAIL",
+  "ALLOW_UNICODE"
+]
