@@ -13,8 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-      - uses: psf/black@stable
+
+      - uses: conda-incubator/setup-miniconda@v2
         with:
-          options: "--check --verbose --diff"
-          src: "permamodel"
+          miniforge-version: latest
+          python-version: 3.11
+          auto-activate-base: false
+
+      - name: Install nox
+        run: pip install nox
+
+      - name: Format code
+        run: nox -s format -- --check --verbose --diff
