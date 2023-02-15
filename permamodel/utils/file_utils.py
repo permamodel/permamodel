@@ -24,7 +24,6 @@ SOFTWARE.
 from __future__ import print_function
 
 import glob
-
 ## import os     (for os.remove)
 import os.path
 import time
