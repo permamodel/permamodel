@@ -38,7 +38,7 @@ jobs:
 
       - name: Test
         run: |
-          nox -s test -- --cov=permamodel --cov-report=xml:./coverage.xml --cov-config=./setup.cfg -vvv --python ${{ matrix.python-version }}
+          nox -s test --python ${{ matrix.python-version }} -- --cov=permamodel --cov-report=xml:./coverage.xml --cov-config=./setup.cfg -vvv
 
       - name: Coveralls
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
