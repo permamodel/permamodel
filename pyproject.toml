@@ -50,6 +50,9 @@ Repository = "https://github.com/permamodel/permamodel"
 [project.optional-dependencies]
 dev = [
   "black",
+  "flake8",
+  "isort",
+  "nox",
 ]
 build = [
   "build",
@@ -88,3 +91,10 @@ doctest_optionflags = [
   "IGNORE_EXCEPTION_DETAIL",
   "ALLOW_UNICODE"
 ]
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+combine_as_imports = true
+line_length = 88

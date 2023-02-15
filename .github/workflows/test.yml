@@ -28,27 +28,17 @@ jobs:
           miniforge-version: latest
           python-version: ${{ matrix.python-version }}
 
-      - name: Install package and testing dependencies
-        run: |
-          mamba install --file requirements.txt
-          mamba install pytest pytest-cov coveralls
-
       - name: Show conda installation info
         run: |
           mamba info
           mamba list
 
-      - name: Install package
-        run: pip install -e .
+      - name: Install package and nox
+        run: pip install -e .[dev]
 
       - name: Test
         run: |
-          pytest --cov=permamodel --cov-report=xml:./coverage.xml --cov-config=./setup.cfg -vvv
-
-      # - name: Test BMI
-      #   if: ${{ matrix.python-version == '3.9' }}  # stuck at py39 pending pymt update
-      #   run: |
-      #     bmi-test bmi_topography:BmiTopography --config-file=./examples/config.yaml --root-dir=./examples -vvv
+          nox -s test --python ${{ matrix.python-version }} -- --cov=permamodel --cov-report=xml:./coverage.xml --cov-config=./setup.cfg -vvv
 
       - name: Coveralls
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
