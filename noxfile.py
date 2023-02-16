@@ -20,6 +20,23 @@ def test(session: nox.Session) -> None:
     session.run("pytest", *args)
 
 
+@nox.session(name="test-bmi", python=PYTHON_VERSIONS, venv_backend="conda")
+def test_bmi(session: nox.Session) -> None:
+    """Test the Basic Model Interface."""
+    session.conda_install("bmi-tester", "pymt>=1.3")
+    session.install(".")
+    tmpdir = session.create_tmp()
+    session.run(
+	    "bmi-test",
+        "permamodel.components.bmi_frost_number:BmiFrostnumberMethod",
+        "--config-file",
+        "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg",
+	    "--root-dir",
+	    tmpdir,
+	    "-vvv",
+    )
+
+
 @nox.session
 def format(session: nox.Session) -> None:
     """Clean lint and assert style."""
