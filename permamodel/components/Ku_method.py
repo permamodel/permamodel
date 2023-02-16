@@ -844,8 +844,8 @@ class Ku_method(perma_base.PermafrostComponent):
 
         x_coords, y_coords = ~aff * (lon, lat)
 
-        x_coords = np.round(x_coords).astype(np.int)
-        y_coords = np.round(y_coords).astype(np.int)
+        x_coords = np.round(x_coords).astype(int)
+        y_coords = np.round(y_coords).astype(int)
 
         if np.size(x_coords) >= 1 and np.size(y_coords) >= 1:
             clay_perc0 = self.Clay_percent[y_coords, x_coords]
