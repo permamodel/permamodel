@@ -27,13 +27,13 @@ def test_bmi(session: nox.Session) -> None:
     session.install(".")
     tmpdir = session.create_tmp()
     session.run(
-	    "bmi-test",
+        "bmi-test",
         "permamodel.components.bmi_frost_number:BmiFrostnumberMethod",
         "--config-file",
         "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg",
-	    "--root-dir",
-	    tmpdir,
-	    "-vvv",
+        "--root-dir",
+        tmpdir,
+        "-vvv",
     )
 
 
