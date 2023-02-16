@@ -40,6 +40,11 @@ jobs:
         run: |
           nox -s test --python ${{ matrix.python-version }} -- --cov=permamodel --cov-report=xml:./coverage.xml --cov-config=./setup.cfg -vvv
 
+      - name: Test BMI
+        if: ${{ matrix.python-version == '3.9' }}  # stuck at py39 pending pymt update
+        run: |
+          nox -s bmi-test --python ${{ matrix.python-version }}
+
       - name: Coveralls
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         uses: AndreMiras/coveralls-python-action@v20201129
