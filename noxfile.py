@@ -25,14 +25,23 @@ def test_bmi(session: nox.Session) -> None:
     """Test the Basic Model Interface."""
     session.conda_install("bmi-tester", "pymt>=1.3")
     session.install(".")
-    tmpdir = session.create_tmp()
+    fn_tmpdir = session.create_tmp()
     session.run(
         "bmi-test",
         "permamodel.components.bmi_frost_number:BmiFrostnumberMethod",
         "--config-file",
         "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg",
         "--root-dir",
-        tmpdir,
+        fn_tmpdir,
+        "-vvv",
+    ku_tmpdir = session.create_tmp()
+    session.run(
+        "bmi-test",
+        "permamodel.components.bmi_ku_component:BmiKuMethod",
+        "--config-file",
+        "./permamodel/examples/Ku_method.cfg",
+        "--root-dir",
+        ku_tmpdir,
         "-vvv",
     )
 
