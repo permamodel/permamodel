@@ -38,7 +38,7 @@ def test_bmi(session: nox.Session) -> None:
     ku_tmpdir = session.create_tmp()
     session.run(
         "bmi-test",
-        "permamodel.components.bmi_ku_component:BmiKuMethod",
+        "permamodel.components.bmi_Ku_component:BmiKuMethod",
         "--config-file",
         "./permamodel/examples/Ku_method.cfg",
         "--root-dir",
