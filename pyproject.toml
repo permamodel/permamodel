@@ -70,9 +70,15 @@ testing = [
 readme = {file = ["README.md", "LICENSE"], content-type = "text/markdown"}
 version = {attr = "permamodel._version.__version__"}
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+permamodel = ["data/*"]
+
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["permamodel*", "permamodel/data"]
+include = ["permamodel*"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
