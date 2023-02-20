@@ -72,7 +72,7 @@ version = {attr = "permamodel._version.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["permamodel*"]
+include = ["permamodel*", "permamodel/data"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
