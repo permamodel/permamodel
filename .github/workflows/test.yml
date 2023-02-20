@@ -41,7 +41,7 @@ jobs:
           nox -s test --python ${{ matrix.python-version }} -- --cov=permamodel --cov-report=xml:./coverage.xml --cov-config=./setup.cfg -vvv
 
       - name: Test BMI
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'  # stuck at py39 pending pymt update
+        if: matrix.python-version == '3.9'  # stuck at py39 pending pymt update
         run: |
           nox -s test-bmi --python ${{ matrix.python-version }}
 
