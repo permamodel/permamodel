@@ -34,6 +34,7 @@ def test_bmi(session: nox.Session) -> None:
         "--root-dir",
         fn_tmpdir,
         "-vvv",
+    )
     ku_tmpdir = session.create_tmp()
     session.run(
         "bmi-test",
