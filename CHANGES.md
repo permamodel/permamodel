@@ -2,7 +2,7 @@
 
 ## 0.1.3 (unreleased)
 
-- Update packaging files #81
+- Update project metadata files #81
 - Test BMI for FrostNumber and Ku models #80
 - Add minimal unit tests for Ku model #79
 - Use nox to build and test project #76
