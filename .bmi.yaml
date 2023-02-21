@@ -1,8 +1,0 @@
-bmi_paths:
-  - .bmi/frost_number
-  - .bmi/frost_number_Geo
-  - .bmi/ku
-  - .bmi/ku_geo
-
-build:
-  - python setup.py install

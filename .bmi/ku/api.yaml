@@ -1,6 +1,0 @@
-name: KuModel
-language: python
-
-package: permamodel.components.bmi_Ku_component
-class: BmiKuMethod
-initialize_args: "ku_model.cfg"
