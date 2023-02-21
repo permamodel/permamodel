@@ -1,0 +1,6 @@
+include noxfile.py
+include requirements.txt
+include permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg
+include permamodel/examples/Ku_method.cfg
+
+recursive-exclude permamodel/examples *.py
