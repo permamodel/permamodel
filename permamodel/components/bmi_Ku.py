@@ -27,40 +27,38 @@ SOFTWARE.
 import numpy as np
 from src.Ku import Ku_model
 
+
 class BmiKuModel:
     """Basic model interface for the Kudryavstev permafrost model."""
 
-    _name = 'Kudryavtsev Permafrost Model'
+    _name = "Kudryavtsev Permafrost Model"
 
     _input_var_names = [
-        'air_temperature',
-        'temperature_amplitude',
-        'snow_thickness',
-        'snow_density',
-        'soil_water_content',
-        'frozen_vegetation_height',
-        'thawed_vegetation_height',
-        'frozen_vegetation_diffusivity',
-        'thawed_vegetation_diffusivity'
+        "air_temperature",
+        "temperature_amplitude",
+        "snow_thickness",
+        "snow_density",
+        "soil_water_content",
+        "frozen_vegetation_height",
+        "thawed_vegetation_height",
+        "frozen_vegetation_diffusivity",
+        "thawed_vegetation_diffusivity",
     ]
 
-    _output_var_names = [
-        'permafrost_temperature',
-        'active_layer_thickness'
-    ]
+    _output_var_names = ["permafrost_temperature", "active_layer_thickness"]
 
     _var_units_map = {
-        'air_temperature': 'degrees C',
-        'temperature_amplitude': 'degrees C',
-        'snow_thickness': 'meters',
-        'snow_density': 'kilograms per cubic meter',
-        'soil_water_content': 'cubic meters (water) per cubic meter (soil)',
-        'frozen_vegetation_height': 'meters',
-        'thawed_vegetation_height': 'meters',
-        'frozen_vegetation_diffusivity': 'square meters per second',
-        'thawed_vegetation_diffusivity': 'square meters per second',
-        'permafrost_temperature': 'degrees C',
-        'active_layer_thickness': 'meters'
+        "air_temperature": "degrees C",
+        "temperature_amplitude": "degrees C",
+        "snow_thickness": "meters",
+        "snow_density": "kilograms per cubic meter",
+        "soil_water_content": "cubic meters (water) per cubic meter (soil)",
+        "frozen_vegetation_height": "meters",
+        "thawed_vegetation_height": "meters",
+        "frozen_vegetation_diffusivity": "square meters per second",
+        "thawed_vegetation_diffusivity": "square meters per second",
+        "permafrost_temperature": "degrees C",
+        "active_layer_thickness": "meters",
     }
 
     def __init__(self):
@@ -71,18 +69,18 @@ class BmiKuModel:
         self._var_loc = {}
         self._grids = {}
         self._grid_type = {}
-        
+
         self._start_time = 0
         self._end_time = None
         self._current_time = 0
 
         # Using 'years' as a time unit is generally not preferred
         # However, the Ku model does not support ANY time step other than 1 year
-        self._time_units = 'years'
+        self._time_units = "years"
 
     def initialize(self, config_file: str):
         """Initialize the Kudryavstev permafrost model.
-        
+
         Args:
             config_file: str
                 Path to the configuration file.
@@ -91,34 +89,41 @@ class BmiKuModel:
 
         # Initialization routines
         self._model.initialize(config_file)
-        
+
         self._values = {
             var: getattr(self._model, var).values for var in self._input_var_names
         }
         for var in self._output_var_names:
-            self._values[var] = np.empty((
-                self._model.number_of_years, 
-                self._model.grid_shape[0],
-                self._model.grid_shape[1]
-            ))
+            self._values[var] = np.empty(
+                (
+                    self._model.number_of_years,
+                    self._model.grid_shape[0],
+                    self._model.grid_shape[1],
+                )
+            )
 
         self._var_units = self._var_units_map.copy()
 
         self._var_loc = {
-            var: 'node' for var in self._input_var_names + self._output_var_names
+            var: "node" for var in self._input_var_names + self._output_var_names
         }
 
         self._grids = {
-            i: list(self._var_units_map.keys())[i] for i in range(len(self._var_units_map.keys())) 
+            i: list(self._var_units_map.keys())[i]
+            for i in range(len(self._var_units_map.keys()))
         }
 
         self._grid_type = {
-            i: 'uniform_rectilinear' for i in range(len(self._var_units_map.keys())) 
+            i: "uniform_rectilinear" for i in range(len(self._var_units_map.keys()))
         }
 
         self._start_time = 0
         self._end_time = self._model.number_of_years
-        self._grid_shape = (self._model.number_of_years, self._model.grid_shape[0], self._model.grid_shape[1])
+        self._grid_shape = (
+            self._model.number_of_years,
+            self._model.grid_shape[0],
+            self._model.grid_shape[1],
+        )
 
     def update(self):
         """Run the model for the current time step."""
@@ -134,11 +139,13 @@ class BmiKuModel:
 
         self._current_time = end_time
 
-    def finalize(self, path_to_output = None):
+    def finalize(self, path_to_output=None):
         """If specified, write output to a netcdf file."""
 
         if path_to_output is not None:
-            self._model.write_output(path_to_output, vars_to_write = self._output_var_names)
+            self._model.write_output(
+                path_to_output, vars_to_write=self._output_var_names
+            )
 
     def get_component_name(self) -> str:
         """Return the name of the component."""
@@ -155,7 +162,7 @@ class BmiKuModel:
     def get_input_var_names(self) -> list:
         """Return a list of input variables."""
         return self._input_var_names
-    
+
     def get_output_var_names(self) -> list:
         """Return a list of output variables."""
         return self._output_var_names
@@ -164,7 +171,7 @@ class BmiKuModel:
         """Return the grid ID for a variable."""
         for grid, variables in self._grids.items():
             if var in variables:
-                return grid 
+                return grid
 
     def get_var_type(self, var: str) -> str:
         """Return the data type of a variable."""
@@ -184,7 +191,7 @@ class BmiKuModel:
 
     def get_var_location(self, var: str) -> str:
         """Returns the location of a variable on the grid: either 'node', 'edge', or 'face'."""
-        return 'node'
+        return "node"
 
     def get_current_time(self) -> int:
         """Return the current time."""
@@ -212,23 +219,25 @@ class BmiKuModel:
 
     def get_value(self, var: str, dest: np.ndarray) -> np.ndarray:
         """Returns an array with a copy of the values of a variable."""
-        dest[:] = np.ravel(self.get_value_ptr(var), order = 'C')
+        dest[:] = np.ravel(self.get_value_ptr(var), order="C")
         return dest
 
-    def get_value_at_indices(self, var: str, dest: np.ndarray, indices: np.ndarray) -> np.ndarray:
+    def get_value_at_indices(
+        self, var: str, dest: np.ndarray, indices: np.ndarray
+    ) -> np.ndarray:
         """Returns an array with a copy of the values of a variable at the given indices."""
-        dest[:] = np.ravel(self.get_value_ptr(var), order = 'C').take(indices)
+        dest[:] = np.ravel(self.get_value_ptr(var), order="C").take(indices)
         return dest
 
     def set_value(self, var: str, values: np.ndarray):
         """Set the value of a variable."""
         vals = np.reshape(values, self._grid_shape)
         getattr(self._model, var).values[:] = vals
-    
+
     def set_value_at_indices(self, var: str, indices: np.ndarray, values: np.ndarray):
         """Set the value of a variable at the given indices."""
         current_values = getattr(self._model, var).values[:]
-        flat_values = np.ravel(current_values, order = 'C')
+        flat_values = np.ravel(current_values, order="C")
         flat_values[indices] = values
 
     def get_grid_type(self, grid: int) -> str:
@@ -256,7 +265,7 @@ class BmiKuModel:
         dims = getattr(self._model, var).dims
         coords = [getattr(self._model, var)[dim] for dim in dims]
         diffs = [np.diff(array)[0] for array in coords]
-        
+
         spacing[:] = diffs
         return spacing
 
@@ -272,7 +281,7 @@ class BmiKuModel:
 
         origin[:] = [y0, x0]
         return origin
-    
+
     def get_grid_x(self, grid: int, xs: np.ndarray) -> np.ndarray:
         """Given a grid ID, return an array of x-coordinates."""
         var = self._grids[grid]
@@ -284,7 +293,7 @@ class BmiKuModel:
         var = self._grids[grid]
         ys[:] = np.ravel(getattr(self._model, var).dims[1])
         return ys
-    
+
     def get_grid_z(self, grid: int, zs: np.ndarray):
         raise NotImplementedError("get_grid_z() not implemented.")
 
@@ -306,4 +315,3 @@ class BmiKuModel:
 
     def get_grid_nodes_per_face(self, grid: int, nodes_per_face: np.ndarray):
         raise NotImplementedError("get_grid_nodes_per_face() not implemented.")
-        
