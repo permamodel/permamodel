@@ -2,7 +2,7 @@ import pytest
 import os
 from numpy.testing import assert_approx_equal, assert_array_equal
 from netCDF4 import Dataset
-from src.Ku import Ku_model
+from permamodel.components.Ku import Ku_model
 
 def test_always_passes():
     assert True
@@ -11,12 +11,14 @@ def test_always_passes():
 def Ku():
     return Ku_model()
 
+config = 'permamodel/examples/Ku_example_config.toml'
+
 def test_read_config(Ku):
-    Ku.read_config("./test/example_config.toml")
+    Ku.read_config(config)
     
     assert Ku.experiment == 'test'
-    assert Ku.inputs_dir == './test/data/inputs/'
-    assert Ku.outputs_dir == './test/data/outputs/'
+    assert Ku.inputs_dir == "permamodel/data/test_directory/inputs/"
+    assert Ku.outputs_dir == "permamodel/data/test_directory/outputs/"
     assert Ku.number_of_years == 100
     assert Ku.grid_shape == [100, 100]
     assert len(Ku.input_files) > 0
@@ -30,14 +32,14 @@ class TestReadInputs:
             Ku.read_input_files()
     
     def test_read_inputs(self, Ku):
-        Ku.read_config("./test/example_config.toml")
+        Ku.read_config(config)
         Ku.read_input_files()
 
         assert Ku.snow_thickness.shape == (100, 100, 100)
         assert Ku.soils['sand']['fraction'].mean() == 0.25
 
     def test_initialize(self, Ku):
-        Ku.initialize("./test/example_config.toml")
+        Ku.initialize(config)
 
         assert Ku.snow_thickness.shape == (100, 100, 100)
         assert Ku.soils['sand']['fraction'].mean() == 0.25
@@ -47,7 +49,7 @@ class TestReadInputs:
 @pytest.fixture
 def Kutest():
     K = Ku_model()
-    K.read_config("./test/example_config.toml")
+    K.read_config(config)
     K.read_input_files()
     return K
 
