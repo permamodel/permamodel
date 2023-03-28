@@ -25,7 +25,7 @@ SOFTWARE.
 """
 
 import numpy as np
-from src.Ku import Ku_model
+from permamodel.components.Ku import Ku_model
 
 
 class BmiKuModel:
