@@ -1,10 +1,10 @@
 import os
 import pathlib
 import shutil
-import toml
 from itertools import chain
 
 import nox
+import toml
 
 PROJECT = "permamodel"
 HERE = pathlib.Path(__file__)
@@ -162,8 +162,12 @@ def _set_absolute_path_in_config(cfg_file):
         config = toml.load(f)
 
     if not pathlib.Path(config["directories"]["inputs_dir"]).is_absolute():
-        config["directories"]["inputs_dir"] = f'{ROOT / config["directories"]["inputs_dir"]}{os.sep}'
-        config["directories"]["outputs_dir"] = f'{ROOT / config["directories"]["outputs_dir"]}{os.sep}'
+        config["directories"][
+            "inputs_dir"
+        ] = f'{ROOT / config["directories"]["inputs_dir"]}{os.sep}'
+        config["directories"][
+            "outputs_dir"
+        ] = f'{ROOT / config["directories"]["outputs_dir"]}{os.sep}'
 
         with open(cfg_file, "w") as f:
             toml.dump(config, f)

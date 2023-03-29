@@ -272,9 +272,9 @@ class Ku_model:
             data = self.broadcast(data)
             setattr(self, var, data)
 
-##########
-# Update #
-##########
+    ##########
+    # Update #
+    ##########
 
     def update_soil_heat_capacity(self, t: int):
         """Calculate the heat capacity of the soil in each column."""

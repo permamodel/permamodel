@@ -25,6 +25,7 @@ SOFTWARE.
 """
 
 import numpy as np
+
 from permamodel.components.Ku import Ku_model
 
 
