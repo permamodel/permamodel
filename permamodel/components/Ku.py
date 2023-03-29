@@ -249,6 +249,11 @@ class Ku_model:
         self.results = {var: np.empty([self.number_of_years, self.grid_shape[0], self.grid_shape[1]]) 
                         for var in vars_to_save}
 
+        for var in vars_to_save:
+            data = xr.full_like(getattr(self, template), 0.0)
+            data = self.broadcast(data)
+            setattr(self, var, data)
+
 ##########
 # Update #
 ##########
