@@ -50,15 +50,15 @@ class BmiKuModel:
     _var_units_map = {
         "air_temperature": "degrees C",
         "temperature_amplitude": "degrees C",
-        "snow_thickness": "meters",
-        "snow_density": "kilograms per cubic meter",
-        "soil_water_content": "cubic meters (water) per cubic meter (soil)",
-        "frozen_vegetation_height": "meters",
-        "thawed_vegetation_height": "meters",
-        "frozen_vegetation_diffusivity": "square meters per second",
-        "thawed_vegetation_diffusivity": "square meters per second",
+        "snow_thickness": "m",
+        "snow_density": "kg m-3",
+        "soil_water_content": "m3 m-3",  # water / soil
+        "frozen_vegetation_height": "m",
+        "thawed_vegetation_height": "m",
+        "frozen_vegetation_diffusivity": "m2 s-1",
+        "thawed_vegetation_diffusivity": "m2 s-1",
         "permafrost_temperature": "degrees C",
-        "active_layer_thickness": "meters",
+        "active_layer_thickness": "m",
     }
 
     def __init__(self):
