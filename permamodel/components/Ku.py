@@ -267,9 +267,14 @@ class Ku_model:
             for var in vars_to_save
         }
 
-    ##########
-    # Update #
-    ##########
+        for var in vars_to_save:
+            data = xr.full_like(getattr(self, template), 0.0)
+            data = self.broadcast(data)
+            setattr(self, var, data)
+
+##########
+# Update #
+##########
 
     def update_soil_heat_capacity(self, t: int):
         """Calculate the heat capacity of the soil in each column."""
