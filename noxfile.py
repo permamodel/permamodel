@@ -1,6 +1,7 @@
 import os
 import pathlib
 import shutil
+import toml
 from itertools import chain
 
 import nox
@@ -19,17 +20,6 @@ def test(session: nox.Session) -> None:
     session.install(".[testing]")
     args = session.posargs or ["--cov", "--cov-report=term", "-vvv"]
     session.run("pytest", *args)
-
-
-class bmi_test_setup:
-    def __init__(self, dir="."):
-        self._dir = dir
-
-    def __enter__(self):
-        os.makedirs(self._dir, exist_ok=True)
-
-    def __exit__(self, type_, value, traceback):
-        shutil.rmtree(self._dir)
 
 
 @nox.session(name="test-bmi", python=PYTHON_VERSIONS, venv_backend="conda")
@@ -55,6 +45,18 @@ def test_bmi(session: nox.Session) -> None:
             "permamodel.components.bmi_Ku_component:BmiKuMethod",
             "--config-file",
             "./permamodel/examples/Ku_method.cfg",
+            "--root-dir",
+            bmi_test_dir,
+            "-vvv",
+        )
+    with bmi_test_setup(bmi_test_dir):
+        cfg_file = "./permamodel/examples/Ku_bmi_example_config.toml"
+        _set_absolute_path_in_config(cfg_file)
+        session.run(
+            "bmi-test",
+            "permamodel.components.bmi_Ku:BmiKuModel",
+            "--config-file",
+            cfg_file,
             "--root-dir",
             bmi_test_dir,
             "-vvv",
@@ -142,3 +144,26 @@ def nuke(session):
     """Clean and also remove the .nox directory."""
     clean(session)
     shutil.rmtree(".nox", ignore_errors=True)
+
+
+class bmi_test_setup:
+    def __init__(self, dir="."):
+        self._dir = dir
+
+    def __enter__(self):
+        os.makedirs(self._dir, exist_ok=True)
+
+    def __exit__(self, type_, value, traceback):
+        shutil.rmtree(self._dir)
+
+
+def _set_absolute_path_in_config(cfg_file):
+    with open(cfg_file, "r") as f:
+        config = toml.load(f)
+
+    if not pathlib.Path(config["directories"]["inputs_dir"]).is_absolute():
+        config["directories"]["inputs_dir"] = f'{ROOT / config["directories"]["inputs_dir"]}{os.sep}'
+        config["directories"]["outputs_dir"] = f'{ROOT / config["directories"]["outputs_dir"]}{os.sep}'
+
+        with open(cfg_file, "w") as f:
+            toml.dump(config, f)
