@@ -40,7 +40,7 @@ dependencies = [
   "numpy",
   "pyyaml",
   "python-dateutil",
-  "tomli",
+  "toml",
   "xarray",
 ]
 dynamic = ["readme", "version"]
