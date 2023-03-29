@@ -20,8 +20,8 @@ jobs:
           python-version: 3.11
           auto-activate-base: false
 
-      - name: Install nox
-        run: pip install nox
+      - name: Install dependencies
+        run: pip install nox toml
 
       - name: Format code
         run: nox -s format -- --check --verbose --diff
