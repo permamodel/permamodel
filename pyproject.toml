@@ -9,6 +9,7 @@ authors = [
   {name = "Elchin Jafarov", email = "elchin.jafarov@colorado.edu"},
   {name = "Scott Stewart", email = "scotts@colorado.edu"},
   {name = "Kang Wang", email = "kang.wang@colorado.edu"},
+  {name = "Ethan Pierce", email = "ethan.pierce@colorado.edu"},
   {name = "Irina Overeem", email = "irina.overeem@colorado.edu"},
 ]
 maintainers = [
