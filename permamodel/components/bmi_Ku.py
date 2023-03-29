@@ -70,9 +70,9 @@ class BmiKuModel:
         self._grids = {}
         self._grid_type = {}
 
-        self._start_time = 0
+        self._start_time = 0.0
         self._end_time = None
-        self._current_time = 0
+        self._current_time = 0.0
 
         # Using 'years' as a time unit is generally not preferred
         # However, the Ku model does not support ANY time step other than 1 year
@@ -117,7 +117,7 @@ class BmiKuModel:
             i: "uniform_rectilinear" for i in range(len(self._var_units_map.keys()))
         }
 
-        self._start_time = 0
+        self._start_time = 0.0
         self._end_time = self._model.number_of_years
         self._grid_shape = (
             self._model.number_of_years,
@@ -128,7 +128,7 @@ class BmiKuModel:
     def update(self):
         """Run the model for the current time step."""
         self._model.run_one_step(self._current_time)
-        self._current_time += 1
+        self._current_time += 1.0
 
     def update_until(self, end_time: int):
         """Update the model until a certain year (inclusive)."""
@@ -211,7 +211,7 @@ class BmiKuModel:
 
     def get_time_step(self) -> str:
         """Return the model's time step."""
-        return 1
+        return 1.0
 
     def get_value_ptr(self, var: str) -> np.ndarray:
         """Returns a reference to the values of a variable."""
