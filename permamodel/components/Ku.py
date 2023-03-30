@@ -54,7 +54,7 @@ SOFTWARE.
 """
 
 import numpy as np
-import tomli
+import toml
 import xarray as xr
 
 
@@ -156,8 +156,8 @@ class Ku_model:
         """
 
         # Open the configuration file with a TOML parser
-        with open(config_file, "rb") as file:
-            config = tomli.load(file)
+        with open(config_file, "r") as file:
+            config = toml.load(file)
 
         # Variables to help when organizing multiple model runs
         self.experiment = config["experiment"]
@@ -272,9 +272,9 @@ class Ku_model:
             data = self.broadcast(data)
             setattr(self, var, data)
 
-##########
-# Update #
-##########
+    ##########
+    # Update #
+    ##########
 
     def update_soil_heat_capacity(self, t: int):
         """Calculate the heat capacity of the soil in each column."""

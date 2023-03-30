@@ -25,7 +25,8 @@ SOFTWARE.
 """
 
 import numpy as np
-from src.Ku import Ku_model
+
+from permamodel.components.Ku import Ku_model
 
 
 class BmiKuModel:
@@ -50,15 +51,15 @@ class BmiKuModel:
     _var_units_map = {
         "air_temperature": "degrees C",
         "temperature_amplitude": "degrees C",
-        "snow_thickness": "meters",
-        "snow_density": "kilograms per cubic meter",
-        "soil_water_content": "cubic meters (water) per cubic meter (soil)",
-        "frozen_vegetation_height": "meters",
-        "thawed_vegetation_height": "meters",
-        "frozen_vegetation_diffusivity": "square meters per second",
-        "thawed_vegetation_diffusivity": "square meters per second",
+        "snow_thickness": "m",
+        "snow_density": "kg m-3",
+        "soil_water_content": "m3 m-3",  # water / soil
+        "frozen_vegetation_height": "m",
+        "thawed_vegetation_height": "m",
+        "frozen_vegetation_diffusivity": "m2 s-1",
+        "thawed_vegetation_diffusivity": "m2 s-1",
         "permafrost_temperature": "degrees C",
-        "active_layer_thickness": "meters",
+        "active_layer_thickness": "m",
     }
 
     def __init__(self):
@@ -70,9 +71,9 @@ class BmiKuModel:
         self._grids = {}
         self._grid_type = {}
 
-        self._start_time = 0
+        self._start_time = 0.0
         self._end_time = None
-        self._current_time = 0
+        self._current_time = 0.0
 
         # Using 'years' as a time unit is generally not preferred
         # However, the Ku model does not support ANY time step other than 1 year
@@ -117,7 +118,7 @@ class BmiKuModel:
             i: "uniform_rectilinear" for i in range(len(self._var_units_map.keys()))
         }
 
-        self._start_time = 0
+        self._start_time = 0.0
         self._end_time = self._model.number_of_years
         self._grid_shape = (
             self._model.number_of_years,
@@ -128,7 +129,7 @@ class BmiKuModel:
     def update(self):
         """Run the model for the current time step."""
         self._model.run_one_step(self._current_time)
-        self._current_time += 1
+        self._current_time += 1.0
 
     def update_until(self, end_time: int):
         """Update the model until a certain year (inclusive)."""
@@ -211,7 +212,7 @@ class BmiKuModel:
 
     def get_time_step(self) -> str:
         """Return the model's time step."""
-        return 1
+        return 1.0
 
     def get_value_ptr(self, var: str) -> np.ndarray:
         """Returns a reference to the values of a variable."""
