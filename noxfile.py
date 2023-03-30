@@ -4,12 +4,14 @@ import shutil
 from itertools import chain
 
 import nox
+import toml
 
 PROJECT = "permamodel"
 HERE = pathlib.Path(__file__)
 ROOT = HERE.parent
 PATHS = [PROJECT + "/components", PROJECT + "/tests", HERE.name]
 PYTHON_VERSIONS = ["3.9", "3.10", "3.11"]
+BUILD_DIR = ROOT / "build"
 
 
 @nox.session(python=PYTHON_VERSIONS)
@@ -25,26 +27,40 @@ def test_bmi(session: nox.Session) -> None:
     """Test the Basic Model Interface."""
     session.conda_install("bmi-tester", "pymt>=1.3")
     session.install(".")
-    os.mkdir("fn")
-    session.run(
-        "bmi-test",
-        "permamodel.components.bmi_frost_number:BmiFrostnumberMethod",
-        "--config-file",
-        "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg",
-        "--root-dir",
-        "fn",
-        "-vvv",
-    )
-    os.mkdir("ku")
-    session.run(
-        "bmi-test",
-        "permamodel.components.bmi_Ku_component:BmiKuMethod",
-        "--config-file",
-        "./permamodel/examples/Ku_method.cfg",
-        "--root-dir",
-        "ku",
-        "-vvv",
-    )
+
+    bmi_test_dir = BUILD_DIR / "bmi_test"
+    with bmi_test_setup(bmi_test_dir):
+        session.run(
+            "bmi-test",
+            "permamodel.components.bmi_frost_number:BmiFrostnumberMethod",
+            "--config-file",
+            "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg",
+            "--root-dir",
+            bmi_test_dir,
+            "-vvv",
+        )
+    with bmi_test_setup(bmi_test_dir):
+        session.run(
+            "bmi-test",
+            "permamodel.components.bmi_Ku_component:BmiKuMethod",
+            "--config-file",
+            "./permamodel/examples/Ku_method.cfg",
+            "--root-dir",
+            bmi_test_dir,
+            "-vvv",
+        )
+    with bmi_test_setup(bmi_test_dir):
+        cfg_file = "./permamodel/examples/Ku_bmi_example_config.toml"
+        _set_absolute_path_in_config(cfg_file)
+        session.run(
+            "bmi-test",
+            "permamodel.components.bmi_Ku:BmiKuModel",
+            "--config-file",
+            cfg_file,
+            "--root-dir",
+            bmi_test_dir,
+            "-vvv",
+        )
 
 
 @nox.session
@@ -109,7 +125,7 @@ def publish_pypi(session):
 @nox.session(python=False)
 def clean(session):
     """Remove virtual environments, build files, and caches."""
-    shutil.rmtree("build", ignore_errors=True)
+    shutil.rmtree(BUILD_DIR, ignore_errors=True)
     shutil.rmtree("dist", ignore_errors=True)
     shutil.rmtree(f"{PROJECT}.egg-info", ignore_errors=True)
     shutil.rmtree(".pytest_cache", ignore_errors=True)
@@ -128,3 +144,30 @@ def nuke(session):
     """Clean and also remove the .nox directory."""
     clean(session)
     shutil.rmtree(".nox", ignore_errors=True)
+
+
+class bmi_test_setup:
+    def __init__(self, dir="."):
+        self._dir = dir
+
+    def __enter__(self):
+        os.makedirs(self._dir, exist_ok=True)
+
+    def __exit__(self, type_, value, traceback):
+        shutil.rmtree(self._dir)
+
+
+def _set_absolute_path_in_config(cfg_file):
+    with open(cfg_file, "r") as f:
+        config = toml.load(f)
+
+    if not pathlib.Path(config["directories"]["inputs_dir"]).is_absolute():
+        config["directories"][
+            "inputs_dir"
+        ] = f'{ROOT / config["directories"]["inputs_dir"]}{os.sep}'
+        config["directories"][
+            "outputs_dir"
+        ] = f'{ROOT / config["directories"]["outputs_dir"]}{os.sep}'
+
+        with open(cfg_file, "w") as f:
+            toml.dump(config, f)
