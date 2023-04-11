@@ -2,6 +2,8 @@
 
 ## 0.1.3 (unreleased)
 
+- Fix coverage reporting #83
+- Update Ku model to newer version #82
 - Update project metadata files #81
 - Test BMI for FrostNumber and Ku models #80
 - Add minimal unit tests for Ku model #79
