@@ -77,7 +77,7 @@ version = {attr = "permamodel._version.__version__"}
 include-package-data = true
 
 [tool.setuptools.package-data]
-permamodel = ["data/*"]
+permamodel = ["data/*", "data/test_directory/inputs/*.nc"]
 
 [tool.setuptools.packages.find]
 where = ["."]
