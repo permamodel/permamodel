@@ -1,5 +1,11 @@
 # Changelog : permamodel
 
+## 0.3 (unreleased)
+
+
+- Nothing changed yet.
+
+
 ## 0.2 (2023-04-11)
 
 - Fix coverage reporting #83
