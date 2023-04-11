@@ -3,5 +3,7 @@ include requirements.txt
 include CITATION.cff
 include permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg
 include permamodel/examples/Ku_method.cfg
+include permamodel/examples/Ku_example_config.toml
+include permamodel/examples/Ku_bmi_example_config.toml
 
 recursive-exclude permamodel/examples *.py
