@@ -28,4 +28,4 @@ or with `conda`:
 ```
 $ conda install -c conda-forge permamodel
 ```
-We recommend installing permaodel into a Python virtual environment.
+We recommend installing permamodel into a Python virtual environment.
