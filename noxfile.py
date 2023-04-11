@@ -18,8 +18,19 @@ BUILD_DIR = ROOT / "build"
 def test(session: nox.Session) -> None:
     """Run the tests."""
     session.install(".[testing]")
-    args = session.posargs or ["--cov", "--cov-report=term", "-vvv"]
+
+    args = [
+        "--cov",
+        PROJECT,
+        "-vvv",
+    ] + session.posargs
+
+    if "CI" in os.environ:
+        args.append(f"--cov-report=xml:{ROOT.absolute()!s}/coverage.xml")
     session.run("pytest", *args)
+
+    if "CI" not in os.environ:
+        session.run("coverage", "report", "--ignore-errors", "--show-missing")
 
 
 @nox.session(name="test-bmi", python=PYTHON_VERSIONS, venv_backend="conda")
