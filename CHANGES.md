@@ -1,6 +1,6 @@
 # Changelog : permamodel
 
-## 0.1.3 (unreleased)
+## 0.2 (2023-04-11)
 
 - Fix coverage reporting #83
 - Update Ku model to newer version #82
