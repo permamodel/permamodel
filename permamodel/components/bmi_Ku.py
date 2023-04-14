@@ -265,7 +265,7 @@ class BmiKuModel:
         coords = [getattr(self._model, var)[dim] for dim in dims]
         diffs = [np.diff(array)[0] for array in coords]
 
-        spacing[:] = diffs
+        spacing[:] = diffs[-2:]
         return spacing
 
     def get_grid_origin(self, grid: int, origin: np.ndarray) -> np.ndarray:
