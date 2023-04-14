@@ -97,7 +97,6 @@ class BmiKuModel:
         for var in self._output_var_names:
             self._values[var] = np.empty(
                 (
-                    self._model.number_of_years,
                     self._model.grid_shape[0],
                     self._model.grid_shape[1],
                 )
@@ -121,7 +120,6 @@ class BmiKuModel:
         self._start_time = 0.0
         self._end_time = self._model.number_of_years
         self._grid_shape = (
-            self._model.number_of_years,
             self._model.grid_shape[0],
             self._model.grid_shape[1],
         )
