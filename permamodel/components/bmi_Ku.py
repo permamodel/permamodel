@@ -275,8 +275,8 @@ class BmiKuModel:
         ydim = getattr(self._model, var).dims[1]
         xdim = getattr(self._model, var).dims[2]
 
-        y0 = getattr(self._model, var)[ydim][0, 0]
-        x0 = getattr(self._model, var)[xdim][0, 0]
+        y0 = getattr(self._model, var)[ydim][0]
+        x0 = getattr(self._model, var)[xdim][0]
 
         origin[:] = [y0, x0]
         return origin
