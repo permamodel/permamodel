@@ -126,7 +126,7 @@ class BmiKuModel:
 
     def update(self):
         """Run the model for the current time step."""
-        self._model.run_one_step(self._current_time)
+        self._model.run_one_step(int(self._current_time))
         self._current_time += 1.0
 
     def update_until(self, end_time: int):
