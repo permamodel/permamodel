@@ -3,7 +3,7 @@
 ## 0.3 (unreleased)
 
 
-- Nothing changed yet.
+- Update new Ku BMI for pymt #84
 
 
 ## 0.2 (2023-04-11)
