@@ -97,7 +97,6 @@ class BmiKuModel:
         for var in self._output_var_names:
             self._values[var] = np.empty(
                 (
-                    self._model.number_of_years,
                     self._model.grid_shape[0],
                     self._model.grid_shape[1],
                 )
@@ -121,14 +120,13 @@ class BmiKuModel:
         self._start_time = 0.0
         self._end_time = self._model.number_of_years
         self._grid_shape = (
-            self._model.number_of_years,
             self._model.grid_shape[0],
             self._model.grid_shape[1],
         )
 
     def update(self):
         """Run the model for the current time step."""
-        self._model.run_one_step(self._current_time)
+        self._model.run_one_step(int(self._current_time))
         self._current_time += 1.0
 
     def update_until(self, end_time: int):
@@ -267,7 +265,7 @@ class BmiKuModel:
         coords = [getattr(self._model, var)[dim] for dim in dims]
         diffs = [np.diff(array)[0] for array in coords]
 
-        spacing[:] = diffs
+        spacing[:] = diffs[-2:]
         return spacing
 
     def get_grid_origin(self, grid: int, origin: np.ndarray) -> np.ndarray:
@@ -277,8 +275,8 @@ class BmiKuModel:
         ydim = getattr(self._model, var).dims[1]
         xdim = getattr(self._model, var).dims[2]
 
-        y0 = getattr(self._model, var)[ydim][0, 0]
-        x0 = getattr(self._model, var)[xdim][0, 0]
+        y0 = getattr(self._model, var)[ydim][0]
+        x0 = getattr(self._model, var)[xdim][0]
 
         origin[:] = [y0, x0]
         return origin
