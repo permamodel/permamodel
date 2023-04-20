@@ -1,6 +1,6 @@
 # Changelog : permamodel
 
-## 0.3 (unreleased)
+## 0.2.1 (2023-04-20)
 
 
 - Update new Ku BMI for pymt #84
