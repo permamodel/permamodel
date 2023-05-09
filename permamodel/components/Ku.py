@@ -181,6 +181,12 @@ class Ku_model:
         """Read input data files and store fields as instance variables."""
 
         # Raise an error if there is no information about variables.
+        if not hasattr(self, info):
+            raise ValueError(
+                "Did not find information about input variables: did you call read_config() first?"
+            )
+
+
         if len(self.info) == 0:
             raise ValueError(
                 "No input variables found: did you call read_config() first?"
