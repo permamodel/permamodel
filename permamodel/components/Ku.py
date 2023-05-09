@@ -168,8 +168,8 @@ class Ku_model:
         self.number_of_years = config["domain"]["number_of_years"]
         self.grid_shape = config["domain"]["grid_shape"]
 
-        # Paths to the input data files
-        self.input_files = {var: ncfile for var, ncfile in config["files"].items()}
+        # Input variables
+        self.info = {var: info for var, info in config["variables"].items()}
 
         # Soil properties
         self.soils = {soil: props for soil, props in config["soils"].items()}
@@ -180,32 +180,35 @@ class Ku_model:
     def read_input_files(self):
         """Read input data files and store fields as instance variables."""
 
-        # Raise an error if there are no input files to read.
-        if len(self.input_files) == 0:
+        # Raise an error if there is no information about variables.
+        if len(self.info) == 0:
             raise ValueError(
-                "No input files to read: did you call read_config() first?"
+                "No input variables found: did you call read_config() first?"
             )
 
         # Read input data from each file.
-        for key, file in self.input_files.items():
-            var = key.replace("_file", "")
-            data = xr.open_dataarray(self.inputs_dir + file)
+        for var, info in self.info.items():
+            if len(info["nc_file"]) > 0:
+                data = xr.open_dataarray(self.inputs_dir + info["nc_file"])
+                data_cube = self.broadcast(data)
+                setattr(self, var, data_cube)
 
-            data = self.broadcast(data)
-
-            setattr(self, var, data)
+            else:
+                data = xr.DataArray([info["scalar"]])
+                data_cube = self.broadcast(data)
+                setattr(self, var, data_cube)
 
         # Read soil properties, if not defined directly in the config file.
         for soil, props in self.soils.items():
             if len(props["nc_file"]) > 0:
                 data = xr.open_dataarray(prop["nc_file"])
-
-                data = self.broadcast(data)
+                data_cube = self.broadcast(data)
 
             else:
-                data = xr.full_like(self.air_temperature, props["scalar_fraction"])
+                data = xr.DataArray([props["scalar_fraction"]])
+                data_cube = self.broadcast(data)
 
-            self.soils[soil]["fraction"] = data
+            self.soils[soil]["fraction"] = data_cube
 
     def broadcast(self, data: xr.DataArray) -> xr.DataArray:
         """Broadcast an xarray DataArray to a shape that matches the model's domain.
@@ -239,8 +242,7 @@ class Ku_model:
 
         else:
             raise ValueError(
-                var
-                + " data cannot be broadcast to shape "
+                "DataArray cannot be broadcast to shape "
                 + str((self.number_of_years, self.grid_shape[0], self.grid_shape[1]))
             )
 
