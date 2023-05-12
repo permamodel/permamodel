@@ -8,16 +8,41 @@ outputs_dir = "permamodel/data/test_directory/outputs/"
 number_of_years = 100 # time
 grid_shape = [100, 100] # [y, x]
 
-[files]
-air_temperature_file = "air_temperature.nc"
-temperature_amplitude_file = "temperature_amplitude.nc"
-snow_thickness_file = "snow_thickness.nc"
-snow_density_file = "snow_density.nc"
-soil_water_content_file = "soil_water_content.nc"
-frozen_vegetation_height_file = "frozen_vegetation_height.nc"
-thawed_vegetation_height_file = "thawed_vegetation_height.nc"
-frozen_vegetation_diffusivity_file = "frozen_vegetation_diffusivity.nc"
-thawed_vegetation_diffusivity_file = "thawed_vegetation_diffusivity.nc"
+[variables.air_temperature]
+nc_file = 'air_temperature.nc'
+scalar = -999
+
+[variables.temperature_amplitude]
+nc_file = 'temperature_amplitude.nc'
+scalar = -999
+
+[variables.snow_thickness]
+nc_file = 'snow_thickness.nc'
+scalar = -999
+
+[variables.snow_density]
+nc_file = 'snow_density.nc'
+scalar = 240.0
+
+[variables.soil_water_content]
+nc_file = 'soil_water_content.nc'
+scalar = -999
+
+[variables.frozen_vegetation_height]
+nc_file = ''
+scalar = 0.1
+
+[variables.thawed_vegetation_height]
+nc_file = ''
+scalar = 0.1
+
+[variables.frozen_vegetation_diffusivity]
+nc_file = ''
+scalar = 2.39e-6
+
+[variables.thawed_vegetation_diffusivity]
+nc_file = ''
+scalar = 1.0556e-6
 
 [soils.sand]
 scalar_fraction = 0.25
