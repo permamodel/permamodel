@@ -2,12 +2,10 @@
 
 ## 0.2.2 (unreleased)
 
-
-- Nothing changed yet.
+- Update Ku to allow scalar inputs #85
 
 
 ## 0.2.1 (2023-04-20)
-
 
 - Update new Ku BMI for pymt #84
 
