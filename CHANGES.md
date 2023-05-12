@@ -1,5 +1,11 @@
 # Changelog : permamodel
 
+## 0.2.3 (unreleased)
+
+
+- Nothing changed yet.
+
+
 ## 0.2.2 (2023-05-12)
 
 - Update Ku to allow scalar inputs #85
