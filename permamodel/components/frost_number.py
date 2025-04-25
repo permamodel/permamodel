@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""  Frost Number by Nelson and Outcalt 1983.
+"""Frost Number by Nelson and Outcalt 1983.
 DOI: 10.2307/1551363. http://www.jstor.org/stable/1551363
 
 *The MIT License (MIT)*
