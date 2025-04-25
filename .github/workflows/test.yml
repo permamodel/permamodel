@@ -35,18 +35,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install package and nox
-        run: pip install -e .[dev]
+      - name: Install nox
+        run: pip install nox
 
       - name: Test
         run: |
           nox -s test
 
       - name: Test BMI
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'  # stuck at py39 pending pymt update
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
         run: |
           nox -s test-bmi
 
       - name: Coveralls
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
         uses: AndreMiras/coveralls-python-action@develop
