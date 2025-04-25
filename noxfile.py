@@ -4,7 +4,6 @@ import shutil
 from itertools import chain
 
 import nox
-import toml
 
 PROJECT = "permamodel"
 HERE = pathlib.Path(__file__)
@@ -168,6 +167,8 @@ class bmi_test_setup:
 
 
 def _set_absolute_path_in_config(cfg_file):
+    import toml
+
     with open(cfg_file, "r") as f:
         config = toml.load(f)
 
