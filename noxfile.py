@@ -31,10 +31,10 @@ def test(session: nox.Session) -> None:
         session.run("coverage", "report", "--ignore-errors", "--show-missing")
 
 
-@nox.session(name="test-bmi", venv_backend="conda")
+@nox.session(name="test-bmi")
 def test_bmi(session: nox.Session) -> None:
     """Test the Basic Model Interface."""
-    session.conda_install("bmi-tester", "pymt>=1.3")
+    session.install("bmi-tester")
     session.install(".")
 
     bmi_test_dir = BUILD_DIR / "bmi_test"
