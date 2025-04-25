@@ -38,12 +38,12 @@ jobs:
 
       - name: Test
         run: |
-          nox -s test --python ${{ matrix.python-version }}
+          nox -s test
 
       - name: Test BMI
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'  # stuck at py39 pending pymt update
         run: |
-          nox -s test-bmi --python ${{ matrix.python-version }}
+          nox -s test-bmi
 
       - name: Coveralls
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'

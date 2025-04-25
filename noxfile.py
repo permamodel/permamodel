@@ -10,11 +10,10 @@ PROJECT = "permamodel"
 HERE = pathlib.Path(__file__)
 ROOT = HERE.parent
 PATHS = [PROJECT + "/components", PROJECT + "/tests", HERE.name]
-PYTHON_VERSIONS = ["3.9", "3.10", "3.11"]
 BUILD_DIR = ROOT / "build"
 
 
-@nox.session(python=PYTHON_VERSIONS)
+@nox.session()
 def test(session: nox.Session) -> None:
     """Run the tests."""
     session.install(".[testing]")
@@ -33,7 +32,7 @@ def test(session: nox.Session) -> None:
         session.run("coverage", "report", "--ignore-errors", "--show-missing")
 
 
-@nox.session(name="test-bmi", python=PYTHON_VERSIONS, venv_backend="conda")
+@nox.session(name="test-bmi", venv_backend="conda")
 def test_bmi(session: nox.Session) -> None:
     """Test the Basic Model Interface."""
     session.conda_install("bmi-tester", "pymt>=1.3")
