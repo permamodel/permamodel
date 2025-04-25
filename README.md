@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/57247541.svg)](https://doi.org/10.5281/zenodo.15284697)
 [![PyPI](https://img.shields.io/pypi/v/permamodel)](https://pypi.org/project/permamodel)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/permamodel.svg)](https://anaconda.org/conda-forge/permamodel)
 [![Basic Model Interface](https://img.shields.io/badge/CSDMS-Basic%20Model%20Interface-green.svg)](https://bmi.readthedocs.io/)
