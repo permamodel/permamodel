@@ -11,7 +11,7 @@ Permamodel is a collection of numerical permafrost models.
 This repository contains source code and examples for two models:
 
 * Frost number
-* Ku
+* Ku (versions by [Kang Wang](https://github.com/wk1984) and [Ethan Pierce](https://github.com/ethan-pierce))
 
 For more information,
 see the project home page: https://permamodel.github.io.
