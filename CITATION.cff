@@ -32,5 +32,6 @@ keywords:
   - models
   - csdms
 license: MIT
-version: v0.1.2
-date-released: '2018-03-19'
+version: v0.2.2
+date-released: 2023-05-12
+doi: 10.5281/zenodo.15284697
