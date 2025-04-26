@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""  Kudryavtsev Model code adapted for the BMI version developed for the Topoflow model
+"""Kudryavtsev Model code adapted for the BMI version developed for the Topoflow model
 
      Author: Kang Wang, 03/29/2016
      Modified: Elchin Jafarov, 03/29/2016
@@ -593,9 +593,9 @@ class Ku_method(perma_base.PermafrostComponent):
         self.Tps = self.Tps_numerator / K_star
 
         if n_grid > 1:
-            self.Tps[
-                np.where(self.Tps_numerator > 0.0)
-            ] = np.nan  # Seasonal Frozen Ground
+            self.Tps[np.where(self.Tps_numerator > 0.0)] = (
+                np.nan
+            )  # Seasonal Frozen Ground
 
         else:
             if self.Tps_numerator > 0.0:

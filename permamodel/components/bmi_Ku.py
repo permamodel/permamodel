@@ -1,7 +1,7 @@
 """Kudryavtsev permafrost model, adapted from Anisimov et al. (1997).
 
 Anisimov, O. A., Shiklomanov, N. I., & Nelson, F. E. (1997).
-Global warming and active-layer thickness: results from transient general circulation models. 
+Global warming and active-layer thickness: results from transient general circulation models.
 Global and Planetary Change, 15(3-4), 61-77. DOI:10.1016/S0921-8181(97)00009-X
 
 *The MIT License (MIT)*

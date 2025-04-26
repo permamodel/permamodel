@@ -1,4 +1,5 @@
 """Test Ku model"""
+
 import os
 
 import pytest

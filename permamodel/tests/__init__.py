@@ -1,2 +1,1 @@
-""" tests subpackage for permamodel
-"""
+"""tests subpackage for permamodel"""
