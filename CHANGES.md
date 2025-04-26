@@ -1,6 +1,6 @@
 # Changelog : permamodel
 
-## 0.2.3 (unreleased)
+## 0.2.3 (2025-04-26)
 
 - Update test setup and CI #87
 
