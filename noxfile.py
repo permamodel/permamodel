@@ -37,29 +37,34 @@ def test_bmi(session: nox.Session) -> None:
     session.install("bmi-tester")
     session.install(".")
 
-    bmi_test_dir = BUILD_DIR / "bmi_test"
+    bmi_test_dir = BUILD_DIR / "lib" / "permamodel" / "examples"
+
+    shutil.rmtree(bmi_test_dir / "Ku_2D_Input")
+
     with bmi_test_setup(bmi_test_dir):
         session.run(
             "bmi-test",
             "permamodel.components.bmi_frost_number:BmiFrostnumberMethod",
             "--config-file",
-            "./permamodel/examples/Frostnumber_example_singlesite_singleyear.cfg",
+            bmi_test_dir / "Frostnumber_example_singlesite_singleyear.cfg",
             "--root-dir",
             bmi_test_dir,
             "-vvv",
         )
+
     with bmi_test_setup(bmi_test_dir):
         session.run(
             "bmi-test",
             "permamodel.components.bmi_Ku_component:BmiKuMethod",
             "--config-file",
-            "./permamodel/examples/Ku_method.cfg",
+            bmi_test_dir / "Ku_method.cfg",
             "--root-dir",
             bmi_test_dir,
             "-vvv",
         )
+
     with bmi_test_setup(bmi_test_dir):
-        cfg_file = "./permamodel/examples/Ku_bmi_example_config.toml"
+        cfg_file = bmi_test_dir / "Ku_bmi_example_config.toml"
         _set_absolute_path_in_config(cfg_file)
         session.run(
             "bmi-test",
@@ -163,7 +168,7 @@ class bmi_test_setup:
         os.makedirs(self._dir, exist_ok=True)
 
     def __exit__(self, type_, value, traceback):
-        shutil.rmtree(self._dir)
+        pass
 
 
 def _set_absolute_path_in_config(cfg_file):
