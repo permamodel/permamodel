@@ -2,8 +2,7 @@
 
 ## 0.2.3 (unreleased)
 
-
-- Nothing changed yet.
+- Update test setup and CI #87
 
 
 ## 0.2.2 (2023-05-12)
