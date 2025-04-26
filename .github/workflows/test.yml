@@ -36,7 +36,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install nox
-        run: pip install nox
+        run: pip install nox toml
 
       - name: Test
         run: |
